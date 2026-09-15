@@ -215,6 +215,24 @@ th{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:10.5px;letter
 td{padding:5px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
 tr.grp td{background:var(--sunk);font-family:"Chakra Petch",sans-serif;font-weight:600;
  font-size:11.5px;letter-spacing:.07em;color:var(--muted);padding:7px 10px}
+/* only the Backpack's group rows carry a fold button, which brings its own padding */
+#stock tr.grp td{padding:0}
+/* The Backpack runs to ten groups, so each header is a fold control that also
+   reports how many of its items you have actually filled in. */
+.gtog{width:100%;display:grid;grid-template-columns:9px minmax(0,1fr) auto;gap:10px;
+ align-items:center;background:none;border:0;cursor:pointer;text-align:left;
+ padding:8px 10px;color:var(--muted);
+ font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.07em}
+.gtog:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+.gtog .chev{width:6px;height:6px;border-right:1.6px solid var(--faint);
+ border-bottom:1.6px solid var(--faint);transform:rotate(45deg);margin-left:1px}
+.gtog[aria-expanded="false"] .chev{transform:rotate(-45deg)}
+.gtog .gname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gmeta{display:flex;align-items:center;gap:8px}
+.gbar{width:40px;height:4px;border-radius:3px;background:#12233A;overflow:hidden;flex:none}
+.gbar i{display:block;height:100%;border-radius:3px;background:var(--ice)}
+.gcount{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--faint);
+ font-variant-numeric:tabular-nums}
 tr.sec td{background:var(--ice);color:#04141C;font-family:"Chakra Petch",sans-serif;
  font-weight:700;font-size:11px;letter-spacing:.14em;padding:6px 10px}
 .num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
@@ -346,6 +364,60 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
   background-size:auto,auto,cover;
   background-position:center,center,72% top}
  .herotext{max-width:none}
+
+ /* ---- the two working tables become lists of cards ----
+    Nine columns cannot fit a phone without either clipping a value or pushing
+    the answer off-screen, so each row stacks. Both Backpack fields stay real
+    inputs: changing a target is half the point of the row. */
+ #stock,#packs,#stock tbody,#packs tbody{display:block}
+ #stock thead,#packs thead{display:none}
+ .tw{border-radius:12px}
+
+ #stock tbody tr.grp,#packs tbody tr.grp,#packs tbody tr.sec{display:block;padding:0}
+ #stock tbody tr.grp>td,#packs tbody tr.grp>td,#packs tbody tr.sec>td{display:block;width:100%}
+
+ #stock tbody tr:not(.grp),#packs tbody tr:not(.grp):not(.sec){
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 12px;
+  padding:13px;border-bottom:1px solid var(--line2);align-items:start}
+ #stock tbody tr:not(.grp)>td,#packs tbody tr:not(.grp):not(.sec)>td{
+  display:block;padding:0;border:0;min-width:0}
+
+ td[data-label]::before{content:attr(data-label);display:block;margin-bottom:5px;
+  font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--faint)}
+
+ /* 16px stops iOS zooming the page in the moment you tap a field */
+ #stock input.cell,#packs input.cell{font-size:16px;padding:9px 11px;min-width:0;width:100%}
+
+ #stock tbody tr:not(.grp){grid-template-areas:"nm pill" "have tgt" "prog prog"}
+ #stock tbody tr:not(.grp)>td:nth-child(1){display:none}
+ #stock tbody tr:not(.grp)>td:nth-child(2){grid-area:nm;font-size:14.5px;font-weight:500;
+  color:#EFF4FA;align-self:center}
+ #stock tbody tr:not(.grp)>td:nth-child(3){grid-area:have}
+ #stock tbody tr:not(.grp)>td:nth-child(4){grid-area:tgt}
+ #stock tbody tr:not(.grp)>td:nth-child(5){display:none}
+ #stock tbody tr:not(.grp)>td:nth-child(6){grid-area:prog}
+ #stock tbody tr:not(.grp)>td:nth-child(7){display:none}
+ #stock tbody tr:not(.grp)>td:nth-child(8){display:none}
+ #stock tbody tr:not(.grp)>td:nth-child(9){grid-area:pill;text-align:right;align-self:center}
+ #stock .prog{gap:10px}
+ #stock .pbar{flex:1;width:auto}
+ #stock .rc{max-width:none;text-align:right;margin-top:3px;font-size:11px}
+
+ #packs tbody tr:not(.grp):not(.sec){grid-template-areas:"nm vd" "price freq" "best best" "pv iv"}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(1){display:none}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(2){grid-area:nm;font-size:14.5px;font-weight:500;
+  color:#EFF4FA;align-self:center}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(3){grid-area:price}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(4){grid-area:freq}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(5){grid-area:best}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(6){grid-area:pv}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(7){grid-area:iv}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(8){grid-area:vd;text-align:right;align-self:center}
+ #packs .vbar{width:52px}
+ #packs td.num[data-label]{text-align:left}
+ #packs tbody tr:not(.grp):not(.sec)>td:nth-child(3){font-family:"IBM Plex Mono",monospace;
+  font-size:15px}
 }
 @media (max-width:680px){
  .stats{grid-template-columns:repeat(2,1fr)}
@@ -354,7 +426,9 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  .footsig{text-align:left;align-self:flex-end}
 }
 @media (max-width:540px){
- .drow,.dlist.buys .drow{grid-template-columns:24px minmax(0,1fr) auto;gap:9px}
+ .drow{grid-template-columns:24px minmax(0,1fr) auto;gap:9px}
+ /* the buys row keeps its value AND its verdict, so it needs the fourth track */
+ .dlist.buys .drow{grid-template-columns:24px minmax(0,1fr) auto auto;gap:9px}
  .dic,.dbarwrap{display:none}
  .drow::after{display:none}
  input[type=search]{margin-left:0;width:100%}
