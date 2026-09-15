@@ -4,6 +4,10 @@
 var SB=null, U=null, D={items:[],packs:[],contents:{},base:{},settings:{}}, uPacks={};
 var timers={}, sync=document.getElementById('sync');
 var sortMode='section', sortDir=-1;
+/* Which Backpack groups are folded shut, keyed by group name so the state
+   survives a re-render and a reload. */
+var FOLD={};
+try{ FOLD=JSON.parse(localStorage.getItem('fox-fold')||'{}')||{}; }catch(err){ FOLD={}; }
 var CURR={GBP:{symbol:'£',rate:1},USD:{symbol:'$',rate:1.27},EUR:{symbol:'€',rate:1.17},
   MUR:{symbol:'Rs',rate:63.4},INR:{symbol:'₹',rate:106},ZAR:{symbol:'R',rate:23.5},
   AUD:{symbol:'A$',rate:1.93},CAD:{symbol:'C$',rate:1.74},PHP:{symbol:'₱',rate:71},
@@ -133,23 +137,40 @@ function inp(val,cls,attrs){
     (val===null||val===undefined?'':val)+'" '+(attrs||'')+'>';
 }
 function renderStock(){
+  /* Count each group first so its header can say how much of it you have filled in. */
+  var stats={};
+  D.items.forEach(function(it){
+    var k=it.grp||'';
+    if(!stats[k]) stats[k]={n:0,f:0};
+    stats[k].n++; if(n(it.have)>0) stats[k].f++;
+  });
   var out=[], g=null;
   D.items.forEach(function(it,idx){
-    if(it.grp!==g){ g=it.grp; out.push('<tr class="grp"><td colspan="9">'+esc(g)+'</td></tr>'); }
+    if(it.grp!==g){
+      g=it.grp;
+      var st=stats[g]||{n:0,f:0}, pc=st.n?Math.round(st.f/st.n*100):0, open=!FOLD[g];
+      out.push('<tr class="grp"><td colspan="9">'+
+        '<button class="gtog" type="button" data-gname="'+esc(g)+'" aria-expanded="'+open+'">'+
+        '<span class="chev" aria-hidden="true"></span>'+
+        '<span class="gname">'+esc(g)+'</span>'+
+        '<span class="gmeta"><span class="gbar"><i style="width:'+pc+'%"></i></span>'+
+        '<span class="gcount">'+st.f+'/'+st.n+'</span></span></button></td></tr>');
+    }
     var c=calcItem(it);
-    var st=c.tgt<=0?'none':(c.ok?'met':'behind');
+    var state=c.tgt<=0?'none':(c.ok?'met':'behind');
     var pill=c.tgt<=0?'<span class="pill p-na">no target</span>'
       :(c.ok?'<span class="pill p-yes">on track</span>':'<span class="pill p-no">behind</span>');
     var w=c.pct===null?0:Math.max(0,Math.min(100,c.pct*100));
-    var rc=c.tgt<=0?'':(c.ok?'on track':(c.left>0?fmt(c.left)+' short after plan':''));
-    out.push('<tr data-state="'+st+'" data-q="'+esc(it.name.toLowerCase())+'">'+
-      '<td class="ic">'+esc(it.icon||'·')+'</td><td class="nm">'+esc(it.name)+'</td>'+
-      '<td>'+inp(it.have,'','data-idx="'+idx+'" data-k="have"')+'</td>'+
-      '<td>'+inp(it.target,'t2','data-idx="'+idx+'" data-k="target"')+'</td>'+
-      '<td class="num">'+(c.tgt>0?fmt(c.raw):'<span class="mini">—</span>')+'</td>'+
+    /* the pill already says "on track"; only the shortfall adds anything */
+    var rc=(c.tgt>0 && !c.ok && c.left>0)?fmt(c.left)+' short after plan':'';
+    out.push('<tr data-state="'+state+'" data-q="'+esc(it.name.toLowerCase())+'" data-gn="'+esc(g)+'">'+
+      '<td class="ic">'+esc(it.icon||'\u00b7')+'</td><td class="nm">'+esc(it.name)+'</td>'+
+      '<td data-label="Have">'+inp(it.have,'','data-idx="'+idx+'" data-k="have" aria-label="'+esc(it.name)+' have"')+'</td>'+
+      '<td data-label="Target">'+inp(it.target,'t2','data-idx="'+idx+'" data-k="target" aria-label="'+esc(it.name)+' target"')+'</td>'+
+      '<td class="num">'+(c.tgt>0?fmt(c.raw):'<span class="mini">\u2014</span>')+'</td>'+
       '<td><div class="prog"><div class="pbar"><i style="width:'+w.toFixed(1)+'%;background:'+pcolor(c.pct)+'"></i></div>'+
-        '<span>'+(c.pct===null?'—':Math.round(c.pct*100)+'%')+'</span></div></td>'+
-      '<td class="num">'+(n(it.free)?fmt(n(it.free),2):'<span class="mini">—</span>')+'</td>'+
+        '<span>'+(c.pct===null?'\u2014':Math.round(c.pct*100)+'%')+'</span></div></td>'+
+      '<td class="num">'+(n(it.free)?fmt(n(it.free),2):'<span class="mini">\u2014</span>')+'</td>'+
       '<td class="num">'+fmt(c.proj)+'</td>'+
       '<td>'+pill+'<div class="rc">'+esc(rc)+'</div></td></tr>');
   });
@@ -191,11 +212,11 @@ function renderPacks(){
       '<td class="ic">'+esc(p.icon||'·')+'</td>'+
       '<td class="nm">'+esc(p.name)+'<div class="mini">'+
         esc(sortMode==='section'?(p.occurrence||''):((p.grp||'')+(p.occurrence?' · '+p.occurrence:'')))+'</div></td>'+
-      '<td class="num">'+fmt(n(p.price)*CUR.rate,2)+'</td>'+
-      '<td>'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'"')+'</td>'+
-      '<td>'+(c.best?esc(c.best):'<span class="mini">'+(c.scoreable?'—':'contents not priced')+'</span>')+'</td>'+
-      '<td class="num">'+vb(c.pv,'var(--ice)')+'</td>'+
-      '<td class="num">'+vb(c.iv,'var(--ember)')+'</td>'+
+      '<td class="num" data-label="Price '+esc(CUR.symbol)+'">'+fmt(n(p.price)*CUR.rate,2)+'</td>'+
+      '<td data-label="Buy / mo">'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'" aria-label="'+esc(p.name)+' packs bought per month"')+'</td>'+
+      '<td data-label="Best item for you">'+(c.best?esc(c.best):'<span class="mini">'+(c.scoreable?'—':'contents not priced')+'</span>')+'</td>'+
+      '<td class="num" data-label="Pack value">'+vb(c.pv,'var(--ice)')+'</td>'+
+      '<td class="num" data-label="Best item">'+vb(c.iv,'var(--ember)')+'</td>'+
       '<td><span class="pill '+VP[c.verdict]+'">'+esc(c.verdict)+'</span></td></tr>');
   });
   $('packs').querySelector('tbody').innerHTML=out.join('');
@@ -336,13 +357,16 @@ function applyFilters(){
   ['stock','packs','matrix'].forEach(function(id){
     var t=$(id); if(!t) return;
     var f=filters[id]||'all', q=(queries[id]||'').trim().toLowerCase();
+    /* A search or a filter reaches across groups, so folding is ignored while one is on. */
+    var searching = !!q || f!=='all';
     [].forEach.call(t.querySelectorAll('tbody tr'),function(r){
       if(r.classList.contains('grp')||r.classList.contains('sec')||r.classList.contains('need')){
-        r.classList.toggle('hide', !!q || f!=='all'); return; }
+        r.classList.toggle('hide', searching); return; }
       var st=r.dataset.state||'';
       var okF = f==='all' || st.split(' ').indexOf(f)>=0;
       var okQ = !q || (r.dataset.q||'').indexOf(q)>=0;
-      r.classList.toggle('hide', !(okF&&okQ));
+      var okG = searching || !r.dataset.gn || !FOLD[r.dataset.gn];
+      r.classList.toggle('hide', !(okF&&okQ&&okG));
     });
   });
 }
@@ -357,6 +381,14 @@ document.addEventListener('click',function(e){
     [].forEach.call(document.querySelectorAll('.panel'),function(p){
       p.classList.toggle('on',p.id==='p-'+t.dataset.p); });
     try{ localStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
+    return; }
+  var gt=t.closest&&t.closest('#stock .gtog');
+  if(gt){
+    var gn=gt.getAttribute('data-gname');
+    if(FOLD[gn]) delete FOLD[gn]; else FOLD[gn]=1;
+    gt.setAttribute('aria-expanded',String(!FOLD[gn]));
+    try{ localStorage.setItem('fox-fold',JSON.stringify(FOLD)); }catch(err){}
+    applyFilters();
     return; }
   var th=t.closest&&t.closest('#packs thead th[data-sort]');
   if(th){ var m=th.getAttribute('data-sort');
