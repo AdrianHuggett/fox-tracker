@@ -65,6 +65,13 @@ var CONFIG = {
 
 <main class="wrap">
 
+<div id="fatal" class="fatal" hidden>
+ <h2 id="fatal-title">Could not load your tracker</h2>
+ <p>Your data is safe &mdash; this is a problem reaching the server, not a problem with your numbers.</p>
+ <p class="why" id="fatal-why"></p>
+ <button type="button" id="fatal-retry">Try again</button>
+</div>
+
 <div id="auth" style="display:none">
  <div class="card">
   <div class="authtabs">
@@ -88,6 +95,7 @@ var CONFIG = {
 </div>
 
 <div id="app" style="display:none">
+<p class="banner" id="svswarn" hidden></p>
 <div class="statspanel"><div class="stats" id="stats"></div></div>
 
 <section class="panel on" id="p-dash">
@@ -202,7 +210,7 @@ var CONFIG = {
    <div class="frow"><span>Units per &pound;</span><input id="cur-rate" class="wide" type="number" step="any" style="width:100px;text-align:right"></div>
    <p class="hint" style="margin:8px 0 0">Set manually — rates aren’t fetched automatically, so keep this roughly current yourself.</p>
   </div>
-  <div class="card" style="grid-column:span 2">
+  <div class="card wide">
    <h3>Torxim value per unit ($)</h3>
    <p class="hint" style="margin:0 0 8px">The baseline behind every pack calculation.</p>
    <div id="baselines"></div>
@@ -224,6 +232,12 @@ var CONFIG = {
  <span>Speedups are counted in hours on pack contents and days on the backpack.</span>
  <span>Pack values from Torxim's WoS Corner at our state settings (FC5-Gen5, SR 46, RSS 25). Fan-made reference, not affiliated with Century Games.</span>
 </footer>
+
+<div id="toast" role="status" aria-live="polite" hidden>
+ <span class="tdot" aria-hidden="true"></span>
+ <span id="toast-text"></span>
+ <button type="button" id="toast-x" aria-label="Dismiss this message">&times;</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="app.js"></script>
