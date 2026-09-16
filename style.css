@@ -280,6 +280,7 @@ input.cell[type=number]{-moz-appearance:textfield}
 .setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:14px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 16px;
  box-shadow:var(--shadow)}
+.card.wide{grid-column:span 2}
 .card h3{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;
  margin:0 0 10px}
 .frow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0}
@@ -337,6 +338,37 @@ th.so[aria-sort="ascending"],th.so[aria-sort="descending"]{color:var(--ice)}
 footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  flex-direction:column;gap:4px}
 
+/* ---------- messages ----------
+   say() used to be the only channel and it lived in a header span that is hidden
+   on a phone, so a failed save was silent. Anything that went wrong now also
+   surfaces here and stays until it is dismissed. */
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));
+ transform:translateX(-50%);z-index:90;max-width:min(560px,calc(100vw - 32px));
+ display:flex;align-items:flex-start;gap:11px;
+ background:#14283C;border:1px solid var(--edit-b);border-radius:11px;padding:12px 13px 12px 15px;
+ box-shadow:0 12px 34px -10px rgba(0,0,0,.75);font-size:13.5px;line-height:1.45;color:var(--ink)}
+#toast[hidden]{display:none}
+#toast.bad{background:#2A1620;border-color:rgba(255,89,70,.5)}
+#toast .tdot{width:7px;height:7px;border-radius:50%;background:var(--coral);flex:none;margin-top:6px}
+#toast button{background:none;border:0;color:var(--faint);cursor:pointer;font-size:18px;line-height:1;
+ padding:1px 4px;border-radius:5px;flex:none;margin-left:2px}
+#toast button:hover{color:var(--ink)}
+
+.banner{margin:20px 0 0;padding:12px 15px;border-radius:11px;font-size:13.5px;line-height:1.5;
+ background:rgba(255,130,63,.10);border:1px solid rgba(255,130,63,.38);color:#FFD6BC}
+.banner[hidden]{display:none}
+
+.fatal{max-width:520px;margin:48px auto;background:var(--surface);
+ border:1px solid rgba(255,89,70,.34);border-radius:14px;padding:26px 28px;box-shadow:var(--shadow)}
+.fatal[hidden]{display:none}
+.fatal h2{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:21px;margin:0 0 11px;color:#fff}
+.fatal p{margin:0 0 8px;color:var(--muted);font-size:14px;line-height:1.55}
+.fatal .why{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint);
+ word-break:break-word;margin-bottom:19px;min-height:1.2em}
+.fatal button{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;
+ background:var(--ice);color:#04141C;border:0;border-radius:8px;padding:11px 20px;cursor:pointer}
+.fatal button:hover{filter:brightness(1.08)}
+
 /* ---------- responsive ---------- */
 @media (max-width:1150px){#sync{display:none}}
 @media (max-width:900px){
@@ -353,6 +385,9 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  nav.tabs button{height:46px}
  #userbar{margin-left:auto}
  #userbar b{display:none}
+ /* the header wraps here, so there is room for the save state again — it is
+    only hidden between 821 and 1150px where the bar is one cramped row */
+ #sync{display:block}
  /* fill the shorter band and crop horizontally rather than shrinking to a thin
     strip; the art spans edge to edge here so no right-edge blend is needed, but
     the scrim has to be heavier because the text sits over the lit fortress */
@@ -418,6 +453,11 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  #packs td.num[data-label]{text-align:left}
  #packs tbody tr:not(.grp):not(.sec)>td:nth-child(3){font-family:"IBM Plex Mono",monospace;
   font-size:15px}
+
+ /* one full-width child was forcing a second 250px track, pushing the currency
+    card and every baseline value off the right edge of the screen */
+ .setgrid{grid-template-columns:minmax(0,1fr)}
+ .card.wide{grid-column:auto}
 }
 @media (max-width:680px){
  .stats{grid-template-columns:repeat(2,1fr)}
