@@ -48,8 +48,38 @@ function saveCurrency(){
   });
 }
 
-function say(t,warn){ if(sync){ sync.textContent=t||''; sync.className=warn?'warn':''; } }
-window.onerror=function(m){ say('error: '+String(m).slice(0,60),1); };
+var toastTimer=null;
+/* The header status span is hidden on narrow screens, so anything that actually
+   went wrong also goes here, where it is visible at every width and stays put
+   until it is dismissed. */
+function toast(msg,bad){
+  var t=$('toast'), x=$('toast-text');
+  if(!t||!x) return;
+  x.textContent=msg;
+  t.className=bad?'bad':'';
+  t.hidden=false;
+  clearTimeout(toastTimer);
+  if(!bad) toastTimer=setTimeout(function(){ t.hidden=true; },2600);
+}
+function say(t,warn){
+  if(sync){ sync.textContent=t||''; sync.className=warn?'warn':''; }
+  if(warn) toast(t,1);
+}
+/* A load that fails leaves nothing on screen, so say what happened and offer a way back. */
+function fatal(title,why){
+  var f=$('fatal'); if(!f) return;
+  if($('fatal-title')) $('fatal-title').textContent=title;
+  if($('fatal-why')) $('fatal-why').textContent=why||'';
+  f.hidden=false;
+  if($('auth')) $('auth').style.display='none';
+  if($('app')) $('app').style.display='none';
+  var nv=$('navtabs'); if(nv) nv.style.display='none';
+  if(sync){ sync.textContent=title; sync.className='warn'; }
+}
+window.onerror=function(m){ say('error: '+String(m).slice(0,80),1); };
+window.addEventListener('unhandledrejection',function(e){
+  var r=e.reason; say('error: '+String((r&&r.message)||r).slice(0,80),1);
+});
 function n(v){ v=parseFloat(v); return isFinite(v)?v:0; }
 function fmt(v,dp){ if(v===null||v===undefined||v==='') return '—';
   dp=dp||0; if(dp===0&&Math.abs(v-Math.round(v))>1e-9) dp=1;
@@ -59,11 +89,27 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
 function $(id){ return document.getElementById(id); }
 
 /* ---------- maths ---------- */
-function days(){
-  var s=D.settings.next_svs; if(!s) return 30;
-  var d=new Date(s+'T00:00:00'); if(isNaN(d)) return 30;
+/* Every projection is driven by this date, and nothing in the app can change it,
+   so when it runs out or goes missing the app has to say so rather than quietly
+   projecting zero days of income. */
+function svsInfo(){
+  var s=D.settings.next_svs;
+  if(!s) return {state:'missing',days:30};
+  var d=new Date(s+'T00:00:00');
+  if(isNaN(d)) return {state:'missing',days:30};
   var t=new Date(); t.setHours(0,0,0,0);
-  return Math.max(0,Math.round((d-t)/86400000));
+  var n=Math.round((d-t)/86400000);
+  return {state:(n<0?'past':(n===0?'today':'ok')),days:Math.max(0,n),date:s};
+}
+function days(){ return svsInfo().days; }
+function renderSvsWarn(){
+  var b=$('svswarn'); if(!b) return;
+  var i=svsInfo();
+  if(i.state==='ok'||i.state==='today'){ b.hidden=true; return; }
+  b.textContent = i.state==='missing'
+    ? 'No SvS date is set, so every projection below assumes 30 days of income. Ask Adrian to set the next date.'
+    : 'The SvS date (' + i.date + ') has passed, so projections now assume no time left and everything reads as behind. Ask Adrian to set the next date.';
+  b.hidden=false;
 }
 function months(){ return days()/30; }
 function calcItem(it){
@@ -114,9 +160,9 @@ function queue(key,fn){
   clearTimeout(timers[key]); say('saving…');
   timers[key]=setTimeout(function(){
     fn().then(function(r){
-      if(r&&r.error){ say('could not save: '+r.error.message,1); }
+      if(r&&r.error){ say('Not saved — check your connection, then change the number again.',1); }
       else say('saved');
-    }).catch(function(e){ say('could not save: '+(e.message||e),1); });
+    }).catch(function(e){ say('Not saved — check your connection, then change the number again.',1); });
   },500);
 }
 function saveItem(it,field){
@@ -329,6 +375,7 @@ function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
   var key=focusKey(document.activeElement);
+  renderSvsWarn();
   renderTop(); renderDash(); renderStock(); renderPacks(); renderMatrix(); renderRef(); applyFilters(); bind();
   if(key){ var a=document.querySelectorAll('input.cell');
     for(var i=0;i<a.length;i++) if(focusKey(a[i])===key){ a[i].focus(); break; } }
@@ -343,7 +390,7 @@ function bind(){
         } else if(el.dataset.pid!==undefined){
           uPacks[el.dataset.pid]=n(el.value); savePack(el.dataset.pid,el.value);
         }
-      }catch(e){ say('edit failed: '+(e.message||e),1); }
+      }catch(e){ say('That change did not go through. Try typing it again.',1); }
     }
     el.addEventListener('input',commit);
     el.addEventListener('blur',commit);
@@ -406,9 +453,11 @@ document.addEventListener('click',function(e){
 
 /* ---------- auth ---------- */
 function authMsg(t,ok){ var e=$('authmsg'); e.textContent=t||''; e.className='authmsg'+(ok?' ok':''); }
-function showAuth(){ $('auth').style.display=''; $('app').style.display='none'; $('userbar').style.display='none';
+function showAuth(){ if($('fatal')) $('fatal').hidden=true;
+  $('auth').style.display=''; $('app').style.display='none'; $('userbar').style.display='none';
   var nv=$('navtabs'); if(nv) nv.style.display='none'; }
-function showApp(){ $('auth').style.display='none'; $('app').style.display=''; $('userbar').style.display='';
+function showApp(){ if($('fatal')) $('fatal').hidden=true;
+  $('auth').style.display='none'; $('app').style.display=''; $('userbar').style.display='';
   var nv=$('navtabs'); if(nv) nv.style.display=''; }
 
 async function loadAll(){
@@ -423,7 +472,7 @@ async function loadAll(){
     SB.from('profiles').select('currency_code,currency_symbol,currency_rate').eq('id',U.id).maybeSingle()
   ]);
   var err=r.find(function(x){ return x.error; });
-  if(err){ say('could not load: '+err.error.message,1); return; }
+  if(err){ fatal('Could not load your tracker',err.error.message); return; }
   D.settings=r[0].data||{};
   D.base={}; r[1].data.forEach(function(b){ D.base[b.item]=Number(b.usd); });
   D.packs=r[2].data;
@@ -434,7 +483,7 @@ async function loadAll(){
   var prof=r[6]&&r[6].data;
   if(prof){ CUR.code=prof.currency_code||'GBP'; CUR.symbol=prof.currency_symbol||'£'; CUR.rate=Number(prof.currency_rate)||1; }
   fillCurrencyInputs();
-  if(!D.items.length){ say('no backpack rows — ask Adrian to reseed',1); }
+  if(!D.items.length){ say('Your backpack is empty — ask Adrian to set your account up.',1); }
   showApp(); render(); say('saved');
   try{ var tb=localStorage.getItem('fox-tab');
     if(tb){ var b=document.querySelector('nav.tabs button[data-p="'+tb+'"]'); if(b) b.click(); } }catch(e){}
@@ -446,25 +495,40 @@ async function boot(){
       '<p class="hint">Add your Supabase project URL and anon key at the top of index.html.</p></div>';
     return; }
   SB=window.supabase.createClient(CONFIG.url,CONFIG.key);
-  var s=await SB.auth.getSession();
-  if(s.data.session){ identifyUser(s.data.session.user); await loadAll(); }
-  else showAuth();
+  /* Listeners go on before the first network call. If that call fails the sign-in
+     form still has to work, rather than sitting there inert behind a blank page. */
+  wireUp();
+  try{
+    var s=await SB.auth.getSession();
+    if(s.data.session){ identifyUser(s.data.session.user); await loadAll(); }
+    else showAuth();
+  }catch(e){
+    fatal('Could not reach the server',(e&&e.message)||String(e));
+  }
+}
 
+function wireUp(){
+  if($('toast-x')) $('toast-x').addEventListener('click',function(){ $('toast').hidden=true; });
+  if($('fatal-retry')) $('fatal-retry').addEventListener('click',function(){ location.reload(); });
   $('signin').addEventListener('submit',async function(e){
     e.preventDefault(); authMsg('Signing in…');
-    var r=await SB.auth.signInWithPassword({email:$('si-email').value.trim(),password:$('si-pw').value});
-    if(r.error) return authMsg(r.error.message);
-    identifyUser(r.data.user); authMsg(''); await loadAll();
+    try{
+      var r=await SB.auth.signInWithPassword({email:$('si-email').value.trim(),password:$('si-pw').value});
+      if(r.error) return authMsg(r.error.message);
+      identifyUser(r.data.user); authMsg(''); await loadAll();
+    }catch(err){ authMsg('Could not reach the server. Check your connection and try again.'); }
   });
   $('signup').addEventListener('submit',async function(e){
     e.preventDefault();
     if($('su-pw').value.length<8) return authMsg('Password needs at least 8 characters.');
     authMsg('Creating your account…');
-    var r=await SB.auth.signUp({email:$('su-email').value.trim(),password:$('su-pw').value,
-      options:{data:{name:$('su-name').value.trim()}}});
-    if(r.error) return authMsg(r.error.message);
-    if(r.data.session){ identifyUser(r.data.user); authMsg(''); await loadAll(); }
-    else authMsg('Check your email to confirm the account, then sign in.',1);
+    try{
+      var r=await SB.auth.signUp({email:$('su-email').value.trim(),password:$('su-pw').value,
+        options:{data:{name:$('su-name').value.trim()}}});
+      if(r.error) return authMsg(r.error.message);
+      if(r.data.session){ identifyUser(r.data.user); authMsg(''); await loadAll(); }
+      else authMsg('Check your email to confirm the account, then sign in.',1);
+    }catch(err){ authMsg('Could not reach the server. Check your connection and try again.'); }
   });
   $('forgot').addEventListener('click',async function(){
     var em=$('si-email').value.trim();
