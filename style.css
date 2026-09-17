@@ -239,7 +239,7 @@ tr.sec td{background:var(--ice);color:#04141C;font-family:"Chakra Petch",sans-se
  white-space:nowrap}
 th.num{text-align:right}
 .ic{width:24px;text-align:center;opacity:.9;padding-right:0}
-tr.hide{display:none}
+tr.hide{display:none!important}
 input.cell{font:inherit;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
  font-size:13px;width:100%;min-width:96px;text-align:right;background:var(--edit);color:var(--ink);
  border:1px solid var(--edit-b);border-radius:5px;padding:3px 6px}
