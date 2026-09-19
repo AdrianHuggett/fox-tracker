@@ -342,7 +342,7 @@ function renderMembers(rows){
       '<td class="nm">'+esc(nm)+
         (m.is_admin?' <span class="pill p-pack">admin</span>':'')+'</td>'+
       '<td data-label="Email"><span class="mail">'+esc(m.email||'\u2014')+'</span></td>'+
-      '<td class="num" data-label="Signed up">'+esc(fmtDate(m.signed_up))+'</td>'+
+      '<td class="num" data-label="Signed up">'+esc(fmtDate(m.created_at))+'</td>'+
       '<td class="num" data-label="Last seen">'+esc(a.text)+'</td>'+
       '<td class="st"><span class="pill '+tn[0]+'">'+tn[1]+'</span></td></tr>';
   }).join('');
@@ -358,7 +358,7 @@ async function loadMembers(force){
   if(membersLoaded&&!force) return;
   if(!membersLoaded) membersMsg('Loading\u2026');
   try{
-    var r=await SB.from('profiles').select('id,name,email,signed_up,last_seen,is_admin');
+    var r=await SB.from('profiles').select('id,name,email,created_at,last_seen,is_admin');
     if(r.error){ membersMsg('Could not load the member list \u2014 '+esc(r.error.message)); return; }
     membersLoaded=true; renderMembers(r.data||[]);
   }catch(e){ membersMsg('Could not reach the server. Try the tab again.'); }
@@ -392,10 +392,9 @@ function touchProfile(){
   if(!U||!SB) return;
   var meta=U.user_metadata||{};
   try{
-    SB.from('profiles').upsert({id:U.id,email:U.email||null,
+    SB.from('profiles').update({email:U.email||null,
       name:String(meta.name||'').trim()||null,
-      signed_up:U.created_at||null,
-      last_seen:new Date().toISOString()},{onConflict:'id'}).then(function(){},function(){});
+      last_seen:new Date().toISOString()}).eq('id',U.id).then(function(){},function(){});
   }catch(e){}
 }
 /* Asked for on its own so a project without the admin column simply answers "no"
