@@ -40,6 +40,9 @@ var CONFIG = {
    <button role="tab" aria-selected="false" data-p="packs">Things to buy</button>
    <button role="tab" aria-selected="false" data-p="matrix">Pack contents</button>
    <button role="tab" aria-selected="false" data-p="ref">Reference</button>
+   <!-- revealed only for an account the database marks as admin; the list itself
+        is protected by a row-level policy, not by this attribute -->
+   <button role="tab" aria-selected="false" data-p="admin" id="tab-admin" hidden>Members</button>
   </nav>
   <div id="userbar" style="display:none">
    <span id="sync"></span>
@@ -187,6 +190,15 @@ var CONFIG = {
    <div class="frow"><span>MUR per &pound;</span><b id="murrate"></b></div>
   </div>
   <div class="card">
+   <h3>My name</h3>
+   <p class="hint" style="margin:0 0 8px">How you appear in the alliance member list, and the letters in your avatar.
+    Only you can change this.</p>
+   <div class="frow"><span>In-game name</span>
+    <input id="dispname" type="text" maxlength="40" autocomplete="nickname" aria-label="Your in-game name">
+   </div>
+   <p class="hint" id="dispname-msg" style="margin:6px 0 0">&nbsp;</p>
+  </div>
+  <div class="card">
    <h3>My currency</h3>
    <p class="hint" style="margin:0 0 8px">Changes how prices and monthly spend look for you only — nobody else in the alliance is affected.</p>
    <div class="frow"><span>Quick pick</span>
@@ -215,6 +227,22 @@ var CONFIG = {
    <p class="hint" style="margin:0 0 8px">The baseline behind every pack calculation.</p>
    <div id="baselines"></div>
   </div>
+ </div>
+</section>
+<section class="panel" id="p-admin">
+ <div class="toolbar">
+  <span class="lbl" id="admin-count">&nbsp;</span>
+  <input type="search" data-for="members" placeholder="Find a member" aria-label="Find a member">
+ </div>
+ <p class="hint">Last seen is stamped each time someone opens the tracker. This list only loads for your
+  account &mdash; the database refuses it for everyone else, whether or not they find this tab.</p>
+ <div class="tw">
+  <table id="members">
+   <thead><tr>
+    <th>Member</th><th>Email</th><th class="num">Signed up</th><th class="num">Last seen</th><th>Status</th>
+   </tr></thead>
+   <tbody><tr><td colspan="5" class="empty">Loading&hellip;</td></tr></tbody>
+  </table>
  </div>
 </section>
 
