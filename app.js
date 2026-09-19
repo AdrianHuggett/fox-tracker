@@ -1,7 +1,7 @@
 /* FOX Prep Tracker — front end */
 (function(){
 'use strict';
-var SB=null, U=null, D={items:[],packs:[],contents:{},base:{},settings:{}}, uPacks={};
+var SB=null, U=null, ADMIN=false, membersLoaded=false, D={items:[],packs:[],contents:{},base:{},settings:{}}, uPacks={};
 var timers={}, sync=document.getElementById('sync');
 var sortMode='section', sortDir=-1;
 /* Which Backpack groups are folded shut, keyed by group name so the state
@@ -301,6 +301,115 @@ function renderRef(){
   $('svsdate').textContent=D.settings.next_svs||'—';
   $('murrate').textContent=D.settings.mur||63.4;
 }
+/* ---------- members (admin only) ---------- */
+function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+function fmtDate(iso){
+  if(!iso) return '\u2014';
+  var d=new Date(iso); if(isNaN(d)) return '\u2014';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+/* One phrase and one colour per member, so the list reads at a glance rather than
+   by comparing timestamps. */
+function ago(iso){
+  if(!iso) return {text:'never',tone:'gone'};
+  var t=new Date(iso); if(isNaN(t)) return {text:'never',tone:'gone'};
+  var mins=Math.floor((Date.now()-t.getTime())/60000);
+  if(mins<0) mins=0;
+  if(mins<2) return {text:'just now',tone:'now'};
+  if(mins<60) return {text:plural(mins,'minute')+' ago',tone:'now'};
+  var hrs=Math.floor(mins/60);
+  if(hrs<24) return {text:plural(hrs,'hour')+' ago',tone:'now'};
+  var d=Math.floor(hrs/24);
+  if(d===1) return {text:'yesterday',tone:'week'};
+  if(d<7) return {text:plural(d,'day')+' ago',tone:'week'};
+  if(d<30) return {text:plural(Math.floor(d/7),'week')+' ago',tone:'slow'};
+  return {text:plural(Math.floor(d/30),'month')+' ago',tone:'gone'};
+}
+var TONE={now:['p-yes','active today'],week:['p-item','this week'],
+          slow:['p-gold','quiet'],gone:['p-na','gone quiet']};
+function renderMembers(rows){
+  var t=$('members'); if(!t) return;
+  rows=rows.slice().sort(function(a,b){
+    var x=a.last_seen?new Date(a.last_seen).getTime():-1;
+    var y=b.last_seen?new Date(b.last_seen).getTime():-1;
+    return y-x; });
+  var active=0;
+  var out=rows.map(function(m){
+    var a=ago(m.last_seen), tn=TONE[a.tone];
+    if(a.tone==='now'||a.tone==='week') active++;
+    var nm=String(m.name||'').trim()||String(m.email||'').split('@')[0]||'\u2014';
+    return '<tr data-q="'+esc((nm+' '+(m.email||'')).toLowerCase())+'">'+
+      '<td class="nm">'+esc(nm)+
+        (m.is_admin?' <span class="pill p-pack">admin</span>':'')+'</td>'+
+      '<td data-label="Email"><span class="mail">'+esc(m.email||'\u2014')+'</span></td>'+
+      '<td class="num" data-label="Signed up">'+esc(fmtDate(m.signed_up))+'</td>'+
+      '<td class="num" data-label="Last seen">'+esc(a.text)+'</td>'+
+      '<td class="st"><span class="pill '+tn[0]+'">'+tn[1]+'</span></td></tr>';
+  }).join('');
+  t.querySelector('tbody').innerHTML=out||'<tr><td colspan="5" class="empty">Nobody has signed up yet.</td></tr>';
+  if($('admin-count')) $('admin-count').textContent=plural(rows.length,'member')+' \u00b7 '+active+' active this week';
+  applyFilters();
+}
+function membersMsg(html){
+  var t=$('members'); if(t) t.querySelector('tbody').innerHTML='<tr><td colspan="5" class="empty">'+html+'</td></tr>';
+}
+async function loadMembers(force){
+  if(!ADMIN) return;
+  if(membersLoaded&&!force) return;
+  if(!membersLoaded) membersMsg('Loading\u2026');
+  try{
+    var r=await SB.from('profiles').select('id,name,email,signed_up,last_seen,is_admin');
+    if(r.error){ membersMsg('Could not load the member list \u2014 '+esc(r.error.message)); return; }
+    membersLoaded=true; renderMembers(r.data||[]);
+  }catch(e){ membersMsg('Could not reach the server. Try the tab again.'); }
+}
+/* The name came from the sign-up form and was never editable afterwards, so a typo
+   or an in-game rename was permanent. The account's own metadata stays the source of
+   truth: the copy in profiles is refreshed from it on every load. */
+function dispMsg(t){ var e=$('dispname-msg'); if(e) e.textContent=t||'\u00a0'; }
+function saveDisplayName(){
+  var el=$('dispname'); if(!el||!U||!SB) return;
+  var v=el.value.trim().slice(0,40);
+  if(!v){ dispMsg('Your name cannot be empty.'); return; }
+  dispMsg('\u00a0');
+  queue('dispname',function(){
+    return SB.auth.updateUser({data:{name:v}}).then(function(r){
+      if(r&&r.error) return r;
+      U.user_metadata=U.user_metadata||{}; U.user_metadata.name=v;
+      var av=$('avatar'); if(av) av.textContent=initials(U.email,v);
+      membersLoaded=false;
+      /* best effort: the admin list reads this copy, but the name is already saved
+         on the account even if this table has not been set up yet */
+      return SB.from('profiles').update({name:v}).eq('id',U.id)
+        .then(function(){ return {error:null}; },function(){ return {error:null}; });
+    });
+  });
+}
+
+/* Everyone stamps their own row on the way in, which is what makes "last seen" work
+   with no server-side job. The admin flag is never written from the browser. */
+function touchProfile(){
+  if(!U||!SB) return;
+  var meta=U.user_metadata||{};
+  try{
+    SB.from('profiles').upsert({id:U.id,email:U.email||null,
+      name:String(meta.name||'').trim()||null,
+      signed_up:U.created_at||null,
+      last_seen:new Date().toISOString()},{onConflict:'id'}).then(function(){},function(){});
+  }catch(e){}
+}
+/* Asked for on its own so a project without the admin column simply answers "no"
+   and the tab stays hidden, rather than breaking the whole load. */
+function checkAdmin(){
+  if(!U||!SB) return;
+  try{
+    SB.from('profiles').select('is_admin').eq('id',U.id).maybeSingle().then(function(r){
+      ADMIN=!!(r&&r.data&&r.data.is_admin);
+      var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
+    },function(){});
+  }catch(e){}
+}
+
 function renderTop(){
   var withT=0,met=0,sum=0,behind=0;
   D.items.forEach(function(it){ var c=calcItem(it);
@@ -399,9 +508,9 @@ function bind(){
 }
 
 /* ---------- filters / tabs ---------- */
-var filters={stock:'all',packs:'all'}, queries={stock:'',packs:'',matrix:''};
+var filters={stock:'all',packs:'all'}, queries={stock:'',packs:'',matrix:'',members:''};
 function applyFilters(){
-  ['stock','packs','matrix'].forEach(function(id){
+  ['stock','packs','matrix','members'].forEach(function(id){
     var t=$(id); if(!t) return;
     var f=filters[id]||'all', q=(queries[id]||'').trim().toLowerCase();
     /* A search or a filter reaches across groups, so folding is ignored while one is on. */
@@ -427,7 +536,8 @@ document.addEventListener('click',function(e){
       b.setAttribute('aria-selected',String(b===t)); });
     [].forEach.call(document.querySelectorAll('.panel'),function(p){
       p.classList.toggle('on',p.id==='p-'+t.dataset.p); });
-    try{ localStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
+    try{ sessionStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
+    if(t.dataset.p==='admin') loadMembers();
     return; }
   var gt=t.closest&&t.closest('#stock .gtog');
   if(gt){
@@ -484,9 +594,30 @@ async function loadAll(){
   if(prof){ CUR.code=prof.currency_code||'GBP'; CUR.symbol=prof.currency_symbol||'£'; CUR.rate=Number(prof.currency_rate)||1; }
   fillCurrencyInputs();
   if(!D.items.length){ say('Your backpack is empty — ask Adrian to set your account up.',1); }
+  touchProfile(); checkAdmin();
+  if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
   showApp(); render(); say('saved');
-  try{ var tb=localStorage.getItem('fox-tab');
-    if(tb){ var b=document.querySelector('nav.tabs button[data-p="'+tb+'"]'); if(b) b.click(); } }catch(e){}
+  restoreTab();
+}
+
+/* Arriving at the site should always open the Dashboard; a refresh should leave you
+   where you were. sessionStorage is already per browser tab, and the navigation type
+   is what separates a reload from someone opening the tracker fresh. */
+function isReload(){
+  try{
+    var e=performance.getEntriesByType('navigation')[0];
+    if(e&&e.type) return e.type==='reload';
+    return !!(performance.navigation&&performance.navigation.type===1);
+  }catch(err){ return false; }
+}
+function restoreTab(){
+  try{
+    if(!isReload()){ sessionStorage.setItem('fox-tab','dash'); return; }
+    var tb=sessionStorage.getItem('fox-tab');
+    if(!tb||tb==='dash') return;
+    var b=document.querySelector('nav.tabs button[data-p="'+tb+'"]');
+    if(b) b.click();
+  }catch(e){}
 }
 
 async function boot(){
@@ -510,6 +641,10 @@ async function boot(){
 function wireUp(){
   if($('toast-x')) $('toast-x').addEventListener('click',function(){ $('toast').hidden=true; });
   if($('fatal-retry')) $('fatal-retry').addEventListener('click',function(){ location.reload(); });
+  if($('dispname')){
+    $('dispname').addEventListener('input',saveDisplayName);
+    $('dispname').addEventListener('blur',saveDisplayName);
+  }
   $('signin').addEventListener('submit',async function(e){
     e.preventDefault(); authMsg('Signing in…');
     try{
