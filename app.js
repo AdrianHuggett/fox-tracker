@@ -449,13 +449,23 @@ function dashRow(rank,it,c,tone,right,sub){
     '<b class="dval">'+right+'</b></li>'; }
 function renderDash(){
   var withT=D.items.map(function(it){ return {it:it,c:calcItem(it)}; }).filter(function(o){ return o.c.tgt>0; });
-  var byPct=withT.slice().sort(function(a,b){ return b.c.pct-a.c.pct; });
-  $('d-top').innerHTML=byPct.slice(0,5).map(function(o,i){
-    return dashRow(i+1,o.it,o.c,'up',Math.round(o.c.pct*100)+'%',o.c.raw>0?(fmt(o.c.raw)+' to go'):'target met'); }).join('')
-    || '<li class="dempty">No targets set yet.</li>';
-  $('d-bot').innerHTML=byPct.slice().reverse().slice(0,5).map(function(o,i){
+  /* A target already hit is finished business. Both cards are about what is still
+     open, so anything at or past 100% drops out of the ranking entirely. */
+  var open=withT.filter(function(o){ return o.c.pct<1; });
+  var byPct=open.slice().sort(function(a,b){ return b.c.pct-a.c.pct; });
+  var closest=byPct.slice(0,5);
+  $('d-top').innerHTML=closest.map(function(o,i){
+    return dashRow(i+1,o.it,o.c,'up',Math.round(o.c.pct*100)+'%',fmt(o.c.raw)+' to go'); }).join('')
+    || (withT.length?'<li class="dempty">Every target met \u2014 nothing left to close.</li>'
+                    :'<li class="dempty">No targets set yet.</li>');
+  /* Taking the worst from what the card above did not already show keeps an item
+     from appearing as both the best and the worst when few targets are open. */
+  var rest=byPct.slice(closest.length);
+  $('d-bot').innerHTML=rest.slice().reverse().slice(0,5).map(function(o,i){
     return dashRow(i+1,o.it,o.c,'down',Math.round(o.c.pct*100)+'%',fmt(o.c.raw)+' short'); }).join('')
-    || '<li class="dempty">No targets set yet.</li>';
+    || (!withT.length?'<li class="dempty">No targets set yet.</li>'
+       :(open.length?'<li class="dempty">Everything still open is listed above.</li>'
+                    :'<li class="dempty">Every target met \u2014 nothing left to close.</li>'));
   var gaps=withT.filter(function(o){ return o.c.raw>0 && D.base[o.it.name]; })
     .map(function(o){ return {it:o.it,c:o.c,usd:o.c.raw*n(D.base[o.it.name])}; })
     .sort(function(a,b){ return b.usd-a.usd; }).slice(0,5);
