@@ -611,6 +611,7 @@ document.addEventListener('click',function(e){
       p.classList.toggle('on',p.id==='p-'+t.dataset.p); });
     try{ sessionStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
     if(t.dataset.p==='admin') loadMembers();
+    headroomShow();
     return; }
   var gt=t.closest&&t.closest('#stock .gtog');
   if(gt){
@@ -693,6 +694,55 @@ function restoreTab(){
   }catch(e){}
 }
 
+/* ---------- headroom ----------
+   The phone header wraps to two rows and the hero takes another 236px below it,
+   so leaving the bar on screen would eat a third of the view, and leaving it
+   static — which is what it did — put the tabs out of reach as soon as you
+   scrolled. This does what a reader expects of a bar instead: it lifts away
+   while you move down the page and returns on any upward flick, so the tabs are
+   always one gesture away. The CSS only arms this below 820px; desktop keeps
+   the plain sticky bar it already had. */
+var hrEl=null, hrLast=0, hrTick=false, hrMq=null;
+var HR_REVEAL=90;  /* stay put over the brand row; there is nothing to gain yet */
+var HR_TOL=5;      /* ignore the jitter a soft keyboard or a rubber-band produces */
+function headroomShow(){ if(hrEl) hrEl.classList.remove('hr-off'); }
+function headroomApply(){
+  hrTick=false;
+  if(!hrEl) return;
+  if(hrMq&&!hrMq.matches){ hrEl.classList.remove('hr-off','hr-stuck'); hrLast=0; return; }
+  var y=window.pageYOffset||document.documentElement.scrollTop||0;
+  if(y<0) y=0;
+  hrEl.classList.toggle('hr-stuck',y>4);
+  var d=y-hrLast;
+  if(d>HR_TOL||d<-HR_TOL){
+    /* Past the end of the document the browser is bouncing, not scrolling, and
+       hiding the bar on a bounce reads as a glitch rather than a gesture. */
+    var floor=document.documentElement.scrollHeight-window.innerHeight-2;
+    if(d>0&&y>HR_REVEAL&&y<floor) hrEl.classList.add('hr-off');
+    else if(d<0) headroomShow();
+    hrLast=y;
+  }
+  if(y<=HR_REVEAL) headroomShow();
+}
+function headroomScroll(){
+  if(hrTick) return;
+  hrTick=true;
+  if(window.requestAnimationFrame) requestAnimationFrame(headroomApply); else setTimeout(headroomApply,16);
+}
+function headroom(){
+  hrEl=document.querySelector('header.top');
+  if(!hrEl||!window.matchMedia) return;
+  hrMq=window.matchMedia('(max-width:820px)');
+  if(hrMq.addEventListener) hrMq.addEventListener('change',headroomApply);
+  else if(hrMq.addListener) hrMq.addListener(headroomApply);
+  window.addEventListener('scroll',headroomScroll,false);
+  window.addEventListener('resize',headroomScroll,false);
+  /* Reaching the sign-out button by keyboard must not leave you typing into a
+     bar that is parked off the top of the screen. */
+  hrEl.addEventListener('focusin',headroomShow,false);
+  headroomApply();
+}
+
 async function boot(){
   if(!window.CONFIG||!CONFIG.url||CONFIG.url.indexOf('YOUR-')===0){
     $('auth').innerHTML='<div class="card"><h3>Not configured yet</h3>'+
@@ -771,5 +821,6 @@ function wireUp(){
     });
   });
 }
+headroom();
 boot();
 })();
