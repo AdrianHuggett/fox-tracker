@@ -1,0 +1,8 @@
+# Keep every text file in this repo on Unix line endings, whoever edits it
+# and on whatever machine. Without this, a file that comes back from a Windows
+# tool arrives as CRLF and every single line reads as changed in the diff.
+* text=auto eol=lf
+
+# Artwork is binary; never touch it
+*.png binary
+*.jpg binary
