@@ -88,6 +88,20 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function $(id){ return document.getElementById(id); }
 
+/* Seasonal quantities represent purchases during this event, never a monthly rate. */
+function moonlightPack(p){ return p.grp==='Moonlight Festival'; }
+function eventBudget(){ var total=0; D.packs.forEach(function(p){ if(moonlightPack(p)) total+=n(p.price)*n(uPacks[p.id]); }); return total; }
+function renderMoonlight(){
+  var event=window.FOX_MOONLIGHT, host=$('moonlight-guide'); if(!event||!host) return;
+  host.innerHTML='<h3>Moonlight Festival</h3><p class="hint">'+esc(event.phase)+' · Checked '+esc(event.checked)+
+    ' · <a href="'+event.source+'" target="_blank" rel="noopener noreferrer">Torxim source</a></p>'+
+    '<p>Start with the free Lanterns. If you plan to spend, Lunar Blessing offers 186 Lanterns for $5; Everbright Moon offers 300 for $20. These are full pass totals, so complete the required missions and claims. Lunar Radiance packs 1 and 2 each give 15 Lanterns per dollar; higher tiers give fewer. Buy only what you need for your chosen milestone.</p>'+
+    '<p class="hint">Finish all 10 paths before resetting a board. Torxim estimates 45.76 Lanterns per full board; rewards and badge totals are not guaranteed. Free Lanterns and random draw rewards are not automatically added to your Backpack.</p>'+
+    '<p><b>Planned event spend: '+money(eventBudget())+'</b> · separate from monthly spend.</p>'+
+    '<p class="hint">Event quantities are purchases for this event, not per month. Passes are capped at one. Prices are estimates converted from Torxim’s USD prices using 1 GBP = 1.27 USD; check your in-game price. Clear the event plan when the event ends or rewards are already entered in Have.</p>'+
+    '<details><summary>Free Lanterns · 542 available with full completion</summary><ul>'+event.free.map(function(r){return '<li>'+esc(r[0])+': '+fmt(r[1])+'</li>';}).join('')+'</ul></details>'+
+    '<details><summary>Moonlit Market · badge costs and limits</summary><p class="hint">Spend Plenilune Badges on your remaining targets. Mithril is a strong value option if you need it; cosmetics have no assigned cash value. Limits below apply to this event unless marked daily. Exchanges are separate from paid pack contents.</p><div class="tw"><table><thead><tr><th>Item</th><th class="num">Badges each</th><th class="num">Limit</th></tr></thead><tbody>'+event.market.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="num">'+fmt(r[1])+'</td><td class="num">'+esc(r[2])+'</td></tr>';}).join('')+'</tbody></table></div></details>';
+}
 /* ---------- maths ---------- */
 /* Every projection is driven by this date, and nothing in the app can change it,
    so when it runs out or goes missing the app has to say so rather than quietly
@@ -117,7 +131,7 @@ function calcItem(it){
   D.packs.forEach(function(p){
     var f=n(uPacks[p.id]); if(!f) return;
     var c=D.contents[p.id]; if(!c||!c[it.name]) return;
-    g+=f*n(c[it.name])*m;
+    g+=f*n(c[it.name])*(moonlightPack(p)?1:m);
   });
   var proj=have+g;
   return {have:have,tgt:tgt,proj:proj,pct:tgt>0?have/tgt:null,
@@ -126,6 +140,7 @@ function calcItem(it){
 }
 function itemMap(){ var m={}; D.items.forEach(function(i){m[i.name]=i;}); return m; }
 function calcPack(p,byName){
+  if(moonlightPack(p)) return {best:null,iv:0,pv:0,verdict:'Event pack',scoreable:false};
   var price=Math.max(n(p.price),0.01), best=null, bv=0, c=D.contents[p.id]||{};
   var scoreable=false;
   Object.keys(c).forEach(function(k){
@@ -150,7 +165,7 @@ function calcPack(p,byName){
   else verdict='Last resort';
   return {best:best,iv:iv,pv:pv,verdict:verdict,scoreable:scoreable};
 }
-function budget(){ var t=0; D.packs.forEach(function(p){ t+=n(p.price)*n(uPacks[p.id]); }); return t; }
+function budget(){ var t=0; D.packs.forEach(function(p){ if(!moonlightPack(p)) t+=n(p.price)*n(uPacks[p.id]); }); return t; }
 function pcolor(p){ if(p===null) return 'var(--faint)';
   if(p>=1) return 'var(--good)'; if(p>=.75) return 'var(--ice)';
   if(p>=.5) return '#C79A16'; return 'var(--ember)'; }
@@ -269,10 +284,11 @@ function renderStock(){
 }
 function packRank(v){ return {'Must buy':4,'Item buy':3,'Worth checking':2,'Last resort':1,'—':0}[v]||0; }
 function renderPacks(){
+  renderMoonlight();
   var byName=itemMap(), out=[], sec=null, grp=null;
   var priceTh=document.querySelector('#packs thead th[data-sort="price"]');
   if(priceTh) priceTh.setAttribute('data-label','Price '+CUR.symbol);
-  var VP={'Must buy':'p-gold','Item buy':'p-item','Worth checking':'p-pack','Last resort':'p-low','—':'p-na'};
+  var VP={'Event pack':'p-pack','Must buy':'p-gold','Item buy':'p-item','Worth checking':'p-pack','Last resort':'p-low','—':'p-na'};
   var list=D.packs.map(function(p,i){ return {p:p,i:i,c:calcPack(p,byName)}; });
   if(sortMode!=='section'){
     var key=function(o){
@@ -299,13 +315,13 @@ function renderPacks(){
              '<span class="mono">'+Math.round(v)+'%</span>'; }
     var k=c.verdict==='Must buy'?'golden':(c.verdict==='Item buy'?'item':(c.verdict==='Worth checking'?'pack':'low'));
     if(n(uPacks[p.id])>0) k+=' buying';
-    out.push('<tr data-state="'+k+'" data-q="'+esc(p.name.toLowerCase())+'">'+
+    out.push('<tr data-state="'+k+'" data-q="'+esc((p.name+' '+p.grp).toLowerCase())+'">'+
       '<td class="ic">'+esc(p.icon||'·')+'</td>'+
       '<td class="nm">'+esc(p.name)+'<div class="mini">'+
         esc(sortMode==='section'?(p.occurrence||''):((p.grp||'')+(p.occurrence?' · '+p.occurrence:'')))+'</div></td>'+
       '<td class="num" data-label="Price '+esc(CUR.symbol)+'">'+fmt(n(p.price)*CUR.rate,2)+'</td>'+
-      '<td data-label="Buy / mo">'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'" aria-label="'+esc(p.name)+' packs bought per month"')+'</td>'+
-      '<td data-label="Best item for you">'+(c.best?esc(c.best):'<span class="mini">'+(c.scoreable?'—':'contents not priced')+'</span>')+'</td>'+
+      '<td data-label="'+(moonlightPack(p)?'Buy / event':'Buy / mo')+'">'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'" aria-label="'+esc(p.name)+(moonlightPack(p)?' purchases this event':' packs bought per month')+'"')+(moonlightPack(p)?'<div class="mini">per event</div>':'')+'</td>'+
+      '<td data-label="Best item for you">'+(c.best?esc(c.best):'<span class="mini">'+(moonlightPack(p)?'See event guide':(c.scoreable?'—':'contents not priced'))+'</span>')+'</td>'+
       '<td class="num" data-label="Pack value">'+vb(c.pv,'var(--ice)')+'</td>'+
       '<td class="num" data-label="Best item">'+vb(c.iv,'var(--ember)')+'</td>'+
       '<td><span class="pill '+VP[c.verdict]+'">'+esc(c.verdict)+'</span></td></tr>');
@@ -324,6 +340,7 @@ function renderPacks(){
 function renderMatrix(){
   var byName=itemMap();
   var cols=D.items.filter(function(i){ return D.base[i.name]!==undefined; }).map(function(i){ return i.name; });
+  D.packs.forEach(function(p){ if(moonlightPack(p)) Object.keys(D.contents[p.id]||{}).forEach(function(k){ if(cols.indexOf(k)<0) cols.push(k); }); });
   $('matrix').querySelector('thead').innerHTML='<tr><th>Pack</th>'+
     cols.map(function(c){ return '<th class="num">'+esc(c)+'</th>'; }).join('')+'</tr>';
   var out=['<tr class="need"><td>Still short</td>'+cols.map(function(c){
@@ -331,7 +348,7 @@ function renderMatrix(){
     return '<td class="num">'+(r?fmt(r):'<span class="mini">0</span>')+'</td>'; }).join('')+'</tr>'];
   D.packs.forEach(function(p){
     var c=D.contents[p.id]||{};
-    out.push('<tr data-q="'+esc(p.name.toLowerCase())+'"><td>'+esc(p.name)+
+    out.push('<tr data-q="'+esc((p.name+' '+p.grp).toLowerCase())+'"><td>'+esc(p.name)+
       ' <span class="mini">'+money(n(p.price))+'</span></td>'+
       cols.map(function(col){
         return '<td class="num">'+(c[col]===undefined?'<span class="mini">·</span>':fmt(n(c[col])))+'</td>';
@@ -551,7 +568,9 @@ function bind(){
         if(el.dataset.idx!==undefined){
           var it=D.items[+el.dataset.idx]; it[el.dataset.k]=n(el.value); saveItem(it,el.dataset.k);
         } else if(el.dataset.pid!==undefined){
-          uPacks[el.dataset.pid]=n(el.value); savePack(el.dataset.pid,el.value);
+          var selected=D.packs.find(function(p){return String(p.id)===el.dataset.pid;});
+          var qty=n(el.value); if(selected&&moonlightPack(selected)){ qty=Math.max(0,Math.floor(qty)); if(/Lunar Blessing|Everbright Moon/.test(selected.name)) qty=Math.min(1,qty); el.value=qty; }
+          uPacks[el.dataset.pid]=qty; savePack(el.dataset.pid,qty);
         }
       }catch(e){ say('That change did not go through. Try typing it again.',1); }
     }

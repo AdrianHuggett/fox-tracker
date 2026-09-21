@@ -151,6 +151,7 @@ var CONFIG = {
 </section>
 
 <section class="panel" id="p-packs">
+ <div class="card" id="moonlight-guide"></div>
  <div class="toolbar">
   <button class="chip" data-scope="packs" data-f="all" aria-pressed="true" id="c-pall">All</button>
   <button class="chip" data-scope="packs" data-f="golden" id="c-gold">Must buy</button>
@@ -167,7 +168,7 @@ var CONFIG = {
  <div class="tw"><table id="packs"><thead><tr><th></th>
  <th class="so" data-sort="name" data-label="Pack">Pack</th>
  <th class="num so" data-sort="price" data-label="Price">Price</th>
- <th class="num so" data-sort="freq" data-label="Buy / mo">Buy / mo</th>
+ <th class="num so" data-sort="freq" data-label="Buy quantity">Buy quantity</th>
  <th>Best item for you</th>
  <th class="num so" data-sort="pv" data-label="Pack value %">Pack value %</th>
  <th class="num so" data-sort="iv" data-label="Best item %">Best item %</th>
@@ -177,7 +178,7 @@ var CONFIG = {
 
 <section class="panel" id="p-matrix">
  <div class="toolbar"><input type="search" data-for="matrix" placeholder="Find a pack…" style="margin-left:0"></div>
- <p class="hint">What each pack contains, per Torxim. The top row is what you are still missing against your
+ <p class="hint">What each pack contains, per Torxim. Moonlight Festival shows direct pack contents and full pass rewards only; random draws and badge exchanges are separate. Enhancement XP Components contain 100 XP each; Hero XP items contain 10,000 XP each; Chief Stamina follows the source quantity, without conversion to Stamina Cans. The top row is what you are still missing against your
  targets, before free income.</p>
  <div class="tw"><table id="matrix" class="mx"><thead></thead><tbody></tbody></table></div>
 </section>
@@ -268,6 +269,7 @@ var CONFIG = {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app.js?v=20260921-icons1"></script>
+<script src="moonlight-festival.js?v=20260921-moonlight1"></script>
+<script src="app.js?v=20260921-moonlight1"></script>
 </body>
 </html>
