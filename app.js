@@ -90,18 +90,6 @@ function $(id){ return document.getElementById(id); }
 
 /* Seasonal quantities represent purchases during this event, never a monthly rate. */
 function moonlightPack(p){ return p.grp==='Moonlight Festival'; }
-function eventBudget(){ var total=0; D.packs.forEach(function(p){ if(moonlightPack(p)) total+=n(p.price)*n(uPacks[p.id]); }); return total; }
-function renderMoonlight(){
-  var event=window.FOX_MOONLIGHT, host=$('moonlight-guide'); if(!event||!host) return;
-  host.innerHTML='<h3>Moonlight Festival</h3><p class="hint">'+esc(event.phase)+' · Checked '+esc(event.checked)+
-    ' · <a href="'+event.source+'" target="_blank" rel="noopener noreferrer">Torxim source</a></p>'+
-    '<p>Start with the free Lanterns. If you plan to spend, Lunar Blessing offers 186 Lanterns for $5; Everbright Moon offers 300 for $20. These are full pass totals, so complete the required missions and claims. Lunar Radiance packs 1 and 2 each give 15 Lanterns per dollar; higher tiers give fewer. Buy only what you need for your chosen milestone.</p>'+
-    '<p class="hint">Finish all 10 paths before resetting a board. Torxim estimates 45.76 Lanterns per full board; rewards and badge totals are not guaranteed. Free Lanterns and random draw rewards are not automatically added to your Backpack.</p>'+
-    '<p><b>Planned event spend: '+money(eventBudget())+'</b> · separate from monthly spend.</p>'+
-    '<p class="hint">Event quantities are purchases for this event, not per month. Passes are capped at one. Prices are estimates converted from Torxim’s USD prices using 1 GBP = 1.27 USD; check your in-game price. Clear the event plan when the event ends or rewards are already entered in Have.</p>'+
-    '<details><summary>Free Lanterns · 542 available with full completion</summary><ul>'+event.free.map(function(r){return '<li>'+esc(r[0])+': '+fmt(r[1])+'</li>';}).join('')+'</ul></details>'+
-    '<details><summary>Moonlit Market · badge costs and limits</summary><p class="hint">Spend Plenilune Badges on your remaining targets. Mithril is a strong value option if you need it; cosmetics have no assigned cash value. Limits below apply to this event unless marked daily. Exchanges are separate from paid pack contents.</p><div class="tw"><table><thead><tr><th>Item</th><th class="num">Badges each</th><th class="num">Limit</th></tr></thead><tbody>'+event.market.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="num">'+fmt(r[1])+'</td><td class="num">'+esc(r[2])+'</td></tr>';}).join('')+'</tbody></table></div></details>';
-}
 /* ---------- maths ---------- */
 /* Every projection is driven by this date, and nothing in the app can change it,
    so when it runs out or goes missing the app has to say so rather than quietly
@@ -284,7 +272,6 @@ function renderStock(){
 }
 function packRank(v){ return {'Must buy':4,'Item buy':3,'Worth checking':2,'Last resort':1,'—':0}[v]||0; }
 function renderPacks(){
-  renderMoonlight();
   var byName=itemMap(), out=[], sec=null, grp=null;
   var priceTh=document.querySelector('#packs thead th[data-sort="price"]');
   if(priceTh) priceTh.setAttribute('data-label','Price '+CUR.symbol);
@@ -321,7 +308,7 @@ function renderPacks(){
         esc(sortMode==='section'?(p.occurrence||''):((p.grp||'')+(p.occurrence?' · '+p.occurrence:'')))+'</div></td>'+
       '<td class="num" data-label="Price '+esc(CUR.symbol)+'">'+fmt(n(p.price)*CUR.rate,2)+'</td>'+
       '<td data-label="'+(moonlightPack(p)?'Buy / event':'Buy / mo')+'">'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'" aria-label="'+esc(p.name)+(moonlightPack(p)?' purchases this event':' packs bought per month')+'"')+(moonlightPack(p)?'<div class="mini">per event</div>':'')+'</td>'+
-      '<td data-label="Best item for you">'+(c.best?esc(c.best):'<span class="mini">'+(moonlightPack(p)?'See event guide':(c.scoreable?'—':'contents not priced'))+'</span>')+'</td>'+
+      '<td data-label="Best item for you">'+(c.best?esc(c.best):'<span class="mini">'+(moonlightPack(p)?'Event rewards':(c.scoreable?'—':'contents not priced'))+'</span>')+'</td>'+
       '<td class="num" data-label="Pack value">'+vb(c.pv,'var(--ice)')+'</td>'+
       '<td class="num" data-label="Best item">'+vb(c.iv,'var(--ember)')+'</td>'+
       '<td><span class="pill '+VP[c.verdict]+'">'+esc(c.verdict)+'</span></td></tr>');
@@ -661,8 +648,12 @@ async function loadAll(){
   D.base={}; r[1].data.forEach(function(b){ D.base[b.item]=Number(b.usd); });
   D.packs=r[2].data;
   D.contents={}; r[3].data.forEach(function(c){ (D.contents[c.pack_id]=D.contents[c.pack_id]||{})[c.item]=Number(c.qty); });
-  D.items=r[4].data.map(function(i){ return {sort:i.sort,grp:i.grp,icon:i.icon,name:i.name,
+  D.items=r[4].data.filter(function(i){ return !/Moonlight Festival/i.test(i.grp||''); }).map(function(i){ return {sort:i.sort,grp:i.grp,icon:i.icon,name:i.name,
     have:Number(i.have),target:Number(i.target),free:Number(i.free)}; });
+  /* Keep added items with their existing Backpack group without changing saved IDs. */
+  var groupOrder={};
+  D.items.forEach(function(it,idx){ if(groupOrder[it.grp]===undefined) groupOrder[it.grp]=idx; });
+  D.items.sort(function(a,b){ return groupOrder[a.grp]-groupOrder[b.grp] || a.sort-b.sort; });
   uPacks={}; r[5].data.forEach(function(p){ uPacks[p.pack_id]=Number(p.freq); });
   var prof=r[6]&&r[6].data;
   if(prof){ CUR.code=prof.currency_code||'GBP'; CUR.symbol=prof.currency_symbol||'£'; CUR.rate=Number(prof.currency_rate)||1; }
