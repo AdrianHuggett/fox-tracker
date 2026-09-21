@@ -571,3 +571,8 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  #packs .mono{font-size:11px}
  #packs tbody tr:not(.grp):not(.sec)>td:nth-child(3){font-size:13px}
 }
+
+/* In-game item artwork; existing responsive icon visibility is preserved. */
+.item-art{display:inline-block;width:24px;height:24px;object-fit:contain;vertical-align:middle}
+#stock td.ic{width:34px;min-width:34px;opacity:1}
+.dic .item-art{width:22px;height:22px}

@@ -178,6 +178,51 @@ function savePack(id,freq){
 }
 
 /* ---------- rendering ---------- */
+/* In-game artwork. Unmatched items keep their existing icon. */
+var ITEM_ART = {
+  "Fire Crystals": "item-fire-crystals.png",
+  "Refined Fire Crystals": "item-refined-fire-crystals.png",
+  "Fire Crystal Shards": "item-fire-crystal-shards.png",
+  "Stamina Cans": "item-stamina-cans.png",
+  "General Expert Sigils": "item-general-expert-sigils.png",
+  "Ciryl Sigils": "item-ciryl-sigils.png",
+  "Agnes Sigils": "item-agnes-sigils.png",
+  "Holger Sigils": "item-holger-sigils.png",
+  "Romulus Sigils": "item-romulus-sigils.png",
+  "Baldur Sigils": "item-baldur-sigils.png",
+  "Fabian Sigils": "item-fabian-sigils.png",
+  "Valeria Sigils": "item-valeria-sigils.png",
+  "Ronne Sigils": "item-ronne-sigils.png",
+  "Kathy Sigils": "item-kathy-sigils.png",
+  "Books of Knowledge": "item-books-of-knowledge.png",
+  "Advanced Wild Marks": "item-advanced-wild-marks.png",
+  "Common Wild Marks": "item-common-wild-marks.png",
+  "Energizing Potions": "item-energizing-potions.png",
+  "Taming Manuals": "item-taming-manuals.png",
+  "Strengthening Serum": "item-strengthening-serum.png",
+  "Charm Designs": "item-charm-designs.png",
+  "Charm Guides": "item-charm-guides.png",
+  "Hardened Alloy": "item-hardened-alloy.png",
+  "Polishing Solution": "item-polishing-solution.png",
+  "Design Plans": "item-design-plans.png",
+  "Lunar Amber": "item-lunar-amber.png",
+  "Mithril": "item-mithril.png",
+  "Essence Stones": "item-essence-stones.png",
+  "Mythic Hero Shards": "item-mythic-hero-shards.png",
+  "Epic Hero Shards": "item-epic-hero-shards.png",
+  "Rare Hero Shards": "item-rare-hero-shards.png",
+  "Gems": "item-gems.png",
+  "General Speedups": "item-general-speedups.png",
+  "Training Speedups": "item-training-speedups.png",
+  "Construction Speedups": "item-construction-speedups.png",
+  "Research Speedups": "item-research-speedups.png",
+  "Expert Skill Learning Speedups": "item-expert-skill-learning-speedups.png",
+  "Healing Speedups": "item-healing-speedups.png"
+};
+function itemIcon(it){
+  var src=ITEM_ART[it.name];
+  return src ? '<img class="item-art" src="'+esc(src)+'" alt="" width="24" height="24" decoding="async">' : esc(it.icon||'·');
+}
 function inp(val,cls,attrs){
   return '<input class="cell '+(cls||'')+'" type="number" step="any" value="'+
     (val===null||val===undefined?'':val)+'" '+(attrs||'')+'>';
@@ -210,7 +255,7 @@ function renderStock(){
     /* the pill already says "on track"; only the shortfall adds anything */
     var rc=(c.tgt>0 && !c.ok && c.left>0)?fmt(c.left)+' short after plan':'';
     out.push('<tr data-state="'+state+'" data-q="'+esc(it.name.toLowerCase())+'" data-gn="'+esc(g)+'">'+
-      '<td class="ic">'+esc(it.icon||'\u00b7')+'</td><td class="nm">'+esc(it.name)+'</td>'+
+      '<td class="ic">'+itemIcon(it)+'</td><td class="nm">'+esc(it.name)+'</td>'+
       '<td data-label="Have">'+inp(it.have,'','data-idx="'+idx+'" data-k="have" aria-label="'+esc(it.name)+' have"')+'</td>'+
       '<td data-label="Target">'+inp(it.target,'t2','data-idx="'+idx+'" data-k="target" aria-label="'+esc(it.name)+' target"')+'</td>'+
       '<td class="num">'+(c.tgt>0?fmt(c.raw):'<span class="mini">\u2014</span>')+'</td>'+
@@ -443,7 +488,7 @@ function dbar(pct,col){
   return '<div class="dbar"><i style="width:'+Math.max(1.5,Math.min(100,pct)).toFixed(1)+'%;background:'+col+'"></i></div>'; }
 function dashRow(rank,it,c,tone,right,sub){
   return '<li class="drow '+tone+'"><span class="rank">'+rank+'</span>'+
-    '<span class="dic">'+esc(it.icon||'·')+'</span>'+
+    '<span class="dic">'+itemIcon(it)+'</span>'+
     '<span class="dname">'+esc(it.name)+'<em>'+esc(sub)+'</em></span>'+
     '<span class="dbarwrap">'+dbar(c.pct===null?0:c.pct*100, tone==='up'?'var(--good)':'var(--ember)')+'</span>'+
     '<b class="dval">'+right+'</b></li>'; }
@@ -472,7 +517,7 @@ function renderDash(){
   var mx=gaps.length?gaps[0].usd:1;
   $('d-gap').innerHTML=gaps.map(function(o,i){
     return '<li class="drow down"><span class="rank">'+(i+1)+'</span>'+
-      '<span class="dic">'+esc(o.it.icon||'·')+'</span>'+
+      '<span class="dic">'+itemIcon(o.it)+'</span>'+
       '<span class="dname">'+esc(o.it.name)+'<em>'+fmt(o.c.raw)+' short</em></span>'+
       '<span class="dbarwrap">'+dbar(o.usd/mx*100,'var(--violet)')+'</span>'+
       '<b class="dval">'+baseMoney(o.usd)+'</b></li>'; }).join('')
