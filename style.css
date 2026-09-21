@@ -518,21 +518,27 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
 #members .nm{font-weight:500;color:#EFF4FA}
 #members .mail{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);word-break:break-all}
 #members .empty{text-align:center}
-@media (max-width:680px){
- /* same treatment as the other two tables: five columns will not fit, so each
-    member becomes a card with the status and the last-seen phrase on the outside edges */
+@media (max-width:820px){
+ #p-admin .toolbar{gap:6px 12px}
+ #p-admin .hint{margin:6px 0;font-size:11px;line-height:1.4}
+ #p-admin .tw{margin-top:8px}
+ #p-admin input[type=search]{font-size:16px}
  #members,#members tbody{display:block}
  #members thead{display:none}
  #members tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;
   grid-template-areas:"nm st" "mail mail" "up seen";
-  gap:7px 12px;padding:13px;border-bottom:1px solid var(--line2);align-items:start}
- #members tbody tr>td{display:block;padding:0;border:0;min-width:0}
- #members tbody tr>td.nm{grid-area:nm;font-size:14.5px;align-self:center}
+  gap:3px 10px;padding:9px 10px;border-bottom:1px solid var(--line2);align-items:center}
+ #members tbody tr>td{display:block;padding:0;border:0;min-width:0;line-height:1.4}
+ #members tbody tr>td.nm{grid-area:nm;font-size:14px;overflow-wrap:anywhere}
  #members tbody tr>td:nth-child(2){grid-area:mail}
+ #members .mail{word-break:normal;overflow-wrap:anywhere;font-size:11px}
+ #members tbody tr>td:nth-child(2)::before{display:none}
  #members tbody tr>td:nth-child(3){grid-area:up;text-align:left}
- #members tbody tr>td:nth-child(4){grid-area:seen;text-align:right}
- #members tbody tr>td.st{grid-area:st;text-align:right;align-self:center}
- #members tbody tr>td.empty{grid-column:1/-1;text-align:center}
+ #members tbody tr>td:nth-child(4){grid-area:seen;text-align:right;justify-content:flex-end}
+ #members tbody tr>td.num{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 5px;font-size:11px;white-space:normal}
+ #members td.num::before{display:inline;margin:0;font-size:9px;letter-spacing:.04em;white-space:nowrap}
+ #members tbody tr>td.st{grid-area:st;text-align:right}
+ #members tbody tr>td.empty{grid-area:auto;grid-column:1/-1;padding:16px 0;text-align:center}
 }
 
 /* ---------- phone & tablet: condense the two working tables ----------
