@@ -604,3 +604,6 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
 #packs tr.sec .gtog{color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;grid-template-columns:9px minmax(0,1fr);text-align:left}
 #packs tr.sec .chev{border-color:currentColor}
 #packs tr.sec .gtog:focus-visible{outline:2px solid currentColor;outline-offset:-3px}
+
+#packs tr.grp>td{padding:0}
+#packs tr.grp .gtog{grid-template-columns:9px minmax(0,1fr);text-align:left}

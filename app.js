@@ -297,14 +297,14 @@ function renderPacks(){
     var p=o.p, c=o.c;
     if(sortMode==='section'){
       if(p.sec!==sec){ sec=p.sec; grp=null; out.push('<tr class="sec"><td colspan="8"><button class="gtog" type="button" data-psection="'+esc(sec)+'" aria-expanded="'+(!PACK_FOLD[sec])+'"><span class="chev" aria-hidden="true"></span><span class="gname">'+esc(sec)+'</span></button></td></tr>'); }
-      if(p.grp!==grp){ grp=p.grp; out.push('<tr class="grp" data-psection="'+esc(sec)+'"><td colspan="8">'+esc(grp)+'</td></tr>'); }
+      if(p.grp!==grp){ grp=p.grp; out.push('<tr class="grp" data-psection="'+esc(sec)+'"><td colspan="8"><button class="gtog" type="button" data-psection="'+esc(sec)+'" data-pgroup="'+esc(sec+'|'+grp)+'" aria-expanded="'+(!PACK_FOLD[sec+'|'+grp])+'"><span class="chev" aria-hidden="true"></span><span class="gname">'+esc(grp)+'</span></button></td></tr>'); }
     }
     function vb(v,col){ if(!(v>0)) return '<span class="mini">—</span>';
       return '<span class="vbar"><i style="width:'+Math.min(100,v/300*100).toFixed(0)+'%;background:'+col+'"></i></span>'+
              '<span class="mono">'+Math.round(v)+'%</span>'; }
     var k=c.verdict==='Must buy'?'golden':(c.verdict==='Item buy'?'item':(c.verdict==='Worth checking'?'pack':'low'));
     if(n(uPacks[p.id])>0) k+=' buying';
-    out.push('<tr data-psection="'+esc(p.sec)+'" data-state="'+k+'" data-q="'+esc((p.name+' '+p.grp).toLowerCase())+'">'+
+    out.push('<tr data-pgroup="'+esc(p.sec+'|'+p.grp)+'" data-psection="'+esc(p.sec)+'" data-state="'+k+'" data-q="'+esc((p.name+' '+p.grp).toLowerCase())+'">'+
       '<td class="ic">'+esc(p.icon||'·')+'</td>'+
       '<td class="nm">'+esc(p.name)+'<div class="mini">'+
         esc(sortMode==='section'?(p.occurrence||''):((p.grp||'')+(p.occurrence?' · '+p.occurrence:'')))+'</div></td>'+
@@ -585,7 +585,7 @@ function applyFilters(){
       var okF = f==='all' || st.split(' ').indexOf(f)>=0;
       var okQ = !q || (r.dataset.q||'').indexOf(q)>=0;
       var okG = searching || !r.dataset.gn || !FOLD[r.dataset.gn];
-      if(id==='packs' && !searching && sortMode==='section' && PACK_FOLD[r.dataset.psection]) okG=false;
+      if(id==='packs' && !searching && sortMode==='section' && (PACK_FOLD[r.dataset.psection] || PACK_FOLD[r.dataset.pgroup])) okG=false;
       r.classList.toggle('hide', !(okF&&okQ&&okG));
     });
   });
@@ -606,7 +606,7 @@ document.addEventListener('click',function(e){
     return; }
   var pt=t.closest&&t.closest('#packs .gtog');
   if(pt){
-    var section=pt.getAttribute('data-psection');
+    var section=pt.getAttribute('data-pgroup')||pt.getAttribute('data-psection');
     if(PACK_FOLD[section]) delete PACK_FOLD[section]; else PACK_FOLD[section]=1;
     pt.setAttribute('aria-expanded',String(!PACK_FOLD[section]));
     try{ localStorage.setItem('fox-pack-fold',JSON.stringify(PACK_FOLD)); }catch(err){}
