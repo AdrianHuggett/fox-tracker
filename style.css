@@ -598,3 +598,9 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  header.top.hr-stuck{box-shadow:0 14px 26px -22px #000}
 }
 @media (prefers-reduced-motion:reduce){header.top{transition:none!important}}
+
+/* Collapsible Things to buy sections. */
+#packs tr.sec>td{padding:0}
+#packs tr.sec .gtog{color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;grid-template-columns:9px minmax(0,1fr);text-align:left}
+#packs tr.sec .chev{border-color:currentColor}
+#packs tr.sec .gtog:focus-visible{outline:2px solid currentColor;outline-offset:-3px}

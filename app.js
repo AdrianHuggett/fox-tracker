@@ -6,6 +6,8 @@ var timers={}, sync=document.getElementById('sync');
 var sortMode='section', sortDir=-1;
 /* Which Backpack groups are folded shut, keyed by group name so the state
    survives a re-render and a reload. */
+var PACK_FOLD={};
+try{ PACK_FOLD=JSON.parse(localStorage.getItem('fox-pack-fold')||'{}')||{}; }catch(err){ PACK_FOLD={}; }
 var FOLD={};
 try{ FOLD=JSON.parse(localStorage.getItem('fox-fold')||'{}')||{}; }catch(err){ FOLD={}; }
 var CURR={GBP:{symbol:'£',rate:1},USD:{symbol:'$',rate:1.27},EUR:{symbol:'€',rate:1.17},
@@ -294,15 +296,15 @@ function renderPacks(){
   list.forEach(function(o){
     var p=o.p, c=o.c;
     if(sortMode==='section'){
-      if(p.sec!==sec){ sec=p.sec; grp=null; out.push('<tr class="sec"><td colspan="8">'+esc(sec)+'</td></tr>'); }
-      if(p.grp!==grp){ grp=p.grp; out.push('<tr class="grp"><td colspan="8">'+esc(grp)+'</td></tr>'); }
+      if(p.sec!==sec){ sec=p.sec; grp=null; out.push('<tr class="sec"><td colspan="8"><button class="gtog" type="button" data-psection="'+esc(sec)+'" aria-expanded="'+(!PACK_FOLD[sec])+'"><span class="chev" aria-hidden="true"></span><span class="gname">'+esc(sec)+'</span></button></td></tr>'); }
+      if(p.grp!==grp){ grp=p.grp; out.push('<tr class="grp" data-psection="'+esc(sec)+'"><td colspan="8">'+esc(grp)+'</td></tr>'); }
     }
     function vb(v,col){ if(!(v>0)) return '<span class="mini">—</span>';
       return '<span class="vbar"><i style="width:'+Math.min(100,v/300*100).toFixed(0)+'%;background:'+col+'"></i></span>'+
              '<span class="mono">'+Math.round(v)+'%</span>'; }
     var k=c.verdict==='Must buy'?'golden':(c.verdict==='Item buy'?'item':(c.verdict==='Worth checking'?'pack':'low'));
     if(n(uPacks[p.id])>0) k+=' buying';
-    out.push('<tr data-state="'+k+'" data-q="'+esc((p.name+' '+p.grp).toLowerCase())+'">'+
+    out.push('<tr data-psection="'+esc(p.sec)+'" data-state="'+k+'" data-q="'+esc((p.name+' '+p.grp).toLowerCase())+'">'+
       '<td class="ic">'+esc(p.icon||'·')+'</td>'+
       '<td class="nm">'+esc(p.name)+'<div class="mini">'+
         esc(sortMode==='section'?(p.occurrence||''):((p.grp||'')+(p.occurrence?' · '+p.occurrence:'')))+'</div></td>'+
@@ -577,11 +579,13 @@ function applyFilters(){
     var searching = !!q || f!=='all';
     [].forEach.call(t.querySelectorAll('tbody tr'),function(r){
       if(r.classList.contains('grp')||r.classList.contains('sec')||r.classList.contains('need')){
-        r.classList.toggle('hide', searching); return; }
+        var foldedGroup=id==='packs' && sortMode==='section' && r.classList.contains('grp') && !!PACK_FOLD[r.dataset.psection];
+        r.classList.toggle('hide', searching || foldedGroup); return; }
       var st=r.dataset.state||'';
       var okF = f==='all' || st.split(' ').indexOf(f)>=0;
       var okQ = !q || (r.dataset.q||'').indexOf(q)>=0;
       var okG = searching || !r.dataset.gn || !FOLD[r.dataset.gn];
+      if(id==='packs' && !searching && sortMode==='section' && PACK_FOLD[r.dataset.psection]) okG=false;
       r.classList.toggle('hide', !(okF&&okQ&&okG));
     });
   });
@@ -600,6 +604,14 @@ document.addEventListener('click',function(e){
     if(t.dataset.p==='admin') loadMembers();
     headroomShow();
     return; }
+  var pt=t.closest&&t.closest('#packs .gtog');
+  if(pt){
+    var section=pt.getAttribute('data-psection');
+    if(PACK_FOLD[section]) delete PACK_FOLD[section]; else PACK_FOLD[section]=1;
+    pt.setAttribute('aria-expanded',String(!PACK_FOLD[section]));
+    try{ localStorage.setItem('fox-pack-fold',JSON.stringify(PACK_FOLD)); }catch(err){}
+    applyFilters(); return;
+  }
   var gt=t.closest&&t.closest('#stock .gtog');
   if(gt){
     var gn=gt.getAttribute('data-gname');
