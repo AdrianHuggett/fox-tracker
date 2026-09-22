@@ -153,7 +153,7 @@ function calcPack(p,byName){
   else verdict='Last resort';
   return {best:best,iv:iv,pv:pv,verdict:verdict,scoreable:scoreable};
 }
-function budget(){ var t=0; D.packs.forEach(function(p){ if(!moonlightPack(p)) t+=n(p.price)*n(uPacks[p.id]); }); return t; }
+function budget(){ var t=0; D.packs.forEach(function(p){ t+=n(p.price)*n(uPacks[p.id]); }); return t; }
 function pcolor(p){ if(p===null) return 'var(--faint)';
   if(p>=1) return 'var(--good)'; if(p>=.75) return 'var(--ice)';
   if(p>=.5) return '#C79A16'; return 'var(--ember)'; }
