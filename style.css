@@ -688,6 +688,10 @@ footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
 .r4addt{margin-left:12px;padding:3px 9px;font-size:10px;vertical-align:1px}
 .r4del{background:none;border:0;color:var(--faint);font-size:17px;line-height:1;cursor:pointer;padding:0 5px}
 .r4del:hover{color:var(--coral)}
+#r4 td.r4x{white-space:nowrap}
+.r4mv{background:none;border:0;color:var(--faint);font-size:12px;line-height:1;cursor:pointer;padding:5px 6px}
+.r4mv:hover:not(:disabled){color:var(--ice)}
+.r4mv:disabled{opacity:.25;cursor:default}
 .r4admin{margin-top:14px}
 .r4mrow,.r4add{display:flex;gap:8px;align-items:center;margin-bottom:8px;max-width:420px}
 .r4mrow input,.r4add input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--ink);background:var(--edit);
@@ -716,6 +720,7 @@ footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
  #r4.adm td.r4task{padding-left:0}
  #r4.adm td.r4freq,#r4.adm td.r4rem{display:block}
  #r4.adm td.r4task{flex:0 0 100%;padding-right:26px}
+ #r4.full td.r4task{padding-right:84px}
  #r4.adm td.r4c{display:inline-block!important;order:1;margin:4px 4px 0 0;flex:none;width:auto}
  #r4.adm button.r4dot{width:auto;height:auto;border-radius:5px;padding:3px 7px}
  #r4.adm .r4n{position:static;width:auto;height:auto;clip:auto;font-size:11px;color:var(--ink)}
