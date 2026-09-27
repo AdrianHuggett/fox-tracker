@@ -860,6 +860,9 @@ function checkAdmin(){
       ADMIN=!!(r&&r.data&&r.data.is_admin);
       var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
       if(R4.loaded) renderR4();
+      /* A refresh on the Members tab clicks it before this answer arrives, so the
+         list is fetched here once admin rights are known. */
+      var pa=$('p-admin'); if(ADMIN&&pa&&pa.classList.contains('on')) loadMembers();
     },function(){});
   }catch(e){}
 }
