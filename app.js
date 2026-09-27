@@ -259,10 +259,221 @@ function noteSnapshot(){
 }
 /* Loaded on its own so a missing table only switches measuring off, rather than
    stopping the whole tracker from loading. */
+/* ---------- R4 roles ----------
+   Who leads each alliance task and who backs them up. Everyone signed in can read
+   it; only an admin can change it, and that is enforced by the database's row
+   policies, not by what this page shows or hides. */
+var R4={members:[],tasks:[],loaded:false,loading:false};
+var R4_SECTIONS=['Core Administrative Tasks','Leadership and Support',
+  'Event, Activity Management & Scheduling','Expansion and Farms'];
+var R4_TONE=['coral','orange','gold','good'];
+function r4Task(id){ for(var i=0;i<R4.tasks.length;i++) if(R4.tasks[i].id===id) return R4.tasks[i]; return null; }
+function r4Name(id){ for(var i=0;i<R4.members.length;i++) if(String(R4.members[i].id)===String(id)) return R4.members[i].name; return ''; }
+function r4Msg(html){
+  var t=$('r4'); if(!t) return;
+  t.querySelector('thead').innerHTML='';
+  t.querySelector('tbody').innerHTML='<tr><td class="empty">'+html+'</td></tr>';
+}
+/* "18:50" or "14:00 / 17:00" in UTC, rewritten in the viewer's own clock. Nothing is
+   shown for someone already on UTC, or for text with no time in it. */
+function r4Local(s){
+  s=String(s||'');
+  if(!/\d{1,2}:\d{2}/.test(s)||!new Date().getTimezoneOffset()) return '';
+  return s.replace(/(\d{1,2}):(\d{2})/g,function(m,h,mi){
+    var d=new Date(); d.setUTCHours(+h,+mi,0,0);
+    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  });
+}
+function r4Sections(){
+  var out=R4_SECTIONS.slice();
+  R4.tasks.forEach(function(t){ if(out.indexOf(t.section)<0) out.push(t.section); });
+  return out;
+}
+function r4Who(t){
+  var main=[], help=[];
+  R4.members.forEach(function(m){
+    var r=t.roles[m.id]; if(r==='main') main.push(m.name); else if(r==='assist') help.push(m.name);
+  });
+  return {main:main,help:help};
+}
+function r4In(t,f,label,max){
+  return '<input class="r4in" type="text" maxlength="'+max+'" data-r4f="'+f+'" data-t="'+t.id+'" value="'+
+    esc(t[f]||'')+'" placeholder="'+esc(label)+'" aria-label="'+esc(label)+'">';
+}
+function renderR4(){
+  var tb=$('r4'); if(!tb||!R4.loaded) return;
+  var adm=!!ADMIN, M=R4.members, cols=4+M.length+(adm?1:0);
+  tb.classList.toggle('adm',adm);
+  tb.querySelector('thead').innerHTML='<tr><th>Task</th>'+
+    M.map(function(m){ return '<th class="r4m" scope="col">'+esc(m.name)+'</th>'; }).join('')+
+    '<th>Frequency</th><th>Remarks</th><th class="num">Time (UTC)</th>'+(adm?'<th><span class="sr">Remove</span></th>':'')+'</tr>';
+  var out=[], open=0, lead={}, help={};
+  M.forEach(function(m){ lead[m.id]=0; help[m.id]=0; });
+  r4Sections().forEach(function(sec,si){
+    var list=R4.tasks.filter(function(t){ return t.section===sec; });
+    if(!list.length&&!adm) return;
+    out.push('<tr class="r4sec" data-tone="'+(R4_TONE[si]||'ice')+'"><td colspan="'+cols+'"><span class="sw" aria-hidden="true"></span>'+
+      esc(sec)+(adm?'<button type="button" class="r4btn r4addt" data-r4="addtask" data-s="'+esc(sec)+'">Add task</button>':'')+'</td></tr>');
+    list.forEach(function(t){
+      var w=r4Who(t);
+      if(!w.main.length&&!w.help.length) open++;
+      var loc=r4Local(t.time_utc);
+      var who=(w.main.length?'<span><b>Main</b> '+esc(w.main.join(', '))+'</span>':'')+
+              (w.help.length?'<span><b>Assist</b> '+esc(w.help.join(', '))+'</span>':'')+
+              (!w.main.length&&!w.help.length?'<span class="r4none">Nobody assigned yet</span>':'');
+      var cells=M.map(function(m){
+        var r=t.roles[m.id]||'';
+        if(r==='main') lead[m.id]++; else if(r==='assist') help[m.id]++;
+        var word=r==='main'?'Main':(r==='assist'?'Assist':'not assigned');
+        if(adm) return '<td class="r4c"><button type="button" class="r4dot '+r+'" data-r4="cycle" data-t="'+t.id+'" data-m="'+m.id+
+          '" aria-label="'+esc(m.name+', '+t.name+': '+word+'. Tap to change')+'"><span class="r4n">'+esc(m.name)+'</span></button></td>';
+        return '<td class="r4c">'+(r?'<span class="r4dot '+r+'" role="img" aria-label="'+esc(m.name+': '+word)+'" title="'+esc(m.name+': '+word)+'"></span>':'')+'</td>';
+      }).join('');
+      out.push('<tr data-q="'+esc((t.name+' '+w.main.join(' ')+' '+w.help.join(' ')+' '+t.remarks).toLowerCase())+'">'+
+        '<td class="r4task">'+(adm?r4In(t,'name','Task name',80):esc(t.name))+'<div class="r4who">'+who+'</div></td>'+cells+
+        '<td class="r4freq">'+(adm?r4In(t,'freq','Frequency',40):esc(t.freq||'—'))+'</td>'+
+        '<td class="r4rem">'+(adm?r4In(t,'remarks','Remarks',200):esc(t.remarks||''))+'</td>'+
+        '<td class="r4time num'+(t.time_utc||adm?'':' nt')+'">'+(adm?r4In(t,'time_utc','Time in UTC',30):(t.time_utc?esc(t.time_utc)+' UTC':'—'))+
+          (loc?'<small>'+esc(loc)+' your time</small>':'')+'</td>'+
+        (adm?'<td class="r4x"><button type="button" class="r4del" data-r4="deltask" data-t="'+t.id+'" aria-label="'+esc('Remove '+t.name)+'">&times;</button></td>':'')+
+        '</tr>');
+    });
+  });
+  if(M.length) out.push('<tr class="need r4tot"><td>Tasks led / backing up</td>'+
+    M.map(function(m){ return '<td class="r4c num">'+lead[m.id]+' / '+help[m.id]+'</td>'; }).join('')+
+    '<td colspan="'+(3+(adm?1:0))+'"></td></tr>');
+  tb.querySelector('tbody').innerHTML=out.join('')||'<tr><td class="empty">No tasks yet.</td></tr>';
+  if($('r4-count')) $('r4-count').textContent=plural(M.length,'R4')+' · '+plural(R4.tasks.length,'task')+
+    (open?' · '+open+' with nobody assigned':'');
+  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' You can edit this: tap a dot to switch between Main, Assist and nobody, and any text saves when you leave the box.':'';
+  var box=$('r4-admin');
+  if(box){
+    box.hidden=!adm;
+    if(adm) $('r4-mlist').innerHTML=M.map(function(m){
+      return '<div class="r4mrow"><input type="text" maxlength="30" data-r4m="'+m.id+'" value="'+esc(m.name)+'" aria-label="'+esc('Rename '+m.name)+'">'+
+        '<button type="button" class="r4btn ghost" data-r4="delmem" data-m="'+m.id+'">Remove</button></div>';
+    }).join('');
+  }
+  applyFilters();
+}
+async function loadR4(force){
+  if(R4.loading||(R4.loaded&&!force)) return;
+  R4.loading=true;
+  if(!R4.loaded) r4Msg('Loading…');
+  try{
+    var r=await Promise.all([
+      SB.from('r4_members').select('*').order('sort').order('id'),
+      SB.from('r4_tasks').select('*').order('sort').order('id')]);
+    var e=r[0].error||r[1].error;
+    if(e){ r4Msg('Could not load the R4 roles — '+esc(e.message)); return; }
+    R4.members=r[0].data||[];
+    R4.tasks=(r[1].data||[]).map(function(t){ t.roles=t.roles||{}; return t; });
+    R4.loaded=true; renderR4();
+  }catch(err){ r4Msg('Could not reach the server. Try the tab again.'); }
+  finally{ R4.loading=false; }
+}
+function r4Refocus(sel){ var el=document.querySelector(sel); if(el) el.focus(); }
+function r4Cycle(tid,mid){
+  var t=r4Task(tid); if(!t) return;
+  var cur=t.roles[mid], next=!cur?'main':(cur==='main'?'assist':null), r={};
+  Object.keys(t.roles).forEach(function(k){ r[k]=t.roles[k]; });
+  if(next) r[mid]=next; else delete r[mid];
+  t.roles=r; renderR4();
+  r4Refocus('#r4 [data-r4="cycle"][data-t="'+tid+'"][data-m="'+mid+'"]');
+  queue('r4r'+tid,function(){ return SB.from('r4_tasks').update({roles:t.roles}).eq('id',tid); });
+}
+function r4Field(el){
+  var t=r4Task(+el.dataset.t); if(!t) return;
+  var f=el.dataset.r4f, v=el.value.trim();
+  if(f==='name'&&!v){ el.value=t.name; say('A task needs a name.',1); return; }
+  if(t[f]===v) return;
+  t[f]=v;
+  var patch={}; patch[f]=v;
+  queue('r4f'+t.id+f,function(){ return SB.from('r4_tasks').update(patch).eq('id',t.id); });
+}
+async function r4AddTask(sec){
+  var list=R4.tasks.filter(function(t){ return t.section===sec; });
+  var sort=list.length?list[list.length-1].sort+1:(R4.tasks.length?R4.tasks[R4.tasks.length-1].sort+10:10);
+  say('saving…');
+  var r=await SB.from('r4_tasks').insert({section:sec,name:'New task',sort:sort}).select().single();
+  if(r.error){ say('Not saved — '+r.error.message,1); return; }
+  r.data.roles=r.data.roles||{};
+  R4.tasks.push(r.data);
+  R4.tasks.sort(function(a,b){ return a.sort-b.sort||a.id-b.id; });
+  renderR4(); say('saved');
+  var el=document.querySelector('#r4 input[data-r4f="name"][data-t="'+r.data.id+'"]');
+  if(el){ el.focus(); el.select(); }
+}
+async function r4DelTask(tid){
+  var t=r4Task(tid); if(!t||!window.confirm('Remove "'+t.name+'" from the R4 roles?')) return;
+  say('saving…');
+  var r=await SB.from('r4_tasks').delete().eq('id',tid);
+  if(r.error){ say('Not removed — '+r.error.message,1); return; }
+  R4.tasks=R4.tasks.filter(function(x){ return x.id!==tid; });
+  renderR4(); say('saved');
+}
+async function r4AddMember(){
+  var el=$('r4-newname'), v=el?el.value.trim():'';
+  if(!v){ say('Type the new R4’s name first.',1); return; }
+  say('saving…');
+  var sort=R4.members.length?R4.members[R4.members.length-1].sort+10:10;
+  var r=await SB.from('r4_members').insert({name:v,sort:sort}).select().single();
+  if(r.error){ say('Not saved — '+r.error.message,1); return; }
+  R4.members.push(r.data); el.value='';
+  renderR4(); say('saved');
+}
+async function r4DelMember(mid){
+  var nm=r4Name(mid);
+  if(!window.confirm('Remove '+nm+' from the R4 list? Their dots are cleared from every task.')) return;
+  say('saving…');
+  var held=R4.tasks.filter(function(t){ return t.roles[mid]; });
+  var ops=held.map(function(t){
+    var r={}; Object.keys(t.roles).forEach(function(k){ if(k!==String(mid)) r[k]=t.roles[k]; });
+    return SB.from('r4_tasks').update({roles:r}).eq('id',t.id).then(function(x){ if(!x.error) t.roles=r; return x; });
+  });
+  var res=await Promise.all(ops);
+  var bad=res.find(function(x){ return x.error; });
+  if(bad){ say('Not removed — '+bad.error.message,1); renderR4(); return; }
+  var d=await SB.from('r4_members').delete().eq('id',mid);
+  if(d.error){ say('Not removed — '+d.error.message,1); renderR4(); return; }
+  R4.members=R4.members.filter(function(m){ return String(m.id)!==String(mid); });
+  renderR4(); say('saved');
+}
+function r4Rename(el){
+  var mid=+el.dataset.r4m, v=el.value.trim(), m=null;
+  R4.members.forEach(function(x){ if(x.id===mid) m=x; });
+  if(!m) return;
+  if(!v){ el.value=m.name; say('A name cannot be empty.',1); return; }
+  if(m.name===v) return;
+  m.name=v; renderR4();
+  queue('r4m'+mid,function(){ return SB.from('r4_members').update({name:v}).eq('id',mid); });
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('#p-r4 [data-r4]'); if(!b||!ADMIN) return;
+  var a=b.getAttribute('data-r4');
+  if(a==='cycle') r4Cycle(+b.dataset.t,b.dataset.m);
+  else if(a==='deltask') r4DelTask(+b.dataset.t);
+  else if(a==='addtask') r4AddTask(b.dataset.s);
+  else if(a==='addmem') r4AddMember();
+  else if(a==='delmem') r4DelMember(+b.dataset.m);
+});
+document.addEventListener('change',function(e){
+  var el=e.target; if(!ADMIN||!el.matches) return;
+  if(el.matches('#p-r4 input[data-r4f]')) r4Field(el);
+  else if(el.matches('#p-r4 input[data-r4m]')) r4Rename(el);
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.id==='r4-newname'){ e.preventDefault(); r4AddMember(); }
+});
+
 /* ---------- what's new ----------
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-27-r4',date:'2026-09-27',title:'New R4 roles tab',points:[
+    'See who leads each alliance task and who backs them up, grouped the same way as our leadership sheet.',
+    'Event times are shown in UTC and in your own time.',
+    'Search a name to see everything one R4 looks after.']},
   {id:'2026-09-27-freeday',date:'2026-09-27',title:'Free / day is now measured from your own updates',points:[
     'Each time you save your Backpack, the tracker quietly notes your Have for that day. Nobody else can see it.',
     'Free / day comes from how your Have grows over your last 3 months, so it keeps up as your daily income changes.',
@@ -638,6 +849,7 @@ function checkAdmin(){
     SB.from('profiles').select('is_admin').eq('id',U.id).maybeSingle().then(function(r){
       ADMIN=!!(r&&r.data&&r.data.is_admin);
       var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
+      if(R4.loaded) renderR4();
     },function(){});
   }catch(e){}
 }
@@ -752,9 +964,9 @@ function bind(){
 }
 
 /* ---------- filters / tabs ---------- */
-var filters={stock:'all',packs:'all'}, queries={stock:'',packs:'',matrix:'',members:''};
+var filters={stock:'all',packs:'all'}, queries={stock:'',packs:'',matrix:'',members:'',r4:''};
 function applyFilters(){
-  ['stock','packs','matrix','members'].forEach(function(id){
+  ['stock','packs','matrix','members','r4'].forEach(function(id){
     var t=$(id); if(!t) return;
     var f=filters[id]||'all', q=(queries[id]||'').trim().toLowerCase();
     /* A search or a filter reaches across groups, so folding is ignored while one is on. */
@@ -784,6 +996,7 @@ document.addEventListener('click',function(e){
       p.classList.toggle('on',p.id==='p-'+t.dataset.p); });
     try{ sessionStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
     if(t.dataset.p==='admin') loadMembers();
+    if(t.dataset.p==='r4') loadR4();
     headroomShow();
     return; }
   var pt=t.closest&&t.closest('#packs .gtog');
