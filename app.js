@@ -8,6 +8,12 @@ var sortMode='section', sortDir=-1;
    survives a re-render and a reload. */
 var PACK_FOLD={};
 try{ PACK_FOLD=JSON.parse(localStorage.getItem('fox-pack-fold')||'{}')||{}; }catch(err){ PACK_FOLD={}; }
+/* Dated snapshots of this member's Have, and the measured Free / day they give. */
+var HIST=[], HIST_OK=false, FREE_M={}, HIST_SPAN=0, HIST_SINCE='';
+var FREE_MIN_DAYS=3;
+/* Daily income drifts as an account grows, so only the latest three months count.
+   The database drops older rows on its own; this keeps the maths to the same window. */
+var FREE_WINDOW_DAYS=90;
 var FOLD={};
 try{ FOLD=JSON.parse(localStorage.getItem('fox-fold')||'{}')||{}; }catch(err){ FOLD={}; }
 var CURR={GBP:{symbol:'£',rate:1},USD:{symbol:'$',rate:1.27},EUR:{symbol:'€',rate:1.17},
@@ -115,14 +121,11 @@ function renderSvsWarn(){
     : 'The SvS date (' + i.date + ') has passed, so projections now assume no time left and everything reads as behind. Ask Adrian to set the next date.';
   b.hidden=false;
 }
-function months(){ return days()/30; }
 function calcItem(it){
-  var have=n(it.have), tgt=n(it.target), g=n(it.free)*days(), m=months();
-  D.packs.forEach(function(p){
-    var f=n(uPacks[p.id]); if(!f) return;
-    var c=D.contents[p.id]; if(!c||!c[it.name]) return;
-    g+=f*n(c[it.name])*(moonlightPack(p)?1:m);
-  });
+  /* The pack number on Things to buy is what has already been bought, and whatever
+     those packs delivered is already inside Have. Adding it again would count it
+     twice, so the only thing still to come is free income until SvS day. */
+  var have=n(it.have), tgt=n(it.target), g=freeRate(it)*days();
   var proj=have+g;
   return {have:have,tgt:tgt,proj:proj,pct:tgt>0?have/tgt:null,
           raw:tgt>0?Math.max(tgt-have,0):0, left:tgt>0?Math.max(tgt-proj,0):0,
@@ -156,6 +159,183 @@ function calcPack(p,byName){
   return {best:best,iv:iv,pv:pv,verdict:verdict,scoreable:scoreable};
 }
 function budget(){ var t=0; D.packs.forEach(function(p){ t+=n(p.price)*n(uPacks[p.id]); }); return t; }
+
+/* ---------- measured free income ----------
+   Every time a member saves their Backpack, today's Have is stored alongside how
+   many of each pack they have bought so far. Free / day is then
+
+     (rise in Have  -  what the packs bought in between delivered)  /  days
+
+   taken from the oldest snapshot in the last FREE_WINDOW_DAYS to the latest, so it
+   sharpens as updates build up and still follows income as it changes. Pack items are taken out of the rate here and
+   are still counted in Projected, through Have. Until a member has FREE_MIN_DAYS
+   of history the starting estimate stored on the item is used instead. */
+function todayKey(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function dayNum(s){ var p=String(s).split('-'); return Math.round(Date.UTC(+p[0],+p[1]-1,+p[2])/864e5); }
+function prettyDay(s){
+  var p=String(s).split('-'); if(p.length<3) return s;
+  return (+p[2])+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+p[1]-1];
+}
+/* Pack counts are stored rather than the items they add up to, and turned into
+   items with today's Pack contents. A later correction to a pack's contents then
+   applies to both ends of the window alike, instead of reading as a purchase. */
+function packCounts(){
+  var c={}; Object.keys(uPacks).forEach(function(id){ if(n(uPacks[id])) c[id]=n(uPacks[id]); });
+  return c;
+}
+function packsDelivered(a,b,item){
+  var pa=a.packs||{}, pb=b.packs||{}, seen={}, t=0;
+  Object.keys(pa).concat(Object.keys(pb)).forEach(function(id){
+    if(seen[id]) return; seen[id]=1;
+    var d=n(pb[id])-n(pa[id]); if(!d) return;
+    var c=D.contents[id]; if(c&&c[item]) t+=d*n(c[item]);
+  });
+  return t;
+}
+function currentSnapshot(){
+  var h={}; D.items.forEach(function(it){ h[it.name]=n(it.have); });
+  return {day:todayKey(),have:h,packs:packCounts()};
+}
+function trimHistory(){
+  if(!HIST.length) return;
+  var cut=dayNum(HIST[HIST.length-1].day)-FREE_WINDOW_DAYS;
+  HIST=HIST.filter(function(s){ return dayNum(s.day)>=cut; });
+}
+function recomputeFree(){
+  trimHistory();
+  FREE_M={}; HIST_SPAN=0; HIST_SINCE=HIST.length?HIST[0].day:'';
+  if(HIST.length<2) return;
+  HIST_SPAN=dayNum(HIST[HIST.length-1].day)-dayNum(HIST[0].day);
+  /* An item added part-way through starts its own clock at its first snapshot. */
+  var first={}, last={};
+  HIST.forEach(function(s){
+    Object.keys(s.have||{}).forEach(function(k){ if(!first[k]) first[k]=s; last[k]=s; });
+  });
+  Object.keys(first).forEach(function(k){
+    var a=first[k], b=last[k], span=dayNum(b.day)-dayNum(a.day);
+    if(span<FREE_MIN_DAYS) return;
+    var gain=n(b.have[k])-n(a.have[k]);
+    var packs=packsDelivered(a,b,k);
+    /* Spending during prep can push this below zero; income is never negative. */
+    FREE_M[k]={rate:Math.max(0,(gain-packs)/span),span:span};
+  });
+}
+function freeRate(it){ var m=FREE_M[it.name]; return m?m.rate:n(it.free); }
+function freeCell(it){
+  var m=FREE_M[it.name];
+  if(m) return '<span title="Measured over '+plural(m.span,'day')+' of your updates">'+fmt(m.rate,2)+'</span>';
+  var v=n(it.free);
+  return v?'<span class="mini" title="Starting estimate, used until you have '+FREE_MIN_DAYS+' days of updates">'+fmt(v,2)+'</span>'
+          :'<span class="mini">\u2014</span>';
+}
+function renderFreeNote(){
+  var el=$('free-note'); if(!el) return;
+  if(!HIST_OK){ el.textContent=''; return; }
+  if(Object.keys(FREE_M).length){
+    el.textContent='Measured over '+plural(HIST_SPAN,'day')+' of your updates, since '+prettyDay(HIST_SINCE)+
+      '. It uses your last 3 months, so it keeps up as your daily income changes.';
+  }else{
+    el.textContent='Measuring started '+prettyDay(HIST_SINCE||todayKey())+'. Once you have '+FREE_MIN_DAYS+
+      ' days of updates, your own measured figure replaces the faded starting estimate.';
+  }
+}
+/* Called on every Backpack or pack-count change. One row per member per day: later
+   saves on the same day replace it, so the day's final numbers are what count. */
+function noteSnapshot(){
+  if(!HIST_OK||!U||!SB) return;
+  var s=currentSnapshot(), last=HIST[HIST.length-1];
+  if(last&&last.day===s.day) HIST[HIST.length-1]=s;
+  else if(!last||last.day<s.day) HIST.push(s);
+  else return;
+  recomputeFree();
+  queue('snap',function(){
+    var x=currentSnapshot();
+    return SB.from('stock_history').upsert({user_id:U.id,day:x.day,have:x.have,packs:x.packs,
+      updated_at:new Date().toISOString()},{onConflict:'user_id,day'});
+  });
+}
+/* Loaded on its own so a missing table only switches measuring off, rather than
+   stopping the whole tracker from loading. */
+/* ---------- what's new ----------
+   Newest first. Add an entry with every change members will notice. Each id must be
+   new, because the newest id a member has closed is what marks the rest as seen. */
+var UPDATES=[
+  {id:'2026-09-27-freeday',date:'2026-09-27',title:'Free / day is now measured from your own updates',points:[
+    'Each time you save your Backpack, the tracker quietly notes your Have for that day. Nobody else can see it.',
+    'Free / day comes from how your Have grows over your last 3 months, so it keeps up as your daily income changes.',
+    'Items from packs you have bought are taken out, so only free income counts.',
+    'Until you have 3 days of updates, you will see your old starting estimate, faded.']},
+  {id:'2026-09-27-bought',date:'2026-09-27',title:'Packs are no longer counted twice',points:[
+    'The number on Things to buy is now "Bought": the packs you have already bought.',
+    'What they gave you is already in your Have, so Projected is now Have plus Free / day until SvS day.',
+    'Some items may now show as behind. That is the corrected figure, not a mistake.']},
+  {id:'2026-09-23-fold',date:'2026-09-23',title:'Things to buy folds by section',points:[
+    'Tap a section or group heading to fold it away. The tracker remembers what you folded.']},
+  {id:'2026-09-21-header',date:'2026-09-21',title:'More room on phones',points:[
+    'The top bar slides away as you scroll down, and comes straight back when you scroll up a little.']},
+  {id:'2026-09-21-art',date:'2026-09-21',title:'Item pictures',points:[
+    'Most items now show their in-game picture in the Backpack and on the Dashboard.']}
+];
+var NEWS_KEY='fox-news-seen';
+function newsHtml(list){
+  return list.map(function(u){
+    return '<article class="nitem"><time datetime="'+esc(u.date)+'">'+esc(prettyDay(u.date)+' '+u.date.slice(0,4))+'</time>'+
+      '<h3>'+esc(u.title)+'</h3><ul>'+u.points.map(function(p){ return '<li>'+esc(p)+'</li>'; }).join('')+'</ul></article>';
+  }).join('');
+}
+function markNewsSeen(){ try{ if(UPDATES.length) localStorage.setItem(NEWS_KEY,UPDATES[0].id); }catch(e){} }
+function openNews(list){
+  var d=$('news'); if(!d||!list.length) return;
+  $('news-list').innerHTML=newsHtml(list);
+  $('news-list').scrollTop=0;
+  $('news-all').hidden=list.length>=UPDATES.length;
+  if(d.showModal){ if(!d.open) d.showModal(); } else d.setAttribute('open','');
+}
+function closeNews(){
+  var d=$('news'); if(!d) return;
+  markNewsSeen();
+  if(d.close&&d.open) d.close(); else d.removeAttribute('open');
+}
+/* Shows only what this member has not closed yet. Someone arriving for the first
+   time gets the latest three rather than the whole history. */
+function maybeShowNews(){
+  if(!UPDATES.length) return;
+  var seen;
+  try{ seen=localStorage.getItem(NEWS_KEY); }catch(e){ return; }  /* no storage: never nag */
+  if(seen===UPDATES[0].id) return;
+  var i=-1;
+  for(var k=0;k<UPDATES.length;k++) if(UPDATES[k].id===seen){ i=k; break; }
+  openNews(i>0?UPDATES.slice(0,i):UPDATES.slice(0,3));
+}
+function wireNews(){
+  var d=$('news'); if(!d) return;
+  $('news-x').addEventListener('click',closeNews);
+  $('news-ok').addEventListener('click',closeNews);
+  $('news-all').addEventListener('click',function(){ openNews(UPDATES); });
+  /* Escape closes a dialog natively; it still counts as having seen it. */
+  d.addEventListener('close',markNewsSeen);
+  /* A tap on the dimmed backdrop lands on the dialog itself, not on its box. */
+  d.addEventListener('click',function(e){ if(e.target===d) closeNews(); });
+  if($('news-open')) $('news-open').addEventListener('click',function(){ openNews(UPDATES); });
+}
+
+async function loadHistory(){
+  HIST=[]; HIST_OK=false;
+  try{
+    var h=await SB.from('stock_history').select('day,have,packs').eq('user_id',U.id).order('day');
+    if(!h.error){
+      HIST=(h.data||[]).map(function(r){ return {day:String(r.day).slice(0,10),have:r.have||{},packs:r.packs||{}}; });
+      HIST_OK=true;
+    }
+  }catch(e){}
+  recomputeFree();
+  /* The first visit starts the clock, so a member does not have to edit anything
+     before measuring begins. */
+  if(HIST_OK&&!HIST.length&&D.items.length) noteSnapshot();
+}
 function pcolor(p){ if(p===null) return 'var(--faint)';
   if(p>=1) return 'var(--good)'; if(p>=.75) return 'var(--ice)';
   if(p>=.5) return '#C79A16'; return 'var(--ember)'; }
@@ -175,11 +355,13 @@ function saveItem(it,field){
   queue('i'+it.sort+field,function(){
     return SB.from('user_items').update(patch).eq('sort',it.sort).eq('user_id',U.id);
   });
+  if(field==='have') noteSnapshot();
 }
 function savePack(id,freq){
   queue('p'+id,function(){
     return SB.from('user_packs').update({freq:n(freq)}).eq('pack_id',id).eq('user_id',U.id);
   });
+  noteSnapshot();
 }
 
 /* ---------- rendering ---------- */
@@ -258,7 +440,7 @@ function renderStock(){
       :(c.ok?'<span class="pill p-yes">on track</span>':'<span class="pill p-no">behind</span>');
     var w=c.pct===null?0:Math.max(0,Math.min(100,c.pct*100));
     /* the pill already says "on track"; only the shortfall adds anything */
-    var rc=(c.tgt>0 && !c.ok && c.left>0)?fmt(c.left)+' short after plan':'';
+    var rc=(c.tgt>0 && !c.ok && c.left>0)?fmt(c.left)+' short by SvS day':'';
     out.push('<tr data-state="'+state+'" data-q="'+esc(it.name.toLowerCase())+'" data-gn="'+esc(g)+'">'+
       '<td class="ic">'+itemIcon(it)+'</td><td class="nm">'+esc(it.name)+'</td>'+
       '<td data-label="Have">'+inp(it.have,'','data-idx="'+idx+'" data-k="have" aria-label="'+esc(it.name)+' have"')+'</td>'+
@@ -266,7 +448,7 @@ function renderStock(){
       '<td class="num">'+(c.tgt>0?fmt(c.raw):'<span class="mini">\u2014</span>')+'</td>'+
       '<td><div class="prog"><div class="pbar"><i style="width:'+w.toFixed(1)+'%;background:'+pcolor(c.pct)+'"></i></div>'+
         '<span>'+(c.pct===null?'\u2014':Math.round(c.pct*100)+'%')+'</span></div></td>'+
-      '<td class="num">'+(n(it.free)?fmt(n(it.free),2):'<span class="mini">\u2014</span>')+'</td>'+
+      '<td class="num">'+freeCell(it)+'</td>'+
       '<td class="num">'+fmt(c.proj)+'</td>'+
       '<td>'+pill+'<div class="rc">'+esc(rc)+'</div></td></tr>');
   });
@@ -309,7 +491,7 @@ function renderPacks(){
       '<td class="nm">'+esc(p.name)+'<div class="mini">'+
         esc(sortMode==='section'?(p.occurrence||''):((p.grp||'')+(p.occurrence?' · '+p.occurrence:'')))+'</div></td>'+
       '<td class="num" data-label="Price '+esc(CUR.symbol)+'">'+fmt(n(p.price)*CUR.rate,2)+'</td>'+
-      '<td data-label="'+(moonlightPack(p)?'Buy / event':'Buy / mo')+'">'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'" aria-label="'+esc(p.name)+(moonlightPack(p)?' purchases this event':' packs bought per month')+'"')+(moonlightPack(p)?'<div class="mini">per event</div>':'')+'</td>'+
+      '<td data-label="Bought">'+inp(uPacks[p.id]||0,'t2','data-pid="'+p.id+'" aria-label="'+esc(p.name)+' packs bought so far'+'"')+(moonlightPack(p)?'<div class="mini">per event</div>':'')+'</td>'+
       '<td data-label="Best item for you">'+(c.best?esc(c.best):'<span class="mini">'+(moonlightPack(p)?'Event rewards':(c.scoreable?'—':'contents not priced'))+'</span>')+'</td>'+
       '<td class="num" data-label="Pack value">'+vb(c.pv,'var(--ice)')+'</td>'+
       '<td class="num" data-label="Best item">'+vb(c.iv,'var(--ember)')+'</td>'+
@@ -471,16 +653,16 @@ function renderTop(){
   var metPct=(withT?met/withT*100:0), avgPct=avg*100;
   $('stats').innerHTML=
     '<div class="stat c-blue"><span class="sicon">'+ICO.target+'</span><span class="lbl">Targets met</span>'+
-    '<b>'+met+' / '+withT+'</b><small>'+behind+' behind after plan</small>'+
+    '<b>'+met+' / '+withT+'</b><small>'+behind+' behind by SvS day</small>'+
     '<div class="barrow"><div class="bar"><i style="width:'+metPct.toFixed(0)+'%;background:var(--ice)"></i></div>'+
     '<span class="barpct" style="color:var(--ice)">'+Math.round(metPct)+'%</span></div></div>'+
     '<div class="stat c-green"><span class="sicon">'+ICO.bars+'</span><span class="lbl">Average progress</span>'+
     '<b>'+Math.round(avg*100)+'%</b><small>across '+withT+' targets</small>'+
     '<div class="barrow"><div class="bar"><i style="width:'+avgPct.toFixed(0)+'%;background:var(--good)"></i></div>'+
     '<span class="barpct" style="color:var(--good)">'+Math.round(avgPct)+'%</span></div></div>'+
-    '<div class="stat c-violet"><span class="sicon">'+ICO.coins+'</span><span class="lbl">Monthly spend</span>'+
+    '<div class="stat c-violet"><span class="sicon">'+ICO.coins+'</span><span class="lbl">Spent so far</span>'+
     '<b>'+money(bud)+'</b><small>'+esc(CUR.code)+'</small></div>'+
-    '<div class="stat c-orange"><span class="sicon">'+ICO.box+'</span><span class="lbl">Packs marked</span>'+
+    '<div class="stat c-orange"><span class="sicon">'+ICO.box+'</span><span class="lbl">Packs bought</span>'+
     '<b>'+marked+'</b><small>of '+D.packs.length+' &middot; '+gold+' must buy</small></div>'+
     '<div class="stat svs"><span class="lbl">Days to next SvS</span>'+
     '<b>'+dleft+'</b><span class="date">'+ICO.calendar+esc(D.settings.next_svs||'')+'</span></div>';
@@ -488,7 +670,7 @@ function renderTop(){
   $('c-behind').textContent='Behind ('+behind+')';
   $('c-pall').textContent='All '+D.packs.length;
   $('c-gold').textContent='Must buy ('+gold+')';
-  $('c-buying').textContent='Buying ('+marked+')';
+  $('c-buying').textContent='Bought ('+marked+')';
 }
 function dbar(pct,col){
   return '<div class="dbar"><i style="width:'+Math.max(1.5,Math.min(100,pct)).toFixed(1)+'%;background:'+col+'"></i></div>'; }
@@ -544,7 +726,7 @@ function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
   var key=focusKey(document.activeElement);
-  renderSvsWarn();
+  renderSvsWarn(); renderFreeNote();
   renderTop(); renderDash(); renderStock(); renderPacks(); renderMatrix(); renderRef(); applyFilters(); bind();
   if(key){ var a=document.querySelectorAll('input.cell');
     for(var i=0;i<a.length;i++) if(focusKey(a[i])===key){ a[i].focus(); break; } }
@@ -671,10 +853,12 @@ async function loadAll(){
   if(prof){ CUR.code=prof.currency_code||'GBP'; CUR.symbol=prof.currency_symbol||'£'; CUR.rate=Number(prof.currency_rate)||1; }
   fillCurrencyInputs();
   if(!D.items.length){ say('Your backpack is empty — ask Adrian to set your account up.',1); }
+  await loadHistory();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
   showApp(); render(); say('saved');
   restoreTab();
+  maybeShowNews();
 }
 
 /* Arriving at the site should always open the Dashboard; a refresh should leave you
@@ -766,6 +950,7 @@ async function boot(){
 
 function wireUp(){
   if($('toast-x')) $('toast-x').addEventListener('click',function(){ $('toast').hidden=true; });
+  wireNews();
   if($('fatal-retry')) $('fatal-retry').addEventListener('click',function(){ location.reload(); });
   if($('dispname')){
     $('dispname').addEventListener('input',saveDisplayName);
