@@ -830,23 +830,23 @@ function renderMembers(rows){
   var out=rows.map(function(m){
     var a=ago(m.last_seen), tn=TONE[a.tone];
     if(a.tone==='now'||a.tone==='week') active++;
-    var nm=String(m.name||'').trim()||String(m.email||'').split('@')[0]||'\u2014';
-    return '<tr data-q="'+esc((nm+' '+(m.email||'')).toLowerCase())+'">'+
+    /* Emails stay private: they are never fetched for this list. */
+    var nm=String(m.name||'').trim()||'Unnamed member';
+    return '<tr data-q="'+esc(nm.toLowerCase())+'">'+
       '<td class="nm">'+esc(nm)+
         (m.is_admin?' <span class="pill p-pack">admin</span>':'')+'</td>'+
-      '<td data-label="Email"><span class="mail">'+esc(m.email||'\u2014')+'</span></td>'+
-      '<td class="num" data-label="Signed up">'+esc(fmtDate(m.created_at))+'</td>'+
-      '<td class="num" data-label="Last seen">'+esc(a.text)+'</td>'+
+      '<td class="num up" data-label="Signed up">'+esc(fmtDate(m.created_at))+'</td>'+
+      '<td class="num seen" data-label="Last seen">'+esc(a.text)+'</td>'+
       '<td class="st"><span class="pill '+tn[0]+'">'+tn[1]+'</span></td>'+
       '<td class="r4e">'+(m.is_admin?'':'<button type="button" class="chip" data-r4ed="'+esc(m.id)+'" aria-pressed="'+!!m.r4_editor+
         '" aria-label="'+esc(nm+' can edit R4 roles')+'">R4 editor</button>')+'</td></tr>';
   }).join('');
-  t.querySelector('tbody').innerHTML=out||'<tr><td colspan="6" class="empty">Nobody has signed up yet.</td></tr>';
+  t.querySelector('tbody').innerHTML=out||'<tr><td colspan="5" class="empty">Nobody has signed up yet.</td></tr>';
   if($('admin-count')) $('admin-count').textContent=plural(rows.length,'member')+' \u00b7 '+active+' active this week';
   applyFilters();
 }
 function membersMsg(html){
-  var t=$('members'); if(t) t.querySelector('tbody').innerHTML='<tr><td colspan="6" class="empty">'+html+'</td></tr>';
+  var t=$('members'); if(t) t.querySelector('tbody').innerHTML='<tr><td colspan="5" class="empty">'+html+'</td></tr>';
 }
 /* Only the admin can name R4 editors: the server function refuses anyone else. */
 document.addEventListener('click',function(e){
@@ -862,7 +862,7 @@ async function loadMembers(force){
   if(membersLoaded&&!force) return;
   if(!membersLoaded) membersMsg('Loading\u2026');
   try{
-    var r=await SB.from('profiles').select('id,name,email,created_at,last_seen,is_admin,r4_editor');
+    var r=await SB.from('profiles').select('id,name,created_at,last_seen,is_admin,r4_editor');
     if(r.error){ membersMsg('Could not load the member list \u2014 '+esc(r.error.message)); return; }
     membersLoaded=true; renderMembers(r.data||[]);
   }catch(e){ membersMsg('Could not reach the server. Try the tab again.'); }
