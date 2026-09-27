@@ -1,7 +1,7 @@
 /* FOX Prep Tracker — front end */
 (function(){
 'use strict';
-var SB=null, U=null, ADMIN=false, membersLoaded=false, D={items:[],packs:[],contents:{},base:{},settings:{}}, uPacks={};
+var SB=null, U=null, ADMIN=false, R4ED=false, membersLoaded=false, D={items:[],packs:[],contents:{},base:{},settings:{}}, uPacks={};
 var timers={}, sync=document.getElementById('sync');
 var sortMode='section', sortDir=-1;
 /* Which Backpack groups are folded shut, keyed by group name so the state
@@ -305,10 +305,11 @@ function r4In(t,f,label,max){
 }
 function renderR4(){
   var tb=$('r4'); if(!tb||!R4.loaded) return;
-  var adm=!!ADMIN&&R4_EDIT, M=R4.members, cols=4+M.length+(adm?1:0);
+  /* Admin edits everything; an R4 editor (named by the admin on Members) only moves the dots. */
+  var adm=!!ADMIN&&R4_EDIT, dots=!!R4ED&&R4_EDIT, M=R4.members, cols=4+M.length+(adm?1:0);
   var eb=$('r4-edit');
-  if(eb){ eb.hidden=!ADMIN; eb.textContent=R4_EDIT?'Done':'Edit roles'; eb.setAttribute('aria-pressed',String(R4_EDIT)); }
-  tb.classList.toggle('adm',adm);
+  if(eb){ eb.hidden=!R4ED; eb.textContent=R4_EDIT?'Done':'Edit roles'; eb.setAttribute('aria-pressed',String(R4_EDIT)); }
+  tb.classList.toggle('adm',dots);
   tb.querySelector('thead').innerHTML='<tr><th>Task</th>'+
     M.map(function(m){ return '<th class="r4m" scope="col">'+esc(m.name)+'</th>'; }).join('')+
     '<th>Frequency</th><th>Remarks</th><th class="num">UTC</th>'+(adm?'<th><span class="sr">Remove</span></th>':'')+'</tr>';
@@ -332,13 +333,13 @@ function renderR4(){
         var r=t.roles[m.id]||'';
         if(r==='main') lead[m.id]++; else if(r==='assist') help[m.id]++;
         var word=r==='main'?'Main':(r==='assist'?'Assist':'not assigned');
-        if(adm) return '<td class="r4c"><button type="button" class="r4dot '+r+'" data-r4="cycle" data-t="'+t.id+'" data-m="'+m.id+
+        if(dots) return '<td class="r4c"><button type="button" class="r4dot '+r+'" data-r4="cycle" data-t="'+t.id+'" data-m="'+m.id+
           '" aria-label="'+esc(m.name+', '+t.name+': '+word+'. Tap to change')+'"><span class="r4n">'+esc(m.name)+'</span></button></td>';
         return '<td class="r4c">'+(r?'<span class="r4dot '+r+'" role="img" aria-label="'+esc(m.name+': '+word)+'" title="'+esc(m.name+': '+word)+'"></span>':'')+'</td>';
       }).join('');
       out.push('<tr data-q="'+esc((t.name+' '+w.main.join(' ')+' '+w.help.join(' ')+' '+t.remarks).toLowerCase())+'">'+
         '<td class="r4task">'+(adm?r4In(t,'name','Task name',80):esc(t.name))+'<div class="r4who">'+who+'</div>'+
-          ((t.freq||t.remarks)&&!adm?'<div class="r4meta">'+esc([t.freq,t.remarks].filter(Boolean).join(' \u00b7 '))+'</div>':'')+'</td>'+cells+
+          ((t.freq||t.remarks)&&!dots?'<div class="r4meta">'+esc([t.freq,t.remarks].filter(Boolean).join(' \u00b7 '))+'</div>':'')+'</td>'+cells+
         '<td class="r4freq">'+(adm?r4In(t,'freq','Frequency',40):esc(t.freq||'—'))+'</td>'+
         '<td class="r4rem">'+(adm?r4In(t,'remarks','Remarks',200):esc(t.remarks||''))+'</td>'+
         '<td class="r4time num'+(t.time_utc||adm?'':' nt')+'">'+(adm?r4In(t,'time_utc','Time in UTC',30):(t.time_utc?esc(t.time_utc):'—'))+
@@ -353,7 +354,8 @@ function renderR4(){
   tb.querySelector('tbody').innerHTML=out.join('')||'<tr><td class="empty">No tasks yet.</td></tr>';
   if($('r4-count')) $('r4-count').textContent=plural(M.length,'R4')+' · '+plural(R4.tasks.length,'task')+
     (open?' · '+open+' with nobody assigned':'');
-  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' Tap a dot to switch between Main, Assist and nobody; text saves when you leave the box.':'';
+  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' Tap a dot to switch between Main, Assist and nobody; text saves when you leave the box.':
+    (dots?' Tap a dot to switch between Main, Assist and nobody.':'');
   var box=$('r4-admin');
   if(box){
     box.hidden=!adm;
@@ -388,7 +390,9 @@ function r4Cycle(tid,mid){
   if(next) r[mid]=next; else delete r[mid];
   t.roles=r; renderR4();
   r4Refocus('#r4 [data-r4="cycle"][data-t="'+tid+'"][data-m="'+mid+'"]');
-  queue('r4r'+tid,function(){ return SB.from('r4_tasks').update({roles:t.roles}).eq('id',tid); });
+  /* One dot at a time on the server, so two people editing different dots never
+     overwrite each other, and an R4 editor can change nothing but the roles. */
+  queue('r4r'+tid+'-'+mid,function(){ return SB.rpc('set_r4_role',{task_id:tid,member_id:+mid,new_role:next}); });
 }
 function r4Field(el){
   var t=r4Task(+el.dataset.t); if(!t) return;
@@ -457,10 +461,11 @@ function r4Rename(el){
   queue('r4m'+mid,function(){ return SB.from('r4_members').update({name:v}).eq('id',mid); });
 }
 document.addEventListener('click',function(e){
-  var b=e.target.closest&&e.target.closest('#p-r4 [data-r4]'); if(!b||!ADMIN) return;
+  var b=e.target.closest&&e.target.closest('#p-r4 [data-r4]'); if(!b||!R4ED) return;
   var a=b.getAttribute('data-r4');
   if(a==='edit'){ R4_EDIT=!R4_EDIT; renderR4(); return; }
   if(!R4_EDIT) return;
+  if(a!=='cycle'&&!ADMIN) return;
   if(a==='cycle') r4Cycle(+b.dataset.t,b.dataset.m);
   else if(a==='deltask') r4DelTask(+b.dataset.t);
   else if(a==='addtask') r4AddTask(b.dataset.s);
@@ -480,6 +485,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-28-r4ed',date:'2026-09-28',title:'R4 editors',points:[
+    'Adrian can now let chosen members update who does which R4 task.',
+    'If that is you, you will see an Edit roles button on the R4 roles tab. Tap a dot to switch between Main, Assist and nobody.']},
   {id:'2026-09-27-r4',date:'2026-09-27',title:'New R4 roles tab',points:[
     'See who leads each alliance task and who backs them up, grouped the same way as our leadership sheet.',
     'Event times are shown in UTC and in your own time.',
@@ -781,8 +789,10 @@ function ago(iso){
 }
 var TONE={now:['p-yes','active today'],week:['p-item','this week'],
           slow:['p-gold','quiet'],gone:['p-na','gone quiet']};
+var MEMBERS=[];
 function renderMembers(rows){
   var t=$('members'); if(!t) return;
+  MEMBERS=rows;
   rows=rows.slice().sort(function(a,b){
     var x=a.last_seen?new Date(a.last_seen).getTime():-1;
     var y=b.last_seen?new Date(b.last_seen).getTime():-1;
@@ -798,21 +808,32 @@ function renderMembers(rows){
       '<td data-label="Email"><span class="mail">'+esc(m.email||'\u2014')+'</span></td>'+
       '<td class="num" data-label="Signed up">'+esc(fmtDate(m.created_at))+'</td>'+
       '<td class="num" data-label="Last seen">'+esc(a.text)+'</td>'+
-      '<td class="st"><span class="pill '+tn[0]+'">'+tn[1]+'</span></td></tr>';
+      '<td class="st"><span class="pill '+tn[0]+'">'+tn[1]+'</span></td>'+
+      '<td class="r4e">'+(m.is_admin?'':'<button type="button" class="chip" data-r4ed="'+esc(m.id)+'" aria-pressed="'+!!m.r4_editor+
+        '" aria-label="'+esc(nm+' can edit R4 roles')+'">R4 editor</button>')+'</td></tr>';
   }).join('');
-  t.querySelector('tbody').innerHTML=out||'<tr><td colspan="5" class="empty">Nobody has signed up yet.</td></tr>';
+  t.querySelector('tbody').innerHTML=out||'<tr><td colspan="6" class="empty">Nobody has signed up yet.</td></tr>';
   if($('admin-count')) $('admin-count').textContent=plural(rows.length,'member')+' \u00b7 '+active+' active this week';
   applyFilters();
 }
 function membersMsg(html){
-  var t=$('members'); if(t) t.querySelector('tbody').innerHTML='<tr><td colspan="5" class="empty">'+html+'</td></tr>';
+  var t=$('members'); if(t) t.querySelector('tbody').innerHTML='<tr><td colspan="6" class="empty">'+html+'</td></tr>';
 }
+/* Only the admin can name R4 editors: the server function refuses anyone else. */
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('#members [data-r4ed]'); if(!b||!ADMIN) return;
+  var id=b.getAttribute('data-r4ed'), m=null;
+  MEMBERS.forEach(function(x){ if(String(x.id)===id) m=x; });
+  if(!m) return;
+  m.r4_editor=!m.r4_editor; b.setAttribute('aria-pressed',String(m.r4_editor));
+  queue('r4ed'+id,function(){ return SB.rpc('set_r4_editor',{target:id,on_off:!!m.r4_editor}); });
+});
 async function loadMembers(force){
   if(!ADMIN) return;
   if(membersLoaded&&!force) return;
   if(!membersLoaded) membersMsg('Loading\u2026');
   try{
-    var r=await SB.from('profiles').select('id,name,email,created_at,last_seen,is_admin');
+    var r=await SB.from('profiles').select('id,name,email,created_at,last_seen,is_admin,r4_editor');
     if(r.error){ membersMsg('Could not load the member list \u2014 '+esc(r.error.message)); return; }
     membersLoaded=true; renderMembers(r.data||[]);
   }catch(e){ membersMsg('Could not reach the server. Try the tab again.'); }
@@ -856,8 +877,9 @@ function touchProfile(){
 function checkAdmin(){
   if(!U||!SB) return;
   try{
-    SB.from('profiles').select('is_admin').eq('id',U.id).maybeSingle().then(function(r){
+    SB.from('profiles').select('is_admin,r4_editor').eq('id',U.id).maybeSingle().then(function(r){
       ADMIN=!!(r&&r.data&&r.data.is_admin);
+      R4ED=ADMIN||!!(r&&r.data&&r.data.r4_editor);
       var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
       if(R4.loaded) renderR4();
       /* A refresh on the Members tab clicks it before this answer arrives, so the
