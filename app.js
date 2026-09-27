@@ -309,10 +309,10 @@ function renderR4(){
   var adm=!!ADMIN&&R4_EDIT, dots=!!R4ED&&R4_EDIT, M=R4.members, cols=4+M.length+(adm?1:0);
   var eb=$('r4-edit');
   if(eb){ eb.hidden=!R4ED; eb.textContent=R4_EDIT?'Done':'Edit roles'; eb.setAttribute('aria-pressed',String(R4_EDIT)); }
-  tb.classList.toggle('adm',dots);
+  tb.classList.toggle('adm',dots); tb.classList.toggle('full',adm);
   tb.querySelector('thead').innerHTML='<tr><th>Task</th>'+
     M.map(function(m){ return '<th class="r4m" scope="col">'+esc(m.name)+'</th>'; }).join('')+
-    '<th>Frequency</th><th>Remarks</th><th class="num">UTC</th>'+(adm?'<th><span class="sr">Remove</span></th>':'')+'</tr>';
+    '<th>Frequency</th><th>Remarks</th><th class="num">UTC</th>'+(adm?'<th><span class="sr">Move or remove</span></th>':'')+'</tr>';
   var out=[], open=0, lead={}, help={};
   M.forEach(function(m){ lead[m.id]=0; help[m.id]=0; });
   r4Sections().forEach(function(sec,si){
@@ -320,7 +320,7 @@ function renderR4(){
     if(!list.length&&!adm) return;
     out.push('<tr class="r4sec" data-tone="'+(R4_TONE[si]||'ice')+'"><td colspan="'+cols+'"><span class="sw" aria-hidden="true"></span>'+
       esc(sec)+(adm?'<button type="button" class="r4btn r4addt" data-r4="addtask" data-s="'+esc(sec)+'">Add task</button>':'')+'</td></tr>');
-    list.forEach(function(t){
+    list.forEach(function(t,ti){
       var w=r4Who(t);
       if(!w.main.length&&!w.help.length) open++;
       var loc=r4Local(t.time_utc);
@@ -344,7 +344,10 @@ function renderR4(){
         '<td class="r4rem">'+(adm?r4In(t,'remarks','Remarks',200):esc(t.remarks||''))+'</td>'+
         '<td class="r4time num'+(t.time_utc||adm?'':' nt')+'">'+(adm?r4In(t,'time_utc','Time in UTC',30):(t.time_utc?esc(t.time_utc):'—'))+
           (loc&&!adm?'<small>'+esc(loc)+' yours</small>':'')+'</td>'+
-        (adm?'<td class="r4x"><button type="button" class="r4del" data-r4="deltask" data-t="'+t.id+'" aria-label="'+esc('Remove '+t.name)+'">&times;</button></td>':'')+
+        (adm?'<td class="r4x">'+
+          '<button type="button" class="r4mv" data-r4="up" data-t="'+t.id+'"'+(ti?'':' disabled')+' aria-label="'+esc('Move '+t.name+' up')+'">&#9650;</button>'+
+          '<button type="button" class="r4mv" data-r4="down" data-t="'+t.id+'"'+(ti<list.length-1?'':' disabled')+' aria-label="'+esc('Move '+t.name+' down')+'">&#9660;</button>'+
+          '<button type="button" class="r4del" data-r4="deltask" data-t="'+t.id+'" aria-label="'+esc('Remove '+t.name)+'">&times;</button></td>':'')+
         '</tr>');
     });
   });
@@ -416,6 +419,27 @@ async function r4AddTask(sec){
   var el=document.querySelector('#r4 input[data-r4f="name"][data-t="'+r.data.id+'"]');
   if(el){ el.focus(); el.select(); }
 }
+/* Moves a task one place within its section. The section is renumbered from its
+   lowest sort value, so tasks that share a sort number still end up in order,
+   and only the rows whose number changed are saved. */
+function r4Move(tid,dir){
+  var t=r4Task(tid); if(!t) return;
+  var list=R4.tasks.filter(function(x){ return x.section===t.section; });
+  var i=list.indexOf(t), j=i+dir;
+  if(i<0||j<0||j>=list.length) return;
+  var base=list[0].sort;
+  list[i]=list[j]; list[j]=t;
+  list.forEach(function(x,k){
+    var s=base+k; if(x.sort===s) return;
+    x.sort=s;
+    queue('r4s'+x.id,function(){ return SB.from('r4_tasks').update({sort:s}).eq('id',x.id); });
+  });
+  R4.tasks.sort(function(a,b){ return a.sort-b.sort||a.id-b.id; });
+  renderR4();
+  var sel='#r4 [data-r4="'+(dir<0?'up':'down')+'"][data-t="'+tid+'"]';
+  var el=document.querySelector(sel);
+  r4Refocus(el&&!el.disabled?sel:'#r4 [data-r4="'+(dir<0?'down':'up')+'"][data-t="'+tid+'"]');
+}
 async function r4DelTask(tid){
   var t=r4Task(tid); if(!t||!window.confirm('Remove "'+t.name+'" from the R4 roles?')) return;
   say('saving…');
@@ -468,6 +492,7 @@ document.addEventListener('click',function(e){
   if(a!=='cycle'&&!ADMIN) return;
   if(a==='cycle') r4Cycle(+b.dataset.t,b.dataset.m);
   else if(a==='deltask') r4DelTask(+b.dataset.t);
+  else if(a==='up'||a==='down') r4Move(+b.dataset.t,a==='up'?-1:1);
   else if(a==='addtask') r4AddTask(b.dataset.s);
   else if(a==='addmem') r4AddMember();
   else if(a==='delmem') r4DelMember(+b.dataset.m);
@@ -485,6 +510,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-28-r4order',date:'2026-09-28',title:'R4 tasks can be reordered',points:[
+    'Adrian can now move tasks up and down within their section, so the list follows the order that matters.']},
   {id:'2026-09-28-ticks',date:'2026-09-28',title:'Ticks on R4 roles',points:[
     'The R4 roles table now uses tick marks: orange for Main, grey for Assist.']},
   {id:'2026-09-28-r4ed',date:'2026-09-28',title:'R4 editors',points:[
