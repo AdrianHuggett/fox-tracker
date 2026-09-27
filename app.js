@@ -311,7 +311,7 @@ function renderR4(){
   tb.classList.toggle('adm',adm);
   tb.querySelector('thead').innerHTML='<tr><th>Task</th>'+
     M.map(function(m){ return '<th class="r4m" scope="col">'+esc(m.name)+'</th>'; }).join('')+
-    '<th>Frequency</th><th>Remarks</th><th class="num">Time (UTC)</th>'+(adm?'<th><span class="sr">Remove</span></th>':'')+'</tr>';
+    '<th>Frequency</th><th>Remarks</th><th class="num">UTC</th>'+(adm?'<th><span class="sr">Remove</span></th>':'')+'</tr>';
   var out=[], open=0, lead={}, help={};
   M.forEach(function(m){ lead[m.id]=0; help[m.id]=0; });
   r4Sections().forEach(function(sec,si){
@@ -341,7 +341,7 @@ function renderR4(){
           ((t.freq||t.remarks)&&!adm?'<div class="r4meta">'+esc([t.freq,t.remarks].filter(Boolean).join(' \u00b7 '))+'</div>':'')+'</td>'+cells+
         '<td class="r4freq">'+(adm?r4In(t,'freq','Frequency',40):esc(t.freq||'—'))+'</td>'+
         '<td class="r4rem">'+(adm?r4In(t,'remarks','Remarks',200):esc(t.remarks||''))+'</td>'+
-        '<td class="r4time num'+(t.time_utc||adm?'':' nt')+'">'+(adm?r4In(t,'time_utc','Time in UTC',30):(t.time_utc?esc(t.time_utc)+' UTC':'—'))+
+        '<td class="r4time num'+(t.time_utc||adm?'':' nt')+'">'+(adm?r4In(t,'time_utc','Time in UTC',30):(t.time_utc?esc(t.time_utc):'—'))+
           (loc&&!adm?'<small>'+esc(loc)+' yours</small>':'')+'</td>'+
         (adm?'<td class="r4x"><button type="button" class="r4del" data-r4="deltask" data-t="'+t.id+'" aria-label="'+esc('Remove '+t.name)+'">&times;</button></td>':'')+
         '</tr>');
