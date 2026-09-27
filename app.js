@@ -264,6 +264,9 @@ function noteSnapshot(){
    it; only an admin can change it, and that is enforced by the database's row
    policies, not by what this page shows or hides. */
 var R4={members:[],tasks:[],loaded:false,loading:false};
+/* An admin reads the same compact table as everyone else; the edit controls only
+   appear after switching to editing, so the page is not a wall of boxes. */
+var R4_EDIT=false;
 var R4_SECTIONS=['Core Administrative Tasks','Leadership and Support',
   'Event, Activity Management & Scheduling','Expansion and Farms'];
 var R4_TONE=['coral','orange','gold','good'];
@@ -302,7 +305,9 @@ function r4In(t,f,label,max){
 }
 function renderR4(){
   var tb=$('r4'); if(!tb||!R4.loaded) return;
-  var adm=!!ADMIN, M=R4.members, cols=4+M.length+(adm?1:0);
+  var adm=!!ADMIN&&R4_EDIT, M=R4.members, cols=4+M.length+(adm?1:0);
+  var eb=$('r4-edit');
+  if(eb){ eb.hidden=!ADMIN; eb.textContent=R4_EDIT?'Done':'Edit roles'; eb.setAttribute('aria-pressed',String(R4_EDIT)); }
   tb.classList.toggle('adm',adm);
   tb.querySelector('thead').innerHTML='<tr><th>Task</th>'+
     M.map(function(m){ return '<th class="r4m" scope="col">'+esc(m.name)+'</th>'; }).join('')+
@@ -318,8 +323,10 @@ function renderR4(){
       var w=r4Who(t);
       if(!w.main.length&&!w.help.length) open++;
       var loc=r4Local(t.time_utc);
-      var who=(w.main.length?'<span><b>Main</b> '+esc(w.main.join(', '))+'</span>':'')+
-              (w.help.length?'<span><b>Assist</b> '+esc(w.help.join(', '))+'</span>':'')+
+      /* On a phone a list of every name says less than "All R4s" does. */
+      var all=function(l){ return M.length>1&&l.length===M.length?'All R4s':l.join(', '); };
+      var who=(w.main.length?'<span><b>Main</b> '+esc(all(w.main))+'</span>':'')+
+              (w.help.length?'<span><b>Assist</b> '+esc(all(w.help))+'</span>':'')+
               (!w.main.length&&!w.help.length?'<span class="r4none">Nobody assigned yet</span>':'');
       var cells=M.map(function(m){
         var r=t.roles[m.id]||'';
@@ -330,11 +337,12 @@ function renderR4(){
         return '<td class="r4c">'+(r?'<span class="r4dot '+r+'" role="img" aria-label="'+esc(m.name+': '+word)+'" title="'+esc(m.name+': '+word)+'"></span>':'')+'</td>';
       }).join('');
       out.push('<tr data-q="'+esc((t.name+' '+w.main.join(' ')+' '+w.help.join(' ')+' '+t.remarks).toLowerCase())+'">'+
-        '<td class="r4task">'+(adm?r4In(t,'name','Task name',80):esc(t.name))+'<div class="r4who">'+who+'</div></td>'+cells+
+        '<td class="r4task">'+(adm?r4In(t,'name','Task name',80):esc(t.name))+'<div class="r4who">'+who+'</div>'+
+          ((t.freq||t.remarks)&&!adm?'<div class="r4meta">'+esc([t.freq,t.remarks].filter(Boolean).join(' \u00b7 '))+'</div>':'')+'</td>'+cells+
         '<td class="r4freq">'+(adm?r4In(t,'freq','Frequency',40):esc(t.freq||'—'))+'</td>'+
         '<td class="r4rem">'+(adm?r4In(t,'remarks','Remarks',200):esc(t.remarks||''))+'</td>'+
         '<td class="r4time num'+(t.time_utc||adm?'':' nt')+'">'+(adm?r4In(t,'time_utc','Time in UTC',30):(t.time_utc?esc(t.time_utc)+' UTC':'—'))+
-          (loc?'<small>'+esc(loc)+' your time</small>':'')+'</td>'+
+          (loc&&!adm?'<small>'+esc(loc)+' yours</small>':'')+'</td>'+
         (adm?'<td class="r4x"><button type="button" class="r4del" data-r4="deltask" data-t="'+t.id+'" aria-label="'+esc('Remove '+t.name)+'">&times;</button></td>':'')+
         '</tr>');
     });
@@ -345,7 +353,7 @@ function renderR4(){
   tb.querySelector('tbody').innerHTML=out.join('')||'<tr><td class="empty">No tasks yet.</td></tr>';
   if($('r4-count')) $('r4-count').textContent=plural(M.length,'R4')+' · '+plural(R4.tasks.length,'task')+
     (open?' · '+open+' with nobody assigned':'');
-  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' You can edit this: tap a dot to switch between Main, Assist and nobody, and any text saves when you leave the box.':'';
+  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' Tap a dot to switch between Main, Assist and nobody; text saves when you leave the box.':'';
   var box=$('r4-admin');
   if(box){
     box.hidden=!adm;
@@ -451,6 +459,8 @@ function r4Rename(el){
 document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('#p-r4 [data-r4]'); if(!b||!ADMIN) return;
   var a=b.getAttribute('data-r4');
+  if(a==='edit'){ R4_EDIT=!R4_EDIT; renderR4(); return; }
+  if(!R4_EDIT) return;
   if(a==='cycle') r4Cycle(+b.dataset.t,b.dataset.m);
   else if(a==='deltask') r4DelTask(+b.dataset.t);
   else if(a==='addtask') r4AddTask(b.dataset.s);
