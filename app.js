@@ -305,7 +305,7 @@ function r4In(t,f,label,max){
 }
 function renderR4(){
   var tb=$('r4'); if(!tb||!R4.loaded) return;
-  /* Admin edits everything; an R4 editor (named by the admin on Members) only moves the dots. */
+  /* Admin edits everything; an R4 editor (named by the admin on Members) only sets the ticks. */
   var adm=!!ADMIN&&R4_EDIT, dots=!!R4ED&&R4_EDIT, M=R4.members, cols=4+M.length+(adm?1:0);
   var eb=$('r4-edit');
   if(eb){ eb.hidden=!R4ED; eb.textContent=R4_EDIT?'Done':'Edit roles'; eb.setAttribute('aria-pressed',String(R4_EDIT)); }
@@ -354,8 +354,8 @@ function renderR4(){
   tb.querySelector('tbody').innerHTML=out.join('')||'<tr><td class="empty">No tasks yet.</td></tr>';
   if($('r4-count')) $('r4-count').textContent=plural(M.length,'R4')+' · '+plural(R4.tasks.length,'task')+
     (open?' · '+open+' with nobody assigned':'');
-  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' Tap a dot to switch between Main, Assist and nobody; text saves when you leave the box.':
-    (dots?' Tap a dot to switch between Main, Assist and nobody.':'');
+  if($('r4-adminhint')) $('r4-adminhint').textContent=adm?' Tap a box to switch between Main, Assist and nobody; text saves when you leave the box.':
+    (dots?' Tap a box to switch between Main, Assist and nobody.':'');
   var box=$('r4-admin');
   if(box){
     box.hidden=!adm;
@@ -390,7 +390,7 @@ function r4Cycle(tid,mid){
   if(next) r[mid]=next; else delete r[mid];
   t.roles=r; renderR4();
   r4Refocus('#r4 [data-r4="cycle"][data-t="'+tid+'"][data-m="'+mid+'"]');
-  /* One dot at a time on the server, so two people editing different dots never
+  /* One tick at a time on the server, so two people editing different ticks never
      overwrite each other, and an R4 editor can change nothing but the roles. */
   queue('r4r'+tid+'-'+mid,function(){ return SB.rpc('set_r4_role',{task_id:tid,member_id:+mid,new_role:next}); });
 }
@@ -436,7 +436,7 @@ async function r4AddMember(){
 }
 async function r4DelMember(mid){
   var nm=r4Name(mid);
-  if(!window.confirm('Remove '+nm+' from the R4 list? Their dots are cleared from every task.')) return;
+  if(!window.confirm('Remove '+nm+' from the R4 list? Their ticks are cleared from every task.')) return;
   say('saving…');
   var held=R4.tasks.filter(function(t){ return t.roles[mid]; });
   var ops=held.map(function(t){
@@ -485,9 +485,11 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-28-ticks',date:'2026-09-28',title:'Ticks on R4 roles',points:[
+    'The R4 roles table now uses tick marks: orange for Main, grey for Assist.']},
   {id:'2026-09-28-r4ed',date:'2026-09-28',title:'R4 editors',points:[
     'Adrian can now let chosen members update who does which R4 task.',
-    'If that is you, you will see an Edit roles button on the R4 roles tab. Tap a dot to switch between Main, Assist and nobody.']},
+    'If that is you, you will see an Edit roles button on the R4 roles tab. Tap a box to switch between Main, Assist and nobody.']},
   {id:'2026-09-27-r4',date:'2026-09-27',title:'New R4 roles tab',points:[
     'See who leads each alliance task and who backs them up, grouped the same way as our leadership sheet.',
     'Event times are shown in UTC and in your own time.',
