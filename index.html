@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Caveat:wght@700&display=swap">
-<link rel="stylesheet" href="style.css?v=20260923-packfold2">
+<link rel="stylesheet" href="style.css?v=20260927-news1">
 </head>
 <body>
 
@@ -143,8 +143,9 @@ var CONFIG = {
   <button class="chip" data-scope="stock" data-f="none">No target</button>
   <input type="search" data-for="stock" placeholder="Find an item…">
  </div>
- <p class="hint">Projected = what you hold, plus free income to SvS day, plus everything the packs you have marked
- will deliver. Status turns green once the projection clears your target.</p>
+ <p class="hint">Projected = what you hold now, plus Free / day until SvS day. Packs you have bought are already in
+ what you hold, so they are not counted twice. Free / day comes from your own Have updates, with anything your bought
+ packs delivered taken out. <span id="free-note"></span> Status turns green once the projection clears your target.</p>
  <div class="tw"><table id="stock"><thead><tr><th></th><th>Item</th><th class="num">Have</th>
  <th class="num">Target</th><th class="num">Remaining</th><th>Progress</th><th class="num">Free / day</th>
  <th class="num">Projected</th><th>Status</th></tr></thead><tbody></tbody></table></div>
@@ -155,7 +156,7 @@ var CONFIG = {
   <button class="chip" data-scope="packs" data-f="all" aria-pressed="true" id="c-pall">All</button>
   <button class="chip" data-scope="packs" data-f="golden" id="c-gold">Must buy</button>
   <button class="chip" data-scope="packs" data-f="pack">Worth checking</button>
-  <button class="chip" data-scope="packs" data-f="buying" id="c-buying">Buying</button>
+  <button class="chip" data-scope="packs" data-f="buying" id="c-buying">Bought</button>
   <span class="sep"></span>
   <button class="chip" id="c-section" aria-pressed="true">Grouped by section</button>
   <input type="search" data-for="packs" placeholder="Find a pack…">
@@ -167,7 +168,7 @@ var CONFIG = {
  <div class="tw"><table id="packs"><thead><tr><th></th>
  <th class="so" data-sort="name" data-label="Pack">Pack</th>
  <th class="num so" data-sort="price" data-label="Price">Price</th>
- <th class="num so" data-sort="freq" data-label="Buy quantity">Buy quantity</th>
+ <th class="num so" data-sort="freq" data-label="Bought">Bought</th>
  <th>Best item for you</th>
  <th class="num so" data-sort="pv" data-label="Pack value %">Pack value %</th>
  <th class="num so" data-sort="iv" data-label="Best item %">Best item %</th>
@@ -200,7 +201,7 @@ var CONFIG = {
   </div>
   <div class="card">
    <h3>My currency</h3>
-   <p class="hint" style="margin:0 0 8px">Changes how prices and monthly spend look for you only — nobody else in the alliance is affected.</p>
+   <p class="hint" style="margin:0 0 8px">Changes how prices and your spend look for you only — nobody else in the alliance is affected.</p>
    <div class="frow"><span>Quick pick</span>
     <select id="cur-select" class="wide">
      <option value="GBP">British Pound (£)</option>
@@ -257,9 +258,25 @@ var CONFIG = {
 </div>
 
 <footer class="wrap">
+ <button type="button" class="nlink" id="news-open">What's new on the tracker</button>
  <span>Speedups are counted in hours on pack contents and days on the backpack.</span>
  <span>Pack values from Torxim's WoS Corner at our state settings (FC5-Gen5, SR 46, RSS 25). Fan-made reference, not affiliated with Century Games.</span>
 </footer>
+
+<!-- What's new: opens by itself once per new update, and from the footer link any time -->
+<dialog id="news" aria-labelledby="news-title">
+ <div class="nbox">
+  <div class="nhead">
+   <h2 id="news-title">What's new</h2>
+   <button type="button" class="nx" id="news-x" aria-label="Close">&times;</button>
+  </div>
+  <div id="news-list"></div>
+  <div class="nfoot">
+   <button type="button" class="nlink" id="news-all">See all updates</button>
+   <button type="button" class="nok" id="news-ok" autofocus>Got it</button>
+  </div>
+ </div>
+</dialog>
 
 <div id="toast" role="status" aria-live="polite" hidden>
  <span class="tdot" aria-hidden="true"></span>
@@ -268,6 +285,6 @@ var CONFIG = {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app.js?v=20260923-packfold2"></script>
+<script src="app.js?v=20260927-news1"></script>
 </body>
 </html>
