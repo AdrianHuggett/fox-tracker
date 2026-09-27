@@ -643,11 +643,12 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
 footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
 
 /* ---------- R4 roles ----------
-   Same density as the other tables: one line per task where it fits, small dots
-   (filled = Main, ring = Assist), and edit controls only while editing. */
-.r4dot,.r4key{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle}
-.r4dot.main,.r4key.main{background:var(--orange)}
-.r4dot.assist,.r4key.assist{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
+   Same density as the other tables: one line per task where it fits, tick marks
+   (orange = Main, grey = Assist), and edit controls only while editing. */
+.r4dot,.r4key{display:inline-block;vertical-align:middle;font-size:14px;font-weight:700;line-height:1}
+.r4dot.main::before,.r4dot.assist::before,.r4key.main::before,.r4key.assist::before{content:"\2713"}
+.r4dot.main,.r4key.main{color:var(--orange)}
+.r4dot.assist,.r4key.assist{color:var(--muted);font-weight:400}
 #r4 th.r4m{text-align:center;padding:10px 2px;min-width:34px;font-size:9.5px;letter-spacing:.03em}
 #r4 td.r4c{text-align:center;padding:5px 2px}
 #r4 td.r4task{white-space:nowrap;padding-left:28px;color:#BFD0E2}
@@ -670,8 +671,9 @@ footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
 #r4 tr.r4tot td{color:var(--faint);font-size:10.5px;background:var(--sunk);border-bottom:0}
 #r4 tr.r4tot td:first-child{font-family:"Chakra Petch",sans-serif;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:10px}
 #r4 .r4n,.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-#r4 button.r4dot{border:1.5px solid var(--line);background:transparent;cursor:pointer;width:14px;height:14px;padding:0;box-shadow:none}
-#r4 button.r4dot.main{background:var(--orange);border-color:var(--orange)}
+#r4 button.r4dot{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1.5px solid var(--line);
+ background:transparent;cursor:pointer;width:18px;height:18px;padding:0;border-radius:4px;font-size:12px;color:var(--muted)}
+#r4 button.r4dot.main{background:var(--orange);border-color:var(--orange);color:#04141C;font-weight:700}
 #r4 button.r4dot.assist{border-color:var(--muted)}
 #r4 button.r4dot:hover{border-color:var(--ice)}
 #r4 button:focus-visible,#p-r4 input:focus-visible,.r4btn:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
@@ -714,7 +716,7 @@ footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
  #r4.adm td.r4task{padding-left:0}
  #r4.adm td.r4freq,#r4.adm td.r4rem{display:block}
  #r4.adm td.r4task{flex:0 0 100%;padding-right:26px}
- #r4.adm td.r4c{display:inline-block!important;order:1;margin:4px 4px 0 0;flex:none}
+ #r4.adm td.r4c{display:inline-block!important;order:1;margin:4px 4px 0 0;flex:none;width:auto}
  #r4.adm button.r4dot{width:auto;height:auto;border-radius:5px;padding:3px 7px}
  #r4.adm .r4n{position:static;width:auto;height:auto;clip:auto;font-size:11px;color:var(--ink)}
  #r4.adm button.r4dot.main .r4n{color:#04141C}
