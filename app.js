@@ -121,12 +121,72 @@ function renderSvsWarn(){
     : 'The SvS date (' + i.date + ') has passed, so projections now assume no time left and everything reads as behind. Ask Adrian to set the next date.';
   b.hidden=false;
 }
+/* ---------- planned exchanges ----------
+   What a member plans to trade in the in-game exchange before SvS. It only moves the
+   Projected figures: the items given leave the "from" item and the items received are
+   added to the "to" item. Once the trade is done in game and Have is updated, the
+   planned amount should go back to 0, or it would be counted twice. Stored per member
+   in user_exchanges (xid, qty = how many "from" items are given). */
+var EXCH=[{id:'charm-g2d',from:'Charm Guides',to:'Charm Designs',give:2,get:1}];
+var EXQ={};
+function exchLots(x){ return Math.floor(n(EXQ[x.id])/x.give); }
+function exchDelta(name){
+  var d=0;
+  EXCH.forEach(function(x){
+    var lots=exchLots(x);
+    if(x.to===name) d+=lots*x.get;
+    if(x.from===name) d-=lots*x.give;
+  });
+  return d;
+}
+async function loadExch(){
+  EXQ={};
+  try{
+    var r=await SB.from('user_exchanges').select('xid,qty');
+    if(!r.error) (r.data||[]).forEach(function(x){ EXQ[x.xid]=n(x.qty); });
+  }catch(e){}
+}
+function saveExch(id){
+  var q=n(EXQ[id]);
+  queue('x'+id,function(){
+    return SB.from('user_exchanges').upsert({user_id:U.id,xid:id,qty:q},{onConflict:'user_id,xid'});
+  });
+}
+function exchRow(x,g,state){
+  var byName=itemMap(), fi=byName[x.from], ti=byName[x.to];
+  if(!fi||!ti) return '';
+  var lots=exchLots(x), got=lots*x.get, used=lots*x.give, q=n(EXQ[x.id]);
+  var before=n(fi.have)+freeRate(fi)*days();
+  var warn=used>before?'That is more '+x.from+' than you are projected to have.':
+    (q%x.give?'Only multiples of '+x.give+' count; '+(q-used)+' left over.':'');
+  return '<tr class="xch" data-state="'+state+'" data-q="'+esc((x.to+' '+x.from+' exchange').toLowerCase())+'" data-gn="'+esc(g)+'">'+
+    '<td colspan="9"><div class="xrow">'+
+    '<span class="xlab">Exchange</span>'+
+    '<span class="xic" title="'+esc(x.from)+'">'+itemIcon(fi)+'</span>'+
+    '<input class="xin" type="number" min="0" step="'+x.give+'" inputmode="numeric" value="'+(q||'')+'" placeholder="0" data-x="'+esc(x.id)+'" aria-label="'+esc(x.from+' to exchange')+'">'+
+    '<span class="xarr" aria-hidden="true">&raquo;</span>'+
+    '<span class="xic" title="'+esc(x.to)+'">'+itemIcon(ti)+'</span>'+
+    '<b class="xgot">+'+fmt(got)+'</b>'+
+    '<span class="xmeta">'+x.give+':'+x.get+(used?' \u00b7 '+esc(x.from)+' \u2212'+fmt(used):'')+'</span>'+
+    '<button type="button" class="xreset" data-xr="'+esc(x.id)+'"'+(q?'':' disabled')+'>Reset</button>'+
+    '</div><div class="xnote'+(warn?' warn':'')+'">'+esc(warn||'Planned trade: counted in Projected. Set it back to 0 once you have traded in game and updated Have.')+'</div></td></tr>';
+}
+document.addEventListener('change',function(e){
+  var el=e.target; if(!el.matches||!el.matches('#stock input.xin')) return;
+  var v=Math.max(0,Math.floor(n(el.value)));
+  EXQ[el.dataset.x]=v; saveExch(el.dataset.x); render();
+});
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('#stock button.xreset'); if(!b) return;
+  EXQ[b.dataset.xr]=0; saveExch(b.dataset.xr); render();
+});
+
 function calcItem(it){
   /* The pack number on Things to buy is what has already been bought, and whatever
      those packs delivered is already inside Have. Adding it again would count it
      twice, so the only thing still to come is free income until SvS day. */
   var have=n(it.have), tgt=n(it.target), g=freeRate(it)*days();
-  var proj=have+g;
+  var proj=have+g+exchDelta(it.name);
   return {have:have,tgt:tgt,proj:proj,pct:tgt>0?have/tgt:null,
           raw:tgt>0?Math.max(tgt-have,0):0, left:tgt>0?Math.max(tgt-proj,0):0,
           ok:tgt>0?(proj>=tgt):null};
@@ -510,6 +570,10 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-28-exchange',date:'2026-09-28',title:'Plan a Charm Guides exchange',points:[
+    'Under Charm Designs on Backpack, type how many Charm Guides you plan to exchange (2 for 1).',
+    'Projected adds the Charm Designs you get and takes away the Charm Guides you give.',
+    'Set it back to 0 once you have made the trade in game and updated Have.']},
   {id:'2026-09-28-password',date:'2026-09-28',title:'Forgotten passwords',points:[
     'On the sign-in screen, type your email and tap "Forgot your password?". The link in the email brings you back here to choose a new one.',
     'You can also change your password any time under Reference, in "My password".']},
@@ -713,6 +777,7 @@ function renderStock(){
       '<td class="num">'+freeCell(it)+'</td>'+
       '<td class="num">'+fmt(c.proj)+'</td>'+
       '<td>'+pill+'<div class="rc">'+esc(rc)+'</div></td></tr>');
+    EXCH.forEach(function(x){ if(x.to===it.name) out.push(exchRow(x,g,state)); });
   });
   $('stock').querySelector('tbody').innerHTML=out.join('');
 }
@@ -1135,6 +1200,7 @@ async function loadAll(){
   fillCurrencyInputs();
   if(!D.items.length){ say('Your backpack is empty — ask Adrian to set your account up.',1); }
   await loadHistory();
+  await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
   showApp(); render(); say('saved');
