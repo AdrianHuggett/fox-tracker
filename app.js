@@ -127,7 +127,8 @@ function renderSvsWarn(){
    added to the "to" item. Once the trade is done in game and Have is updated, the
    planned amount should go back to 0, or it would be counted twice. Stored per member
    in user_exchanges (xid, qty = how many "from" items are given). */
-/* give:get is the in-game ratio; limit is the weekly cap shown in game (information only).
+/* give:get is the in-game ratio; limit is the weekly cap shown in game, used as the most
+   a member can enter (it caps the number of items given).
    Rows appear under the "to" item, in this order. An item can feed several exchanges:
    every trade that gives it away or brings it in is summed into its figures. */
 var EXCH=[
@@ -141,7 +142,8 @@ var EXCH=[
   {id:'polish-plans',from:'Polishing Solution',to:'Design Plans',       give:10,   get:1,   limit:50},
   {id:'alloy-plans', from:'Hardened Alloy',    to:'Design Plans',       give:1000, get:1,   limit:50}];
 var EXQ={};
-function exchLots(x){ return Math.floor(n(EXQ[x.id])/x.give); }
+function exchQty(x){ var q=Math.max(0,n(EXQ[x.id])); return x.limit?Math.min(q,x.limit):q; }
+function exchLots(x){ return Math.floor(exchQty(x)/x.give); }
 function exchGiven(name){
   var d=0;
   EXCH.forEach(function(x){ if(x.from===name) d+=exchLots(x)*x.give; });
@@ -172,7 +174,7 @@ function saveExch(id){
 function exchRow(x,g,state){
   var byName=itemMap(), fi=byName[x.from], ti=byName[x.to];
   if(!fi||!ti) return '';
-  var lots=exchLots(x), got=lots*x.get, used=lots*x.give, q=n(EXQ[x.id]);
+  var lots=exchLots(x), got=lots*x.get, used=lots*x.give, q=exchQty(x);
   var before=n(fi.have)+freeRate(fi)*days(), given=exchGiven(x.from);
   var warn=used&&given>before?'Your exchanges give away '+fmt(given)+' '+x.from+', more than the '+fmt(before)+' you are projected to have.':
     (q%x.give?'Only multiples of '+x.give+' count; '+(q-used)+' left over.':'');
@@ -180,17 +182,19 @@ function exchRow(x,g,state){
     '<td colspan="9"><div class="xrow">'+
     '<span class="xlab">Exchange</span>'+
     '<span class="xic" title="'+esc(x.from)+'">'+itemIcon(fi)+'</span>'+
-    '<input class="xin" type="number" min="0" step="'+x.give+'" inputmode="numeric" value="'+(q||'')+'" placeholder="0" data-x="'+esc(x.id)+'" aria-label="'+esc(x.from+' to exchange')+'">'+
+    '<input class="xin" type="number" min="0"'+(x.limit?' max="'+x.limit+'"':'')+' step="'+x.give+'" inputmode="numeric" value="'+(q||'')+'" placeholder="0" data-x="'+esc(x.id)+'" aria-label="'+esc(x.from+' to exchange')+'">'+
     '<span class="xarr" aria-hidden="true">&raquo;</span>'+
     '<span class="xic" title="'+esc(x.to)+'">'+itemIcon(ti)+'</span>'+
     '<b class="xgot">+'+fmt(got)+'</b>'+
-    '<span class="xmeta">'+fmt(x.give)+':'+fmt(x.get)+(x.limit?' \u00b7 Limit '+fmt(x.limit)+'/week':'')+(used?' \u00b7 '+esc(x.from)+' \u2212'+fmt(used):'')+'</span>'+
+    '<span class="xmeta">'+fmt(x.give)+':'+fmt(x.get)+(x.limit?' \u00b7 Max '+fmt(x.limit)+'/week':'')+(used?' \u00b7 '+esc(x.from)+' \u2212'+fmt(used):'')+'</span>'+
     '<button type="button" class="xreset" data-xr="'+esc(x.id)+'"'+(q?'':' disabled')+'>Reset</button>'+
     '</div>'+(warn||q?'<div class="xnote'+(warn?' warn':'')+'">'+esc(warn||'Planned, not yet traded. Reset it once you have traded in game and updated Have.')+'</div>':'')+'</td></tr>';
 }
 document.addEventListener('change',function(e){
   var el=e.target; if(!el.matches||!el.matches('#stock input.xin')) return;
-  var v=Math.max(0,Math.floor(n(el.value)));
+  var v=Math.max(0,Math.floor(n(el.value))), x=null;
+  EXCH.forEach(function(y){ if(y.id===el.dataset.x) x=y; });
+  if(x&&x.limit&&v>x.limit){ v=x.limit; say('The weekly limit for this exchange is '+fmt(x.limit)+'.',1); }
   EXQ[el.dataset.x]=v; saveExch(el.dataset.x); render();
 });
 document.addEventListener('click',function(e){
@@ -590,6 +594,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-29-exchmax',date:'2026-09-29',title:'Exchanges follow the weekly limit',points:[
+    'Each gear exchange now stops at its in-game weekly limit (shown as Max on the row).']},
   {id:'2026-09-28-exchange2',date:'2026-09-28',title:'Plan your material exchanges',points:[
     'On Backpack, under Charm Designs, Charm Guides, Design Plans, Lunar Amber, Polishing Solution and Hardened Alloy, type how many items you plan to give in each in-game exchange.',
     'Progress, Remaining and Projected include what you receive and take away what you give. An item used in several exchanges counts all of them.',
