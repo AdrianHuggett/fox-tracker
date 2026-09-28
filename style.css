@@ -509,9 +509,9 @@ footer{padding:16px 18px 34px;color:var(--faint);font-size:12px;display:flex;
  .stat.svs .date{grid-area:date;justify-content:flex-end;margin-top:0;font-size:11px}
 }
 
-#dispname{font:inherit;font-size:13px;background:var(--edit);color:var(--ink);
+#dispname,#newpw{font:inherit;font-size:13px;background:var(--edit);color:var(--ink);
  border:1px solid var(--edit-b);border-radius:5px;padding:4px 8px;width:min(210px,58%)}
-#dispname:focus{outline:2px solid var(--ice);outline-offset:0}
+#dispname:focus,#newpw:focus{outline:2px solid var(--ice);outline-offset:0}
 
 /* ---------- members list (admin only) ---------- */
 #members td{padding:8px 10px}
