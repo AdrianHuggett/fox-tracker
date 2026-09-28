@@ -510,6 +510,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-09-28-password',date:'2026-09-28',title:'Forgotten passwords',points:[
+    'On the sign-in screen, type your email and tap "Forgot your password?". The link in the email brings you back here to choose a new one.',
+    'You can also change your password any time under Reference, in "My password".']},
   {id:'2026-09-28-r4order',date:'2026-09-28',title:'R4 tasks can be reordered',points:[
     'Adrian can now move tasks up and down within their section, so the list follows the order that matters.']},
   {id:'2026-09-28-ticks',date:'2026-09-28',title:'Ticks on R4 roles',points:[
@@ -559,8 +562,9 @@ function closeNews(){
 }
 /* Shows only what this member has not closed yet. Someone arriving for the first
    time gets the latest three rather than the whole history. */
+var SKIP_NEWS=false;  /* set while a password reset is being finished */
 function maybeShowNews(){
-  if(!UPDATES.length) return;
+  if(!UPDATES.length||SKIP_NEWS) return;
   var seen;
   try{ seen=localStorage.getItem(NEWS_KEY); }catch(e){ return; }  /* no storage: never nag */
   if(seen===UPDATES[0].id) return;
@@ -1207,7 +1211,33 @@ function headroom(){
   headroomApply();
 }
 
+/* ---------- password ----------
+   The reset email signs the member in through its link; they then pick a new password
+   here. The same box lets anyone change their password at any time. */
+function pwMsg(t,ok){ var e=$('pw-msg'); if(e){ e.textContent=t||'\u00a0'; e.style.color=ok?'var(--good)':''; } }
+async function changePassword(){
+  var el=$('newpw'); if(!el||!SB) return;
+  var v=el.value;
+  if(v.length<8){ pwMsg('Use at least 8 characters.'); el.focus(); return; }
+  pwMsg('Saving…');
+  try{
+    var r=await SB.auth.updateUser({password:v});
+    if(r.error){ pwMsg(r.error.message); return; }
+    el.value=''; pwMsg('Password changed. Use it next time you sign in.',1);
+  }catch(err){ pwMsg('Could not reach the server. Try again.'); }
+}
+function openPasswordBox(){
+  var b=document.querySelector('nav.tabs button[data-p="ref"]'); if(b) b.click();
+  pwMsg('Choose a new password to finish resetting it.',1);
+  var el=$('newpw'); if(el){ el.scrollIntoView({block:'center'}); el.focus(); }
+}
+
 async function boot(){
+  /* Read before the client consumes and clears the link's #fragment. */
+  var hash=location.hash||'';
+  var recovering=/type=recovery/.test(hash);
+  SKIP_NEWS=recovering;
+  var linkErr=/error_description=([^&]*)/.exec(hash);
   if(!window.CONFIG||!CONFIG.url||CONFIG.url.indexOf('YOUR-')===0){
     $('auth').innerHTML='<div class="card"><h3>Not configured yet</h3>'+
       '<p class="hint">Add your Supabase project URL and anon key at the top of index.html.</p></div>';
@@ -1218,8 +1248,11 @@ async function boot(){
   wireUp();
   try{
     var s=await SB.auth.getSession();
-    if(s.data.session){ identifyUser(s.data.session.user); await loadAll(); }
-    else showAuth();
+    if(s.data.session){ identifyUser(s.data.session.user); await loadAll(); if(recovering) openPasswordBox(); }
+    else{
+      showAuth();
+      if(linkErr) authMsg('That link did not work ('+decodeURIComponent(linkErr[1].replace(/\+/g,' '))+'). Ask for a new one with "Forgot your password?".');
+    }
   }catch(e){
     fatal('Could not reach the server',(e&&e.message)||String(e));
   }
@@ -1256,9 +1289,15 @@ function wireUp(){
   $('forgot').addEventListener('click',async function(){
     var em=$('si-email').value.trim();
     if(!em) return authMsg('Type your email above first.');
-    var r=await SB.auth.resetPasswordForEmail(em,{redirectTo:location.href});
-    authMsg(r.error?r.error.message:'Reset link sent to '+em,!r.error);
+    authMsg('Sending…');
+    try{
+      /* The link must come back to the tracker itself, without any old #fragment. */
+      var r=await SB.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});
+      authMsg(r.error?r.error.message:'If '+em+' has an account, a reset link is on its way. Check your spam folder too.',!r.error);
+    }catch(err){ authMsg('Could not reach the server. Check your connection and try again.'); }
   });
+  if($('pw-save')) $('pw-save').addEventListener('click',changePassword);
+  if($('newpw')) $('newpw').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); changePassword(); } });
   $('signout').addEventListener('click',async function(){
     await SB.auth.signOut(); location.reload();
   });
