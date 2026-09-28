@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Caveat:wght@700&display=swap">
-<link rel="stylesheet" href="style.css?v=20260928-priv">
+<link rel="stylesheet" href="style.css?v=20260928-pw">
 </head>
 <body>
 
@@ -201,6 +201,15 @@ var CONFIG = {
    <p class="hint" id="dispname-msg" style="margin:6px 0 0">&nbsp;</p>
   </div>
   <div class="card">
+   <h3>My password</h3>
+   <p class="hint" style="margin:0 0 8px">At least 8 characters. You stay signed in on this device.</p>
+   <div class="frow"><span>New password</span>
+    <input id="newpw" type="password" minlength="8" autocomplete="new-password" aria-label="New password">
+   </div>
+   <div class="frow"><span></span><button type="button" class="r4btn ghost2" id="pw-save">Change password</button></div>
+   <p class="hint" id="pw-msg" style="margin:6px 0 0" aria-live="polite">&nbsp;</p>
+  </div>
+  <div class="card">
    <h3>My currency</h3>
    <p class="hint" style="margin:0 0 8px">Changes how prices and your spend look for you only — nobody else in the alliance is affected.</p>
    <div class="frow"><span>Quick pick</span>
@@ -307,6 +316,6 @@ var CONFIG = {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app.js?v=20260928-priv"></script>
+<script src="app.js?v=20260928-pw"></script>
 </body>
 </html>
