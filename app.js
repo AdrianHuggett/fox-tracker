@@ -127,9 +127,26 @@ function renderSvsWarn(){
    added to the "to" item. Once the trade is done in game and Have is updated, the
    planned amount should go back to 0, or it would be counted twice. Stored per member
    in user_exchanges (xid, qty = how many "from" items are given). */
-var EXCH=[{id:'charm-g2d',from:'Charm Guides',to:'Charm Designs',give:2,get:1}];
+/* give:get is the in-game ratio; limit is the weekly cap shown in game (information only).
+   Rows appear under the "to" item, in this order. An item can feed several exchanges:
+   every trade that gives it away or brings it in is summed into its figures. */
+var EXCH=[
+  {id:'charm-g2d',   from:'Charm Guides',      to:'Charm Designs',      give:2,    get:1},
+  {id:'charm-d2g',   from:'Charm Designs',     to:'Charm Guides',       give:2,    get:1},
+  {id:'plans-amber', from:'Design Plans',      to:'Lunar Amber',        give:10,   get:1,   limit:500},
+  {id:'plans-polish',from:'Design Plans',      to:'Polishing Solution', give:1,    get:3,   limit:500},
+  {id:'alloy-polish',from:'Hardened Alloy',    to:'Polishing Solution', give:200,  get:1,   limit:500},
+  {id:'plans-alloy', from:'Design Plans',      to:'Hardened Alloy',     give:1,    get:300, limit:500},
+  {id:'polish-alloy',from:'Polishing Solution',to:'Hardened Alloy',     give:1,    get:50,  limit:1000},
+  {id:'polish-plans',from:'Polishing Solution',to:'Design Plans',       give:10,   get:1,   limit:50},
+  {id:'alloy-plans', from:'Hardened Alloy',    to:'Design Plans',       give:1000, get:1,   limit:50}];
 var EXQ={};
 function exchLots(x){ return Math.floor(n(EXQ[x.id])/x.give); }
+function exchGiven(name){
+  var d=0;
+  EXCH.forEach(function(x){ if(x.from===name) d+=exchLots(x)*x.give; });
+  return d;
+}
 function exchDelta(name){
   var d=0;
   EXCH.forEach(function(x){
@@ -156,8 +173,8 @@ function exchRow(x,g,state){
   var byName=itemMap(), fi=byName[x.from], ti=byName[x.to];
   if(!fi||!ti) return '';
   var lots=exchLots(x), got=lots*x.get, used=lots*x.give, q=n(EXQ[x.id]);
-  var before=n(fi.have)+freeRate(fi)*days();
-  var warn=used>before?'That is more '+x.from+' than you are projected to have.':
+  var before=n(fi.have)+freeRate(fi)*days(), given=exchGiven(x.from);
+  var warn=used&&given>before?'Your exchanges give away '+fmt(given)+' '+x.from+', more than the '+fmt(before)+' you are projected to have.':
     (q%x.give?'Only multiples of '+x.give+' count; '+(q-used)+' left over.':'');
   return '<tr class="xch" data-state="'+state+'" data-q="'+esc((x.to+' '+x.from+' exchange').toLowerCase())+'" data-gn="'+esc(g)+'">'+
     '<td colspan="9"><div class="xrow">'+
@@ -167,9 +184,9 @@ function exchRow(x,g,state){
     '<span class="xarr" aria-hidden="true">&raquo;</span>'+
     '<span class="xic" title="'+esc(x.to)+'">'+itemIcon(ti)+'</span>'+
     '<b class="xgot">+'+fmt(got)+'</b>'+
-    '<span class="xmeta">'+x.give+':'+x.get+(used?' \u00b7 '+esc(x.from)+' \u2212'+fmt(used):'')+'</span>'+
+    '<span class="xmeta">'+fmt(x.give)+':'+fmt(x.get)+(x.limit?' \u00b7 Limit '+fmt(x.limit)+'/week':'')+(used?' \u00b7 '+esc(x.from)+' \u2212'+fmt(used):'')+'</span>'+
     '<button type="button" class="xreset" data-xr="'+esc(x.id)+'"'+(q?'':' disabled')+'>Reset</button>'+
-    '</div><div class="xnote'+(warn?' warn':'')+'">'+esc(warn||'Planned trade: counted in Projected. Set it back to 0 once you have traded in game and updated Have.')+'</div></td></tr>';
+    '</div>'+(warn||q?'<div class="xnote'+(warn?' warn':'')+'">'+esc(warn||'Planned, not yet traded. Reset it once you have traded in game and updated Have.')+'</div>':'')+'</td></tr>';
 }
 document.addEventListener('change',function(e){
   var el=e.target; if(!el.matches||!el.matches('#stock input.xin')) return;
@@ -185,8 +202,11 @@ function calcItem(it){
   /* The pack number on Things to buy is what has already been bought, and whatever
      those packs delivered is already inside Have. Adding it again would count it
      twice, so the only thing still to come is free income until SvS day. */
-  var have=n(it.have), tgt=n(it.target), g=freeRate(it)*days();
-  var proj=have+g+exchDelta(it.name);
+  /* Planned exchanges count as if already made: they move Have-based figures
+     (progress, remaining) as well as Projected. */
+  var have=n(it.have)+exchDelta(it.name), tgt=n(it.target), g=freeRate(it)*days();
+  var proj=have+g;
+  have=Math.max(have,0);
   return {have:have,tgt:tgt,proj:proj,pct:tgt>0?have/tgt:null,
           raw:tgt>0?Math.max(tgt-have,0):0, left:tgt>0?Math.max(tgt-proj,0):0,
           ok:tgt>0?(proj>=tgt):null};
@@ -570,10 +590,10 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
-  {id:'2026-09-28-exchange',date:'2026-09-28',title:'Plan a Charm Guides exchange',points:[
-    'Under Charm Designs on Backpack, type how many Charm Guides you plan to exchange (2 for 1).',
-    'Projected adds the Charm Designs you get and takes away the Charm Guides you give.',
-    'Set it back to 0 once you have made the trade in game and updated Have.']},
+  {id:'2026-09-28-exchange2',date:'2026-09-28',title:'Plan your material exchanges',points:[
+    'On Backpack, under Charm Designs, Charm Guides, Design Plans, Lunar Amber, Polishing Solution and Hardened Alloy, type how many items you plan to give in each in-game exchange.',
+    'Progress, Remaining and Projected include what you receive and take away what you give. An item used in several exchanges counts all of them.',
+    'Set each one back to 0 once you have made the trade in game and updated Have.']},
   {id:'2026-09-28-password',date:'2026-09-28',title:'Forgotten passwords',points:[
     'On the sign-in screen, type your email and tap "Forgot your password?". The link in the email brings you back here to choose a new one.',
     'You can also change your password any time under Reference, in "My password".']},
