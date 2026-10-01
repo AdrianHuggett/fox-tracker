@@ -21,7 +21,7 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 
 - Every Backpack or pack-count save calls `noteSnapshot()`, which upserts one `stock_history` row per member per day (later saves the same day replace it): `have` = {item: Have} (raw Have, **not** including exchanges), `packs` = {pack_id: bought}.
 - `recomputeFree()`: for each item, from its first snapshot to its latest within the last 90 days (`FREE_WINDOW_DAYS`):
-  `rate = max(0, (Have rise − items delivered by packs bought in between) / days)`.
+  `rate = Σ max(0, rise in Have between consecutive snapshots − items delivered by packs bought in that step) / days`. Only rises count, so spending never cancels earned income (changed 2 Oct 2026; before, it was first-vs-last snapshot, which dropped to 0 after spending).
   Pack deliveries use **today's** `pack_contents` × the change in pack counts, so correcting a pack's contents later applies to both ends of the window alike.
 - An item needs at least 3 days of span (`FREE_MIN_DAYS`). Before that, `freeRate` falls back to `user_items.free` (shown faded, "starting estimate").
 - `renderFreeNote()` explains the measuring state above the Backpack table.
@@ -110,7 +110,7 @@ Next SvS date and MUR rate (read-only), **My name** (edits the auth metadata nam
 ## What's new
 
 - `UPDATES` (newest first) holds `{id, date, title, points[]}`. On load, if the newest id differs from `localStorage['fox-news-seen']`, a modal lists the unseen entries. Closing it marks the newest as seen. The footer link "What's new on the tracker" reopens the full list.
-- Current newest ids: `2026-10-02-r4load`, `2026-09-29-exchmax`, `2026-09-28-exchange2`, `2026-09-28-password`, `2026-09-28-r4order`, `2026-09-28-ticks`, `2026-09-28-r4ed`, …
+- Current newest ids: `2026-10-02-freeincome`, `2026-10-02-r4load`, `2026-09-29-exchmax`, `2026-09-28-exchange2`, `2026-09-28-password`, `2026-09-28-r4order`, `2026-09-28-ticks`, `2026-09-28-r4ed`, …
 - Write entries for members: plain English, what changed and what to do, two or three bullet points at most.
 
 ## Other behaviour

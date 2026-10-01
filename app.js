@@ -248,11 +248,12 @@ function budget(){ var t=0; D.packs.forEach(function(p){ t+=n(p.price)*n(uPacks[
    Every time a member saves their Backpack, today's Have is stored alongside how
    many of each pack they have bought so far. Free / day is then
 
-     (rise in Have  -  what the packs bought in between delivered)  /  days
+     (sum of the rises in Have between consecutive snapshots  -  what the packs
+      bought in between delivered)  /  days
 
-   taken from the oldest snapshot in the last FREE_WINDOW_DAYS to the latest, so it
-   sharpens as updates build up and still follows income as it changes. Pack items are taken out of the rate here and
-   are still counted in Projected, through Have. Until a member has FREE_MIN_DAYS
+   over the last FREE_WINDOW_DAYS. Each step counts only if it is a rise, so items a
+   member spends never cancel the income they earned. Pack items are taken out of
+   the rate here and are still counted in Projected, through Have. Until a member has FREE_MIN_DAYS
    of history the starting estimate stored on the item is used instead. */
 function todayKey(){
   var d=new Date();
@@ -294,17 +295,21 @@ function recomputeFree(){
   if(HIST.length<2) return;
   HIST_SPAN=dayNum(HIST[HIST.length-1].day)-dayNum(HIST[0].day);
   /* An item added part-way through starts its own clock at its first snapshot. */
-  var first={}, last={};
+  var steps={};
   HIST.forEach(function(s){
-    Object.keys(s.have||{}).forEach(function(k){ if(!first[k]) first[k]=s; last[k]=s; });
+    Object.keys(s.have||{}).forEach(function(k){ (steps[k]=steps[k]||[]).push(s); });
   });
-  Object.keys(first).forEach(function(k){
-    var a=first[k], b=last[k], span=dayNum(b.day)-dayNum(a.day);
+  Object.keys(steps).forEach(function(k){
+    var list=steps[k], a=list[0], b=list[list.length-1], span=dayNum(b.day)-dayNum(a.day);
     if(span<FREE_MIN_DAYS) return;
-    var gain=n(b.have[k])-n(a.have[k]);
-    var packs=packsDelivered(a,b,k);
-    /* Spending during prep can push this below zero; income is never negative. */
-    FREE_M[k]={rate:Math.max(0,(gain-packs)/span),span:span};
+    /* Only rises count: spending never cancels earned income. Each step has its own
+       pack deliveries taken out, so a pack can only cancel the rise it came with. */
+    var earned=0;
+    for(var i=1;i<list.length;i++){
+      var rise=n(list[i].have[k])-n(list[i-1].have[k])-packsDelivered(list[i-1],list[i],k);
+      if(rise>0) earned+=rise;
+    }
+    FREE_M[k]={rate:earned/span,span:span};
   });
 }
 function freeRate(it){ var m=FREE_M[it.name]; return m?m.rate:n(it.free); }
@@ -613,6 +618,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-02-freeincome',date:'2026-10-02',title:'Free / day no longer drops to zero after you spend',points:[
+    'Free / day now adds up only the days your items went up, so spending speedups or other items no longer cancels the income you earned.',
+    'Nothing to do: the figures update by themselves the next time you open the tracker.']},
   {id:'2026-10-02-r4load',date:'2026-10-02',title:'R4 workload cards',points:[
     'Under the R4 roles table, a card per R4 shows how many tasks they lead and back up, on phones too.',
     'Tap a card to show only that R4\u2019s tasks; tap it again to show everything.']},

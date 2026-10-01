@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 2 Oct 2026
 
+- **Free/day counts only rises.** `recomputeFree()` summed first-vs-last snapshots, so any spending in the 90-day window (Adrian's General Speedups) pulled the net change to 0 and the rate showed 0.00. It now adds up the positive steps between consecutive snapshots, each with its own pack deliveries removed. Chosen by Adrian over a manual start date or a shorter window.
 - `f73c1ea`, `97f2c28`, `6d3fcb2`: **R4 workload cards.** The "Tasks led / backing up" totals row (pairs like `11 / 6` running together, and hidden on phones) was replaced by one card per R4 under the table. Tapping a card filters to that R4.
 
 ## 29 Sep 2026
