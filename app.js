@@ -435,9 +435,20 @@ function renderR4(){
         '</tr>');
     });
   });
-  if(M.length) out.push('<tr class="need r4tot"><td>Tasks led / backing up</td>'+
-    M.map(function(m){ return '<td class="r4c num">'+lead[m.id]+' / '+help[m.id]+'</td>'; }).join('')+
-    '<td colspan="'+(3+(adm?1:0))+'"></td></tr>');
+  /* Workload per R4 as cards under the table: the old totals row was a run of
+     "11 / 6" pairs that ran together and was hidden on phones. Tapping a card
+     searches for that R4. */
+  var ld=$('r4-load');
+  if(ld){
+    var cur=(queries.r4||'').trim().toLowerCase();
+    ld.innerHTML=M.length?'<h3>Workload per R4</h3><div class="r4lgrid">'+M.map(function(m){
+      var on=cur===String(m.name).toLowerCase();
+      return '<button type="button" class="r4lcard" data-r4n="'+esc(m.name)+'" aria-pressed="'+on+'" title="'+esc('Show '+m.name+'\u2019s tasks')+'">'+
+        '<span class="r4lname">'+esc(m.name)+'</span>'+
+        '<span class="r4lrow"><span class="r4key main" aria-hidden="true"></span>Leads <b>'+lead[m.id]+'</b></span>'+
+        '<span class="r4lrow"><span class="r4key assist" aria-hidden="true"></span>Backs up <b>'+help[m.id]+'</b></span></button>';
+    }).join('')+'</div>':'';
+  }
   tb.querySelector('tbody').innerHTML=out.join('')||'<tr><td class="empty">No tasks yet.</td></tr>';
   if($('r4-count')) $('r4-count').textContent=plural(M.length,'R4')+' · '+plural(R4.tasks.length,'task')+
     (open?' · '+open+' with nobody assigned':'');
@@ -586,6 +597,14 @@ document.addEventListener('change',function(e){
   if(el.matches('#p-r4 input[data-r4f]')) r4Field(el);
   else if(el.matches('#p-r4 input[data-r4m]')) r4Rename(el);
 });
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('#r4-load [data-r4n]'); if(!b) return;
+  var s=document.querySelector('input[data-for="r4"]'), nm=b.getAttribute('data-r4n');
+  var v=(queries.r4||'').trim().toLowerCase()===nm.toLowerCase()?'':nm;
+  queries.r4=v; if(s) s.value=v;
+  renderR4();
+  var tw=$('r4'); if(v&&tw) tw.scrollIntoView({behavior:'smooth',block:'start'});
+});
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&e.target.id==='r4-newname'){ e.preventDefault(); r4AddMember(); }
 });
@@ -594,6 +613,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-02-r4load',date:'2026-10-02',title:'R4 workload cards',points:[
+    'Under the R4 roles table, a card per R4 shows how many tasks they lead and back up, on phones too.',
+    'Tap a card to show only that R4\u2019s tasks; tap it again to show everything.']},
   {id:'2026-09-29-exchmax',date:'2026-09-29',title:'Exchanges follow the weekly limit',points:[
     'Each gear exchange now stops at its in-game weekly limit (shown as Max on the row).']},
   {id:'2026-09-28-exchange2',date:'2026-09-28',title:'Plan your material exchanges',points:[
