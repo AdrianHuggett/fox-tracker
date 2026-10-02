@@ -8,7 +8,8 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Caveat:wght@700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261002-freeinc">
+<link rel="stylesheet" href="style.css?v=20261003-buildings">
+<link rel="stylesheet" href="buildings.css?v=20261003-buildings">
 </head>
 <body>
 
@@ -38,6 +39,7 @@ var CONFIG = {
    <button role="tab" aria-selected="true" data-p="dash">Dashboard</button>
    <button role="tab" aria-selected="false" data-p="stock">Backpack</button>
    <button role="tab" aria-selected="false" data-p="packs">Things to buy</button>
+   <button role="tab" aria-selected="false" data-p="buildings">Buildings</button>
    <button role="tab" aria-selected="false" data-p="matrix">Pack contents</button>
    <button role="tab" aria-selected="false" data-p="ref">Reference</button>
    <button role="tab" aria-selected="false" data-p="r4">R4 roles</button>
@@ -177,6 +179,7 @@ var CONFIG = {
  </tr></thead><tbody></tbody></table></div>
 </section>
 
+<section class="panel" id="p-buildings" aria-label="Building upgrade planner"></section>
 <section class="panel" id="p-matrix">
  <div class="toolbar"><input type="search" data-for="matrix" placeholder="Find a pack…" style="margin-left:0"></div>
  <p class="hint">What each pack contains, per Torxim. Moonlight Festival shows direct pack contents and full pass rewards only; random draws and badge exchanges are separate. Enhancement XP Components contain 100 XP each; Hero XP items contain 10,000 XP each; Chief Stamina follows the source quantity, without conversion to Stamina Cans. The top row is what you are still missing against your
@@ -317,6 +320,8 @@ var CONFIG = {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="app.js?v=20261002-freeinc"></script>
+<script src="buildings-data.js?v=20261003-buildings"></script>
+<script src="buildings.js?v=20261003-buildings"></script>
+<script src="app.js?v=20261003-buildings"></script>
 </body>
 </html>

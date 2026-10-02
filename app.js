@@ -618,6 +618,11 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-03-buildings',date:'2026-10-03',title:'Plan your building upgrades',points:[
+    'The new Buildings tab covers eight Fire Crystal buildings and their upgrade stages through FC10.',
+    'Save your personal plan, see FC and Refined Fire Crystal costs and estimated SvS points, then review and replace your Backpack targets.',
+    'Prerequisites are listed for reference. Add their upgrades to your plan separately.'
+  ]},
   {id:'2026-10-02-freeincome',date:'2026-10-02',title:'Free / day no longer drops to zero after you spend',points:[
     'Free / day now adds up only the days your items went up, so spending speedups or other items no longer cancels the income you earned.',
     'Nothing to do: the figures update by themselves the next time you open the tracker.']},
@@ -1126,6 +1131,7 @@ function renderDash(){
 function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
+  if(buildingPlanner&&U&&buildingOwner===U.id) buildingPlanner.refresh();
   var key=focusKey(document.activeElement);
   renderSvsWarn(); renderFreeNote();
   renderTop(); renderDash(); renderStock(); renderPacks(); renderMatrix(); renderRef(); applyFilters(); bind();
@@ -1259,7 +1265,7 @@ async function loadAll(){
   await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
-  showApp(); render(); say('saved');
+  showApp(); mountBuildings(); render(); say('saved');
   restoreTab();
   maybeShowNews();
 }
@@ -1447,6 +1453,46 @@ function wireUp(){
     });
   });
 }
+
+/* Building plans are private account metadata; targets remain in user_items. */
+var buildingPlanner=null, buildingOwner=null;
+function mountBuildings(){
+  if(!window.FOXBuildings||!$('p-buildings')) return;
+  if(buildingPlanner) buildingPlanner.dispose();
+  buildingOwner=U.id;
+  var owner=U.id;
+  buildingPlanner=window.FOXBuildings.mount($('p-buildings'),{
+    plan:U.user_metadata&&U.user_metadata.fox_building_plan,
+    stock:function(){
+      var out={}; ['Fire Crystals','Refined Fire Crystals'].forEach(function(name,i){
+        var it=D.items.find(function(x){return x.name===name;});
+        if(it){var c=calcItem(it);out[i?'rfc':'fc']={have:c.have,target:it.target,projected:svsInfo().state==='missing'||svsInfo().state==='past'?null:c.proj};}
+      }); return out;
+    },
+    savePlan:async function(plan){
+      if(!U||U.id!==owner) throw new Error('Please sign in again.');
+      var r=await SB.auth.updateUser({data:{fox_building_plan:plan}});
+      if(r.error) throw r.error;
+      if(U&&U.id===owner) U=r.data.user;
+    },
+    applyTargets:async function(changes){
+      if(!U||U.id!==owner) throw new Error('Please sign in again.');
+      var applied=0;
+      try{
+        for(var k=0;k<changes.length;k++){
+          var c=changes[k],it=D.items.find(function(x){return x.name===c.name;});
+          if(!it||!Number.isSafeInteger(c.target)||c.target<0) throw new Error('Invalid target.');
+          clearTimeout(timers['i'+it.sort+'target']);
+          var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');
+          if(r.error||!r.data||r.data.length!==1) throw new Error('Target was not saved.');
+          it.target=c.target;applied++;
+        }
+      }catch(err){render();throw new Error((applied?'Some targets were saved. ':'')+'Could not save all targets. Check your connection and retry.');}
+      render();say('saved');toast('Building targets updated in Backpack.');
+    }
+  });
+}
+
 headroom();
 boot();
 })();
