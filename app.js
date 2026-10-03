@@ -618,6 +618,11 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-03-charms',date:'2026-10-03',title:'Plan your Chief Charm upgrades',points:[
+    'The new Chief Charms tab tracks all 18 charms separately, including partial stages up to level 18.',
+    'Review Guide, Design and Jewel Secret costs, then replace the relevant Backpack targets. Your plan is saved to your account.',
+    'SvS estimates remain unavailable for unverified charm scores. Material costs are calculated independently.'
+  ]},
   {id:'2026-10-03-buildings',date:'2026-10-03',title:'Plan your building upgrades',points:[
     'The new Buildings tab covers eight Fire Crystal buildings and their upgrade stages through FC10.',
     'Save your personal plan, see FC and Refined Fire Crystal costs and estimated SvS points, then review and replace your Backpack targets.',
@@ -1131,6 +1136,7 @@ function renderDash(){
 function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
+  if(charmPlanner&&U&&charmOwner===U.id)charmPlanner.refresh();
   if(buildingPlanner&&U&&buildingOwner===U.id) buildingPlanner.refresh();
   var key=focusKey(document.activeElement);
   renderSvsWarn(); renderFreeNote();
@@ -1265,7 +1271,7 @@ async function loadAll(){
   await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
-  showApp(); mountBuildings(); render(); say('saved');
+  showApp(); mountBuildings(); mountCharms(); render(); say('saved');
   restoreTab();
   maybeShowNews();
 }
@@ -1489,6 +1495,40 @@ function mountBuildings(){
         }
       }catch(err){render();throw new Error((applied?'Some targets were saved. ':'')+'Could not save all targets. Check your connection and retry.');}
       render();say('saved');toast('Building targets updated in Backpack.');
+    }
+  });
+}
+
+
+/* Per-account charms, saved separately from building plans. */
+var charmPlanner=null,charmOwner=null;
+function charmItem(key){var names={guides:['Charm Guides'],designs:['Charm Designs'],secrets:['Jewel Secrets','Charm Secrets']};return D.items.find(function(it){return names[key]&&names[key].indexOf(it.name)>=0;});}
+function mountCharms(){
+  if(!window.FOXCharms||!$('p-charms'))return;
+  if(charmPlanner)charmPlanner.dispose();
+  var owner=U.id;charmOwner=owner;
+  charmPlanner=window.FOXCharms.mount($('p-charms'),{
+    plan:U.user_metadata&&U.user_metadata.fox_charm_plan,
+    stock:function(){var stock={};['guides','designs','secrets'].forEach(function(key){var it=charmItem(key);if(it)stock[key]={have:calcItem(it).have,target:it.target};});return stock;},
+    savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_charm_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},
+    applyTargets:async function(changes){
+      if(!U||U.id!==owner)throw new Error('Please sign in again.');
+      var applied=0;
+      try{for(var k=0;k<changes.length;k++){
+        var c=changes[k];if(['guides','designs','secrets'].indexOf(c.key)<0||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Invalid target');
+        var it=charmItem(c.key);
+        if(!it&&c.key==='secrets'){
+          /* Create only this user's missing material when they approve a target. */
+          var fresh=await SB.from('user_items').select('*').eq('user_id',owner);if(fresh.error)throw fresh.error;
+          var existing=(fresh.data||[]).find(function(x){return x.name==='Jewel Secrets'||x.name==='Charm Secrets';});
+          if(existing){it=existing;D.items.push(it);}
+          else{var guide=charmItem('guides');var row={user_id:owner,sort:Math.max.apply(null,[0].concat((fresh.data||[]).map(function(x){return Number(x.sort)||0;})))+1,grp:guide?guide.grp:'Chief Charms',icon:'💎',name:'Jewel Secrets',have:0,target:c.target,free:0};var added=await SB.from('user_items').insert(row).select('*');if(added.error||!added.data||added.data.length!==1)throw new Error('Could not add Jewel Secrets');it=added.data[0];var gi=guide?D.items.indexOf(guide):-1;D.items.splice(gi>=0?gi+1:D.items.length,0,it);applied++;continue;}
+        }
+        if(!it)throw new Error('Material missing from Backpack');
+        clearTimeout(timers['i'+it.sort+'target']);
+        var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target not saved');it.target=c.target;applied++;
+      }}catch(e){render();throw new Error((applied?'Some targets were saved. ':'')+'Could not save all charm targets. Check your connection and retry.');}
+      render();say('saved');toast('Charm targets updated in Backpack.');
     }
   });
 }
