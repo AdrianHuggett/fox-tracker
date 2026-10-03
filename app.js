@@ -787,6 +787,9 @@ var ITEM_ART = {
   "Lunar Amber": "item-lunar-amber.png",
   "Mithril": "item-mithril.png",
   "Essence Stones": "item-essence-stones.png",
+  "Mythic Hero Gear": "item-mythic-hero-gear.png",
+  "100 Enhancement XP Component": "item-enhancement-xp.png",
+  "Enhancement XP Components": "item-enhancement-xp.png",
   "Mythic Hero Shards": "item-mythic-hero-shards.png",
   "Epic Hero Shards": "item-epic-hero-shards.png",
   "Rare Hero Shards": "item-rare-hero-shards.png",
@@ -1136,7 +1139,7 @@ function renderDash(){
 function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
-  if(gearPlanner&&U&&gearOwner===U.id)gearPlanner.refresh();if(warPlanner&&U&&warOwner===U.id)warPlanner.refresh();
+  if(gearPlanner&&U&&gearOwner===U.id)gearPlanner.refresh();if(warPlanner&&U&&warOwner===U.id)warPlanner.refresh();if(heroPlanner&&U&&heroOwner===U.id)heroPlanner.refresh();
   if(charmPlanner&&U&&charmOwner===U.id)charmPlanner.refresh();
   if(buildingPlanner&&U&&buildingOwner===U.id) buildingPlanner.refresh();
   var key=focusKey(document.activeElement);
@@ -1273,7 +1276,7 @@ async function loadAll(){
   await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
-  showApp(); mountBuildings(); mountCharms(); mountGear();mountWar(); render(); say('saved');
+  showApp(); mountBuildings(); mountCharms(); mountGear();mountWar(); mountHero(); render(); say('saved');
   restoreTab();
   maybeShowNews();
 }
@@ -1505,7 +1508,7 @@ function mountBuildings(){
 /* Per-account charms, saved separately from building plans. */
 
 /* Navigation groups use the existing page switch, including its access checks. */
-var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
+var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['hero','Hero Gear'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
 function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'dash';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='dash'||page==='planner';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['planner','alliance','resources'].indexOf(group)>=0;}
 function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
@@ -1514,6 +1517,10 @@ if($('p-planner'))$('p-planner').onclick=function(e){var b=e.target.closest('[da
 var gearPlanner=null,gearOwner=null,GEAR_NAMES={hardenedAlloy:'Hardened Alloy',polishingSolution:'Polishing Solution',designPlans:'Design Plans',lunarAmber:'Lunar Amber'};
 function gearItem(key){return D.items.find(function(it){return it.name===GEAR_NAMES[key];});}
 function mountGear(){if(!window.FOXGear||!$('p-gear'))return;if(gearPlanner)gearPlanner.dispose();var owner=U.id;gearOwner=owner;gearPlanner=window.FOXGear.mount($('p-gear'),{plan:U.user_metadata&&U.user_metadata.fox_gear_plan,stock:function(){var out={};Object.keys(GEAR_NAMES).forEach(function(k){var it=gearItem(k);if(it)out[k]={have:calcItem(it).have,target:it.target};});return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_gear_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=gearItem(c.key);if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
+
+var heroPlanner=null,heroOwner=null,HERO_NAMES={essence:'Essence Stones',mithril:'Mithril',mythic:'Mythic Hero Gear',xp:'100 Enhancement XP Component'};
+function heroItem(key){return D.items.find(function(it){return it.name===HERO_NAMES[key]||(key==='xp'&&/^(100 )?Enhancement XP Components?$/.test(it.name));});}
+function mountHero(){if(!window.FOXHero||!$('p-hero'))return;if(heroPlanner)heroPlanner.dispose();var owner=U.id;heroOwner=owner;heroPlanner=window.FOXHero.mount($('p-hero'),{plan:U.user_metadata&&U.user_metadata.fox_hero_plan,stock:function(){var out={};Object.keys(HERO_NAMES).forEach(function(k){var it=heroItem(k);if(it)out[k]={have:calcItem(it).have,target:it.target};});if(!out.xp)out.xp={have:0,target:0};return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_hero_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=heroItem(c.key);if(!it&&c.key==='xp'&&Number.isSafeInteger(c.target)&&c.target>0){var sort=Math.max.apply(null,D.items.map(function(i){return i.sort;}).concat([0]))+1;var fresh={user_id:owner,sort:sort,grp:'Hero Gear',icon:'🔩',name:HERO_NAMES.xp,have:0,target:c.target,free:0};var created=await SB.from('user_items').insert(fresh).select('sort');if(created.error||!created.data||created.data.length!==1)throw new Error('XP Components could not be added to your Backpack.');it={sort:sort,grp:fresh.grp,icon:fresh.icon,name:fresh.name,have:0,target:c.target,free:0};D.items.push(it);}if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
 
 var warPlanner=null,warOwner=null,WAR_NAMES={fcShards:'Fire Crystal Shards',steel:'Steel',refinedFC:'Refined Fire Crystals'};
 function warItem(key){return D.items.find(function(it){return it.name===WAR_NAMES[key];});}
