@@ -81,7 +81,7 @@ function fatal(title,why){
   f.hidden=false;
   if($('auth')) $('auth').style.display='none';
   if($('app')) $('app').style.display='none';
-  var nv=$('navtabs'); if(nv) nv.style.display='none';
+  var nv=$('navtabs'); if(nv) nv.style.display='none'; if($('category-nav'))$('category-nav').style.display='none';if($('category-subwrap'))$('category-subwrap').hidden=true;
   if(sync){ sync.textContent=title; sync.className='warn'; }
 }
 window.onerror=function(m){ say('error: '+String(m).slice(0,80),1); };
@@ -1044,7 +1044,7 @@ function checkAdmin(){
     SB.from('profiles').select('is_admin,r4_editor').eq('id',U.id).maybeSingle().then(function(r){
       ADMIN=!!(r&&r.data&&r.data.is_admin);
       R4ED=ADMIN||!!(r&&r.data&&r.data.r4_editor);
-      var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
+      var at=$('tab-admin'); if(at) at.hidden=!ADMIN; syncCategories();
       if(R4.loaded) renderR4();
       /* A refresh on the Members tab clicks it before this answer arrives, so the
          list is fetched here once admin rights are known. */
@@ -1136,6 +1136,7 @@ function renderDash(){
 function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
+  if(gearPlanner&&U&&gearOwner===U.id)gearPlanner.refresh();
   if(charmPlanner&&U&&charmOwner===U.id)charmPlanner.refresh();
   if(buildingPlanner&&U&&buildingOwner===U.id) buildingPlanner.refresh();
   var key=focusKey(document.activeElement);
@@ -1196,6 +1197,7 @@ document.addEventListener('click',function(e){
     [].forEach.call(document.querySelectorAll('.panel'),function(p){
       p.classList.toggle('on',p.id==='p-'+t.dataset.p); });
     try{ sessionStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
+    syncCategories(t.dataset.p);
     if(t.dataset.p==='admin') loadMembers();
     if(t.dataset.p==='r4') loadR4();
     headroomShow();
@@ -1237,7 +1239,7 @@ function showAuth(){ if($('fatal')) $('fatal').hidden=true;
   var nv=$('navtabs'); if(nv) nv.style.display='none'; }
 function showApp(){ if($('fatal')) $('fatal').hidden=true;
   $('auth').style.display='none'; $('app').style.display=''; $('userbar').style.display='';
-  var nv=$('navtabs'); if(nv) nv.style.display=''; }
+  var nv=$('navtabs'); if(nv) nv.style.display='';if($('category-nav'))$('category-nav').style.display='';syncCategories(); }
 
 async function loadAll(){
   say('loading…');
@@ -1271,7 +1273,7 @@ async function loadAll(){
   await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
-  showApp(); mountBuildings(); mountCharms(); render(); say('saved');
+  showApp(); mountBuildings(); mountCharms(); mountGear(); render(); say('saved');
   restoreTab();
   maybeShowNews();
 }
@@ -1501,6 +1503,18 @@ function mountBuildings(){
 
 
 /* Per-account charms, saved separately from building plans. */
+
+/* Navigation groups use the existing page switch, including its access checks. */
+var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
+function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'dash';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='dash'||page==='planner';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['planner','alliance','resources'].indexOf(group)>=0;}
+function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
+if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
+if($('category-sub'))$('category-sub').onclick=function(e){var b=e.target.closest('[data-page]');if(b)goCategoryPage(b.dataset.page);};
+if($('p-planner'))$('p-planner').onclick=function(e){var b=e.target.closest('[data-go]');if(b)goCategoryPage(b.dataset.go);};
+var gearPlanner=null,gearOwner=null,GEAR_NAMES={hardenedAlloy:'Hardened Alloy',polishingSolution:'Polishing Solution',designPlans:'Design Plans',lunarAmber:'Lunar Amber'};
+function gearItem(key){return D.items.find(function(it){return it.name===GEAR_NAMES[key];});}
+function mountGear(){if(!window.FOXGear||!$('p-gear'))return;if(gearPlanner)gearPlanner.dispose();var owner=U.id;gearOwner=owner;gearPlanner=window.FOXGear.mount($('p-gear'),{plan:U.user_metadata&&U.user_metadata.fox_gear_plan,stock:function(){var out={};Object.keys(GEAR_NAMES).forEach(function(k){var it=gearItem(k);if(it)out[k]={have:calcItem(it).have,target:it.target};});return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_gear_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=gearItem(c.key);if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
+
 var charmPlanner=null,charmOwner=null;
 function charmItem(key){var names={guides:['Charm Guides'],designs:['Charm Designs'],secrets:['Jewel Secrets','Charm Secrets']};return D.items.find(function(it){return names[key]&&names[key].indexOf(it.name)>=0;});}
 function mountCharms(){
