@@ -618,6 +618,11 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-04-fc6packs',date:'2026-10-04',title:'More packs for FC6',points:[
+    '130 Torxim offers and reward variants above 100% Pack Value have been added. Early-game-only offers are excluded.',
+    'Four existing Pack Values have been reviewed. Torxim values use the FC5-Gen5 reference (SR 46, RSS 25); Torxim has no exact FC6 setting.',
+    'The full pack contents catalogue now loads across multiple pages. Your existing Bought counts are unchanged.'
+  ]},
   {id:'2026-10-03-charms',date:'2026-10-03',title:'Plan your Chief Charm upgrades',points:[
     'The new Chief Charms tab tracks all 18 charms separately, including partial stages up to level 18.',
     'Review Guide, Design and Jewel Secret costs, then replace the relevant Backpack targets. Your plan is saved to your account.',
@@ -857,6 +862,18 @@ function renderPacks(){
   if(priceTh) priceTh.setAttribute('data-label','Price '+CUR.symbol);
   var VP={'Event pack':'p-pack','Must buy':'p-gold','Item buy':'p-item','Worth checking':'p-pack','Last resort':'p-low','—':'p-na'};
   var list=D.packs.map(function(p,i){ return {p:p,i:i,c:calcPack(p,byName)}; });
+  if(sortMode==='section'){
+    var sections={}, groups={};
+    list.forEach(function(o){
+      var s=o.p.sec, g=s+'|'+o.p.grp;
+      if(sections[s]===undefined) sections[s]=o.i;
+      if(groups[g]===undefined) groups[g]=o.i;
+    });
+    list.sort(function(a,b){
+      return sections[a.p.sec]-sections[b.p.sec] ||
+        groups[a.p.sec+'|'+a.p.grp]-groups[b.p.sec+'|'+b.p.grp] || a.i-b.i;
+    });
+  }
   if(sortMode!=='section'){
     var key=function(o){
       switch(sortMode){
@@ -1244,13 +1261,28 @@ function showApp(){ if($('fatal')) $('fatal').hidden=true;
   $('auth').style.display='none'; $('app').style.display=''; $('userbar').style.display='';
   var nv=$('navtabs'); if(nv) nv.style.display='';if($('category-nav'))$('category-nav').style.display='';syncCategories(); }
 
+async function loadPackContents(){
+  var all=[], pageSize=500;
+  // Supabase caps response sizes; keep the composite primary-key order stable.
+  for(;;){
+    var r=await SB.from('pack_contents').select('*',{count:'exact'})
+      .order('pack_id').order('item').range(all.length,all.length+pageSize-1);
+    if(r.error) return r;
+    var rows=r.data||[];
+    all=all.concat(rows);
+    if(typeof r.count==='number'){
+      if(all.length>=r.count) return {data:all,error:null};
+      if(!rows.length) return {data:null,error:{message:'Pack contents could not be loaded completely. Please refresh.'}};
+    }else if(rows.length<pageSize) return {data:all,error:null};
+  }
+}
 async function loadAll(){
   say('loading…');
   var r = await Promise.all([
     SB.from('settings').select('*').single(),
     SB.from('baselines').select('*'),
     SB.from('packs').select('*').order('sort'),
-    SB.from('pack_contents').select('*'),
+    loadPackContents(),
     SB.from('user_items').select('*').order('sort'),
     SB.from('user_packs').select('*'),
     SB.from('profiles').select('currency_code,currency_symbol,currency_rate').eq('id',U.id).maybeSingle()

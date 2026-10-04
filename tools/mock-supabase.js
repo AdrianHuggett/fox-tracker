@@ -28,10 +28,12 @@ var DB = window.__DB = {
 };
 var log = window.__log = [];
 function clone(x){ return JSON.parse(JSON.stringify(x)); }
-function Q(t){ this.t=t; this.op='select'; this.f=[]; this.one=false; }
-Q.prototype.select=function(){ return this; };
+function Q(t){ this.t=t; this.op='select'; this.f=[]; this.one=false; this.orders=[]; }
+Q.prototype.select=function(columns,options){ this.count=options&&options.count; return this; };
 Q.prototype.eq=function(k,v){ this.f.push([k,v]); return this; };
-Q.prototype.order=Q.prototype.limit=Q.prototype.gte=Q.prototype.lte=function(){ return this; };
+Q.prototype.order=function(k){ this.orders.push(k); return this; };
+Q.prototype.range=function(first,last){ this.bounds=[first,last]; return this; };
+Q.prototype.limit=Q.prototype.gte=Q.prototype.lte=function(){ return this; };
 Q.prototype.maybeSingle=Q.prototype.single=function(){ this.one=true; return this; };
 Q.prototype.update=function(p){ this.op='update'; this.p=p; return this; };
 Q.prototype.insert=function(p){ this.op='insert'; this.p=p; return this; };
@@ -51,8 +53,13 @@ Q.prototype.then=function(res,rej){
   }
   else if(this.op==='delete'){ log.push([this.t,'delete',f]); DB[this.t]=T.filter(function(r){ return !match(r); }); data=rows; }
   else data=rows.slice().sort(function(a,b){ return (a.sort||0)-(b.sort||0)||((a.id||0)-(b.id||0)); });
+  var orders=this.orders;
+  if(orders.length) data.sort(function(a,b){ for(var k of orders){ if(a[k]<b[k]) return -1; if(a[k]>b[k]) return 1; } return 0; });
+  var count=data.length;
+  if(this.bounds) data=data.slice(this.bounds[0],this.bounds[1]+1);
+  if(this.op==='select') data=data.slice(0,window.__MOCK_ROW_CAP||1000);
   data=clone(data);
-  return Promise.resolve({data:this.one?(data[0]||null):data, error:null}).then(res,rej);
+  return Promise.resolve({data:this.one?(data[0]||null):data, count:this.count?count:null, error:null}).then(res,rej);
 };
 var user={id:'u1', email:'adrian@example.test', user_metadata:{name:'Adrian'}};
 window.supabase={createClient:function(){ return {

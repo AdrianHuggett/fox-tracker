@@ -15,6 +15,16 @@ MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
 TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin']
+CATEGORIES = {'dash':'dash', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance'}
+
+def open_tab(pg, tab):
+    pg.click(f'#category-nav button[data-category="{CATEGORIES[tab]}"]')
+    if tab != 'dash':
+        button = pg.locator(f'#category-sub button[data-page="{tab}"]')
+        if button.count() == 0:
+            return False
+        button.click()
+    return True
 
 
 def route(r):
@@ -27,7 +37,8 @@ def route(r):
 
 
 def run(p, width, name):
-    b = p.chromium.launch()
+    executable = os.environ.get('FOX_TEST_BROWSER')
+    b = p.chromium.launch(**({'executable_path': executable} if executable else {}))
     pg = b.new_page(viewport={'width': width, 'height': 900})
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
@@ -36,21 +47,19 @@ def run(p, width, name):
     pg.wait_for_timeout(1500)
     pg.evaluate("var n=document.querySelector('#news'); if(n) n.remove()")
     for t in TABS:
-        btn = pg.query_selector(f'nav.tabs button[data-p="{t}"]')
-        if not btn or not btn.is_visible():
+        if not open_tab(pg, t):
             print(f'[{name}] tab {t}: not visible (ok if not admin)')
             continue
-        btn.click()
         pg.wait_for_timeout(400)
         pg.screenshot(path=str(OUT / f'{name}-{t}.png'), full_page=True)
 
     # Feature checks: keep these in sync with docs/03-features.md
-    pg.click('nav.tabs button[data-p="stock"]'); pg.wait_for_timeout(300)
+    open_tab(pg, 'stock'); pg.wait_for_timeout(300)
     proj = pg.eval_on_selector_all(
         '#stock tbody tr:not(.grp):not(.xch)',
         'rs=>Object.fromEntries(rs.map(r=>[r.children[1].innerText.trim(), r.children[7].innerText.trim()]))')
     print(f'[{name}] projected:', proj)
-    pg.click('nav.tabs button[data-p="r4"]'); pg.wait_for_timeout(400)
+    open_tab(pg, 'r4'); pg.wait_for_timeout(400)
     print(f'[{name}] r4 workload:', pg.inner_text('#r4-load').replace('\n', ' | ') if pg.query_selector('#r4-load') else 'missing')
 
     b.close()
