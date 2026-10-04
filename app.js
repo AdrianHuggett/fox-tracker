@@ -618,6 +618,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-05-xchfold',date:'2026-10-05',title:'Phone fix: folded groups hide their exchanges',points:[
+    'On phones, folding a Backpack group or searching now hides the exchange rows too, instead of leaving them on screen.']},
   {id:'2026-10-04-fc6packs',date:'2026-10-04',title:'More packs for FC6',points:[
     '130 Torxim offers and reward variants above 100% Pack Value have been added. Early-game-only offers are excluded.',
     'Four existing Pack Values have been reviewed. Torxim values use the FC5-Gen5 reference (SR 46, RSS 25); Torxim has no exact FC6 setting.',
