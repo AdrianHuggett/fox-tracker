@@ -2,6 +2,12 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 5 Oct 2026
+
+- **Backpack export** (cache tag `20261005-export`): an Export chip on Backpack opens a full-screen sheet of small cards (game icon, Have in green or red, Target) drawn on a canvas and saved or copied as a PNG. Designed first as an Artifact mockup with Adrian: icon-led cards, no names, and every card visible on one phone screen.
+- **Phone fix** (`bd2579e`): exchange rows now hide with their folded group. The phone rule for `tr.xch` beat `tr.hide`.
+
+
 ## 2 Oct 2026
 
 - **Free/day counts only rises.** `recomputeFree()` summed first-vs-last snapshots, so any spending in the 90-day window (Adrian's General Speedups) pulled the net change to 0 and the rate showed 0.00. It now adds up the positive steps between consecutive snapshots, each with its own pack deliveries removed. Chosen by Adrian over a manual start date or a shorter window.

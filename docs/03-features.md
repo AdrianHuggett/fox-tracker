@@ -68,6 +68,12 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 
 Pack × item grid of quantities, with a first "Still short" row (`raw` per item). Columns are the items that have a baseline, plus any Moonlight item.
 
+## Backpack export
+
+- The **Export** chip in the Backpack toolbar opens `#export`, a full-screen dialog holding one canvas. `xpItems()` takes every item with a target (via `calcItem`): `met` when Have ≥ Target, `behind` when not met and the projection falls short. "Behind only" keeps just those.
+- `xpRender()` sizes the canvas to the screen shape (1080 px wide, aspect clamped 0.6 to 2.4), then picks the fewest columns (3 to 16) whose rows fit the height, so cards are as large as possible and all show without scrolling. Each card: game icon (`ITEM_ART`, emoji fallback), Have (green when met, red otherwise), Target. Numbers from 100,000 are shortened (`123.5k`).
+- Save downloads the PNG, Copy uses the async clipboard (needs HTTPS and a supporting browser), Share appears only where `navigator.canShare` accepts files. The status line is inside the dialog because the toast sits below the top layer.
+
 ## Dashboard
 
 - **Stats strip (`renderTop`)**: Targets met (met/with targets, behind count), Average progress (capped per item at 100%), Spent so far (Σ price × bought, in the member's currency), Packs bought (count, and how many packs are "Must buy"), Days to next SvS.

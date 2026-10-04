@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦊</text></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Caveat:wght@700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261005-xchfold">
+<link rel="stylesheet" href="style.css?v=20261005-export">
 <link rel="stylesheet" href="buildings.css?v=20261003-compact-recap">
 <link rel="stylesheet" href="charms.css?v=20261003-views">
 <link rel="stylesheet" href="navigation.css?v=20261003-navigation"><link rel="stylesheet" href="chief-gear.css?v=20261003-gear"><link rel="stylesheet" href="war-academy.css?v=20261003-war"><link rel="stylesheet" href="hero-gear.css?v=20261003-hero"></head>
@@ -146,6 +146,7 @@ var CONFIG = {
   <button class="chip" data-scope="stock" data-f="behind" id="c-behind">Behind</button>
   <button class="chip" data-scope="stock" data-f="met">On track</button>
   <button class="chip" data-scope="stock" data-f="none">No target</button>
+  <button type="button" class="chip xport" id="export-open" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg> Export</button>
   <input type="search" data-for="stock" placeholder="Find an item…">
  </div>
  <p class="hint">Projected = what you hold now, plus Free / day until SvS day. Packs you have bought are already in
@@ -301,6 +302,17 @@ var CONFIG = {
  <span>Pack values from Torxim's WoS Corner using the FC5-Gen5 reference (SR 46, RSS 25). FC6 availability is filtered; Torxim has no exact FC6 setting. Fan-made reference, not affiliated with Century Games.</span>
 </footer>
 
+<!-- Backpack export: a full-screen sheet with the targets drawn as one image -->
+<dialog id="export" aria-label="Export targets">
+ <div class="xp-bar">
+  <div class="xp-seg" role="group" aria-label="What to include"><button type="button" id="xp-all" aria-pressed="true">All</button><button type="button" id="xp-behind" aria-pressed="false">Behind only</button></div>
+  <button type="button" class="xp-x" id="xp-close" aria-label="Close">&#x2715;</button>
+ </div>
+ <div class="xp-view" id="xp-view"><canvas id="xp-canvas"></canvas></div>
+ <p class="xp-msg" id="xp-msg" role="status" aria-live="polite"></p>
+ <div class="xp-act"><button type="button" class="xp-main" id="xp-save">Save as image</button><button type="button" id="xp-copy">Copy image</button><button type="button" id="xp-share" hidden>Share</button></div>
+</dialog>
+
 <!-- What's new: opens by itself once per new update, and from the footer link any time -->
 <dialog id="news" aria-labelledby="news-title">
  <div class="nbox">
@@ -328,6 +340,6 @@ var CONFIG = {
 <script src="charms-data.js?v=20261003-charms"></script>
 <script src="charms.js?v=20261003-views"></script>
 <script src="chief-gear-data.js?v=20261003-gear"></script><script src="chief-gear.js?v=20261003-gear"></script>
-<script src="war-academy-data.js?v=20261003-war"></script><script src="war-academy.js?v=20261003-war"></script><script src="hero-gear-data.js?v=20261003-hero"></script><script src="hero-gear.js?v=20261003-hero"></script><script src="app.js?v=20261005-xchfold"></script>
+<script src="war-academy-data.js?v=20261003-war"></script><script src="war-academy.js?v=20261003-war"></script><script src="hero-gear-data.js?v=20261003-hero"></script><script src="hero-gear.js?v=20261003-hero"></script><script src="app.js?v=20261005-export"></script>
 </body>
 </html>

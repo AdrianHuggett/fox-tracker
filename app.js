@@ -618,6 +618,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-05-export',date:'2026-10-05',title:'Export your Backpack as an image',points:[
+    'On Backpack, tap Export to see every item with a target as a small card: icon, what you have, and the target. Green means reached, red means still short.',
+    'Save it as an image, copy it, or share it. Behind only shows just the items you still need to close.']},
   {id:'2026-10-05-xchfold',date:'2026-10-05',title:'Phone fix: folded groups hide their exchanges',points:[
     'On phones, folding a Backpack group or searching now hides the exchange rows too, instead of leaving them on screen.']},
   {id:'2026-10-04-fc6packs',date:'2026-10-04',title:'More packs for FC6',points:[
@@ -1591,6 +1594,127 @@ function mountCharms(){
     }
   });
 }
+
+/* ---------- Backpack export ----------
+   Every item with a target, as one small card (icon, Have, Target), drawn on a
+   canvas that is sized to the screen so all cards show without scrolling. The
+   column count is the smallest one whose rows still fit, which keeps cards as large
+   as possible. The same canvas is what Save, Copy and Share send out. */
+var XP={mode:'all',art:{},busy:0};
+function xpItems(){
+  var out=[];
+  D.items.forEach(function(it){
+    var c=calcItem(it); if(!(c.tgt>0)) return;
+    var met=c.have>=c.tgt;
+    out.push({it:it,have:c.have,tgt:c.tgt,met:met,behind:!met&&!c.ok});
+  });
+  return out;
+}
+function xpNum(v){ v=Math.round(n(v)); return v>=100000?(Math.round(v/100)/10)+'k':String(v); }
+function xpArt(it){
+  var src=ITEM_ART[it.name]; if(!src) return Promise.resolve(null);
+  if(!XP.art[src]) XP.art[src]=new Promise(function(res){
+    var im=new Image(); im.onload=function(){ res(im); }; im.onerror=function(){ res(null); }; im.src=src; });
+  return XP.art[src];
+}
+function xpRound(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function xpText(ctx,txt,cx,y,size,weight,color,maxW){
+  var s=size; ctx.font=weight+' '+s+'px "IBM Plex Mono",ui-monospace,Consolas,monospace';
+  while(s>8&&ctx.measureText(txt).width>maxW){ s--; ctx.font=weight+' '+s+'px "IBM Plex Mono",ui-monospace,Consolas,monospace'; }
+  ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText(txt,cx,y);
+}
+async function xpRender(){
+  var token=++XP.busy, cv=$('xp-canvas'), view=$('xp-view'); if(!cv||!view) return;
+  var all=xpItems(), list=XP.mode==='behind'?all.filter(function(r){ return r.behind; }):all;
+  var vw=Math.max(view.clientWidth,200), vh=Math.max(view.clientHeight,200);
+  var W=1080, aspect=Math.min(2.4,Math.max(.6,vh/vw)), H=Math.round(W*aspect);
+  try{ await document.fonts.load('600 20px "IBM Plex Mono"'); }catch(e){}
+  var arts=await Promise.all(list.map(function(r){ return xpArt(r.it); }));
+  if(token!==XP.busy) return;
+  cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  var g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0B1B2D'); g.addColorStop(1,'#071320');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  var P=34, met=all.filter(function(r){ return r.met; }).length;
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  ctx.font='700 46px "Chakra Petch",sans-serif'; ctx.fillStyle='#FF7A3D'; ctx.fillText('FOX',P,P+40);
+  var fw=ctx.measureText('FOX ').width; ctx.fillStyle='#F5F7FF'; ctx.fillText('Backpack',P+fw,P+40);
+  var who=String((U&&U.user_metadata&&U.user_metadata.name)||'').trim();
+  ctx.font='500 24px "IBM Plex Sans",sans-serif'; ctx.fillStyle='#9AB6D0';
+  ctx.fillText((who?who+' · ':'')+'State #3685',P,P+76);
+  ctx.textAlign='right'; ctx.font='600 26px "IBM Plex Mono",monospace'; ctx.fillStyle='#F5F7FF';
+  ctx.fillText(met+'/'+all.length+' met',W-P,P+34);
+  ctx.font='500 22px "IBM Plex Mono",monospace'; ctx.fillStyle='#9AB6D0';
+  ctx.fillText(days()+' days to SvS · '+prettyDay(todayKey()),W-P,P+70);
+  var gx=P, gy=P+104, gw=W-2*P, gh=H-gy-P, gap=12, n_=list.length, best=null;
+  if(!n_){
+    ctx.textAlign='center'; ctx.font='600 34px "Chakra Petch",sans-serif'; ctx.fillStyle='#5CF28F';
+    ctx.fillText(all.length?'Nothing behind. Every target is on track.':'No targets set yet.',W/2,H/2);
+  }
+  for(var cols=3;n_&&cols<=16;cols++){
+    var cw=Math.floor((gw-(cols-1)*gap)/cols), pad=Math.round(cw*.06);
+    var ch=pad+(cw-2*pad)+Math.round(cw*.07)+Math.round(cw*.27)+Math.round(cw*.22)+pad, rows=Math.ceil(n_/cols);
+    best={cols:cols,cw:cw,ch:ch,pad:pad};
+    if(rows*ch+(rows-1)*gap<=gh) break;
+  }
+  if(n_){
+    var used=best.cols*best.cw+(best.cols-1)*gap, ox=gx+Math.floor((gw-used)/2);
+    list.forEach(function(r,i){
+      var col=i%best.cols, row=Math.floor(i/best.cols), x=ox+col*(best.cw+gap), y=gy+row*(best.ch+gap);
+      var cw2=best.cw, pad2=best.pad, ts=cw2-2*pad2;
+      xpRound(ctx,x,y,cw2,best.ch,Math.round(cw2*.1)); ctx.fillStyle='#0C3A6E'; ctx.fill();
+      ctx.lineWidth=2; ctx.strokeStyle=r.met?'#2E8F6B':'#1B5A9C'; ctx.stroke();
+      xpRound(ctx,x+pad2,y+pad2,ts,ts,Math.round(cw2*.07)); ctx.fillStyle='#071423'; ctx.fill();
+      var im=arts[i];
+      if(im){ var s=Math.round(ts*.88); ctx.drawImage(im,x+pad2+(ts-s)/2,y+pad2+(ts-s)/2,s,s); }
+      else{ ctx.font=Math.round(ts*.5)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#F5F7FF';
+        ctx.fillText(String(r.it.icon||'·'),x+cw2/2,y+pad2+ts/2); ctx.textBaseline='alphabetic'; }
+      var fs=Math.min(40,Math.round(cw2*.23)), ty=y+pad2+ts+Math.round(cw2*.07);
+      xpText(ctx,xpNum(r.have),x+cw2/2,ty+fs,fs,'600',r.met?'#5CF28F':'#FF7B7B',cw2-2*pad2);
+      xpText(ctx,xpNum(r.tgt),x+cw2/2,ty+fs+Math.round(cw2*.22),Math.round(fs*.85),'400','#8DB4DB',cw2-2*pad2);
+    });
+  }
+  $('xp-msg').textContent=list.length?list.length+' of '+all.length+' targets':'';
+}
+function xpBlob(){ return new Promise(function(res){ $('xp-canvas').toBlob(res,'image/png'); }); }
+function xpMsg(t){ var m=$('xp-msg'); if(m) m.textContent=t; }
+function openExport(){
+  var d=$('export'); if(!d) return;
+  XP.mode='all'; $('xp-all').setAttribute('aria-pressed','true'); $('xp-behind').setAttribute('aria-pressed','false');
+  if(d.showModal){ if(!d.open) d.showModal(); } else d.setAttribute('open','');
+  var canShare=!!(navigator.canShare&&window.File&&navigator.canShare({files:[new File([''],'a.png',{type:'image/png'})]}));
+  $('xp-share').hidden=!canShare;
+  xpRender();
+}
+function wireExport(){
+  var d=$('export'); if(!d||!$('export-open')) return;
+  $('export-open').addEventListener('click',openExport);
+  $('xp-close').addEventListener('click',function(){ d.close?d.close():d.removeAttribute('open'); });
+  [['xp-all','all'],['xp-behind','behind']].forEach(function(p){
+    $(p[0]).addEventListener('click',function(){
+      XP.mode=p[1]; $('xp-all').setAttribute('aria-pressed',String(p[1]==='all'));
+      $('xp-behind').setAttribute('aria-pressed',String(p[1]==='behind')); xpRender(); }); });
+  var rz; window.addEventListener('resize',function(){ if(d.open){ clearTimeout(rz); rz=setTimeout(xpRender,150); } });
+  $('xp-save').addEventListener('click',async function(){
+    var b=await xpBlob(); if(!b){ xpMsg('Could not make the image. Try again.'); return; }
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fox-backpack-'+todayKey()+'.png';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); },4000);
+    xpMsg('Saved to your downloads.');
+  });
+  $('xp-copy').addEventListener('click',async function(){
+    if(!navigator.clipboard||!window.ClipboardItem){ xpMsg('Copying images is not supported here. Use Save as image.'); return; }
+    try{ var b=await xpBlob(); await navigator.clipboard.write([new ClipboardItem({'image/png':b})]); xpMsg('Image copied. Paste it in your chat.'); }
+    catch(e){ xpMsg('Copy was blocked. Use Save as image instead.'); }
+  });
+  $('xp-share').addEventListener('click',async function(){
+    try{ var b=await xpBlob(); await navigator.share({files:[new File([b],'fox-backpack.png',{type:'image/png'})],title:'FOX Backpack'}); }
+    catch(e){ if(e&&e.name!=='AbortError') xpMsg('Sharing failed. Use Save as image instead.'); }
+  });
+}
+wireExport();
 
 headroom();
 boot();

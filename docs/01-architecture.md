@@ -53,6 +53,8 @@ A tab click toggles `.panel.on` and stores the tab in `sessionStorage['fox-tab']
 
 **Dashboard**: `renderTop()`, `dbar()`, `dashRow()`, `renderDash()`.
 
+**Backpack export**: `XP`, `xpItems()`, `xpNum()`, `xpArt()`, `xpRound()`, `xpText()`, `xpRender()` (draws the canvas), `xpBlob()`, `xpMsg()`, `openExport()`, `wireExport()`. Markup: `#export` dialog in `index.html`, styles at the end of `style.css`.
+
 **Render loop**: `focusKey()`, **`render()`** (calls `renderSvsWarn, renderFreeNote, renderTop, renderDash, renderStock, renderPacks, renderMatrix, renderRef, applyFilters, bind`, then restores focus), `bind()` (wires `input.cell` fields: input/blur save, change re-renders).
 
 **Filters and tabs**: `filters`, `queries`, `applyFilters()` (per table: chip filter via `data-state`, search via `data-q`, folding via `data-gn` / `data-psection` / `data-pgroup`; rows with class `grp`, `sec` or `need` are headers), then document handlers for search, tab clicks, chips, sort headers and folding.
