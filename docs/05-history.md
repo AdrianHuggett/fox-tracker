@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 5 Oct 2026
 
+- **Steel icon**: `item-steel.png` (cut out of an in-game screenshot Adrian supplied, 128 px, transparent) added to `ITEM_ART` and to the War Academy materials list (it was `null` there).
 - **Backpack export** (cache tag `20261005-export`): an Export chip on Backpack opens a full-screen sheet of small cards (game icon, Have in green or red, Target) drawn on a canvas and saved or copied as a PNG. Designed first as an Artifact mockup with Adrian: icon-led cards, no names, and every card visible on one phone screen.
 - **Phone fix** (`bd2579e`): exchange rows now hide with their folded group. The phone rule for `tr.xch` beat `tr.hide`.
 

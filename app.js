@@ -618,6 +618,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-05-steelicon',date:'2026-10-05',title:'Steel has its own icon',points:[
+    'Steel now shows its in-game anvil icon on Backpack, in the Export image and in the War Academy planner.']},
   {id:'2026-10-05-export',date:'2026-10-05',title:'Export your Backpack as an image',points:[
     'On Backpack, tap Export to see every item with a target as a small card: icon, what you have, and the target. Green means reached, red means still short.',
     'Save it as an image, copy it, or share it. Behind only shows just the items you still need to close.']},
@@ -792,6 +794,7 @@ var ITEM_ART = {
   "Charm Designs": "item-charm-designs.png",
   "Charm Guides": "item-charm-guides.png",
   "Hardened Alloy": "item-hardened-alloy.png",
+  "Steel": "item-steel.png",
   "Polishing Solution": "item-polishing-solution.png",
   "Design Plans": "item-design-plans.png",
   "Lunar Amber": "item-lunar-amber.png",
