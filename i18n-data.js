@@ -417,6 +417,14 @@ window.I18N_ROWS=[
 ["Under the R{n} roles table, a card per R{n} shows how many tasks they lead and back up, on phones too.","Bajo la tabla de roles de R{n}, una tarjeta por R{n} muestra cuántas tareas lidera y apoya, también en el móvil.","R{n} rolleri tablosunun altında, her R{n} için bir kart kaç görevi yönettiğini ve yedeklediğini gösterir; telefonlarda da.","Under tabellen med R{n}-roller viser et kort per R{n} hvor mange oppgaver vedkommende leder og støtter, også på mobil."],
 ["Tap a card to show only that R{n}’s tasks; tap it again to show everything.","Toca una tarjeta para ver solo las tareas de ese R{n}; vuelve a tocarla para verlo todo.","Yalnızca o R{n}'in görevlerini görmek için bir karta dokun; her şeyi görmek için tekrar dokun.","Trykk på et kort for å se bare oppgavene til den R{n}; trykk igjen for å se alt."],
 
+["R{n} editor","Editor de R{n}","R{n} editörü","R{n}-redaktør"],
+["R{n} editors","Editores de R{n}","R{n} editörleri","R{n}-redaktører"],
+["Chief Charm upgrade planner","Planificador de mejoras de Chief Charm","Chief Charm yükseltme planlayıcı","Chief Charm-oppgraderingsplanlegger"],
+["Widget level","Nivel de widget","Widget seviyesi","Widget-nivå"],
+["Current widget level","Nivel de widget actual","Mevcut widget seviyesi","Nåværende widget-nivå"],
+["Target widget level","Nivel de widget objetivo","Hedef widget seviyesi","Mål for widget-nivå"],
+["· Through Red T{n} {n}★, including partial stages. Verify available tiers in your state.","· Hasta Red T{n} {n}★, incluidas etapas parciales. Verifica los niveles disponibles en tu estado.","· Red T{n} {n}★'a kadar, kısmi aşamalar dahil. Kullanılabilir kademeleri state'inde doğrula.","· Til og med Red T{n} {n}★, inkludert delvise trinn. Sjekk tilgjengelige nivåer i staten din."],
+
 /* dates: {m} is the month name */
 ["{n} {m} {n}","{n} {m} {n}","{n} {m} {n}","{n}. {m} {n}"],
 ["{n} {m}","{n} {m}","{n} {m}","{n}. {m}"]
