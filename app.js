@@ -618,6 +618,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-05-svsdate',date:'2026-10-05',title:'The SvS date is now set in the tracker',points:[
+    'An admin can change the next SvS date on the Reference tab, so the countdown and every projection stay current.']},
   {id:'2026-10-05-nodays',date:'2026-10-05',title:'Backpack groups no longer show a day',points:[
     'Group names on Backpack, such as Speedups and Chief Gear, no longer end with a Day number.']},
   {id:'2026-10-05-language',date:'2026-10-05',title:'Choose your language',points:[
@@ -959,6 +961,25 @@ function renderRef(){
     return '<div class="frow"><span>'+esc(k)+'</span><b class="mono">'+D.base[k]+'</b></div>'; }).join('');
   $('svsdate').textContent=D.settings.next_svs||'—';
   $('murrate').textContent=D.settings.mur||63.4;
+  var se=$('svs-edit'), si=$('svs-input');
+  if(se){ se.hidden=!ADMIN; if(ADMIN&&si&&document.activeElement!==si) si.value=D.settings.next_svs||''; }
+}
+/* Admin only. The database function refuses anyone else, so hiding the control is
+   only a convenience; the new date is read back before it is reported as saved. */
+function svsMsg(t,warn){ var m=$('svs-msg'); if(!m) return; m.textContent=t||''; m.hidden=!t; m.style.color=warn?'var(--coral)':''; }
+async function saveSvsDate(){
+  if(!ADMIN||!SB) return;
+  var v=String(($('svs-input')||{}).value||'');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)||isNaN(new Date(v+'T00:00:00'))){ svsMsg('Choose a valid date.',1); return; }
+  svsMsg('Saving…');
+  try{
+    var r=await SB.rpc('set_next_svs',{new_date:v});
+    if(r.error){ svsMsg('Not saved — '+r.error.message,1); return; }
+    var back=await SB.from('settings').select('next_svs').eq('id',1).maybeSingle();
+    var now=back&&back.data&&back.data.next_svs;
+    if(String(now).slice(0,10)!==v){ svsMsg('The server did not keep the new date. Try again.',1); return; }
+    D.settings.next_svs=v; render(); svsMsg('Saved.'); say('saved');
+  }catch(e){ svsMsg('Could not reach the server. Try again.',1); }
 }
 /* ---------- members (admin only) ---------- */
 function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
@@ -1079,6 +1100,7 @@ function checkAdmin(){
       R4ED=ADMIN||!!(r&&r.data&&r.data.r4_editor);
       var at=$('tab-admin'); if(at) at.hidden=!ADMIN; syncCategories();
       if(R4.loaded) renderR4();
+      renderRef();
       /* A refresh on the Members tab clicks it before this answer arrives, so the
          list is fetched here once admin rights are known. */
       var pa=$('p-admin'); if(ADMIN&&pa&&pa.classList.contains('on')) loadMembers();
@@ -1481,6 +1503,7 @@ function wireUp(){
     }catch(err){ authMsg('Could not reach the server. Check your connection and try again.'); }
   });
   if($('pw-save')) $('pw-save').addEventListener('click',changePassword);
+  if($('svs-save')) $('svs-save').addEventListener('click',saveSvsDate);
   if($('newpw')) $('newpw').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); changePassword(); } });
   $('signout').addEventListener('click',async function(){
     await SB.auth.signOut(); location.reload();

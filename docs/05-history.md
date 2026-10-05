@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 5 Oct 2026
 
+- **SvS date editable by admins**: a date picker and Save on the Reference tab (admin only) calls `set_next_svs()`, then reads the date back before saying Saved. Front-end first built and tested, SQL run by Adrian before the deploy.
 - **Backpack group names**: the Day number in a group name (e.g. `Speedups (Day 1)`) is hidden on display by a regex in `renderStock()`; the database still holds the full `user_items.grp`. Adrian asked for it because the Day split is now covered by the SvS prep guide, not by the tracker.
 - **Languages**: Spanish, Turkish and Norwegian added through `i18n.js` and `i18n-data.js` (about 400 texts). Chosen over editing every string in `app.js`: it changes no app logic, falls back to English per text, and switches instantly. Item and building names stay English because data is joined by name; whether members play in English or in their own language is still to confirm with Adrian.
 - **Steel icon**: `item-steel.png` (cut out of an in-game screenshot Adrian supplied, 128 px, transparent) added to `ITEM_ART` and to the War Academy materials list (it was `null` there).

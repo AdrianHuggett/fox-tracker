@@ -96,7 +96,7 @@ Pack × item grid of quantities, with a first "Still short" row (`raw` per item)
 
 ## Reference tab
 
-Next SvS date and MUR rate (read-only), **My name** (edits the auth metadata name and the profiles copy), **My password** (see Auth), **My currency** (presets or a custom symbol and rate, saved to the profile), and the baseline value list.
+Next SvS date and MUR rate (read-only for members; an admin also sees a date picker and Save under them, which calls `set_next_svs()` and reads the date back before saying Saved), **My name** (edits the auth metadata name and the profiles copy), **My password** (see Auth), **My currency** (presets or a custom symbol and rate, saved to the profile), and the baseline value list.
 
 ## R4 roles
 

@@ -25,7 +25,7 @@ RLS is enabled on every table. `anon` has no grants anywhere, and TRUNCATE is re
 
 ### `settings`, a single shared row
 
-`id` ✔ int default 1, `next_svs` ✔ date (drives every projection), `mur` ✔ numeric default 63.4 (MUR per £, display only). Read by all; edited by Adrian in the dashboard.
+`id` ✔ int default 1, `next_svs` ✔ date (drives every projection), `mur` ✔ numeric default 63.4 (MUR per £, display only). Read by all. The table stays read-only for members; the SvS date is changed by an admin through `set_next_svs()` (Reference tab), `mur` still by Adrian in the dashboard.
 
 ### Shared reference data (read by all signed-in users)
 
@@ -89,6 +89,20 @@ begin
    where id = task_id;
   if not found then raise exception 'Unknown task'; end if;
 end $$;
+```
+
+```sql
+-- 5 Oct (run by Adrian in the SQL Editor, approved by him)
+create or replace function public.set_next_svs(new_date date) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not is_admin() then raise exception 'Admins only'; end if;
+  if new_date is null then raise exception 'Date required'; end if;
+  update settings set next_svs = new_date where id = 1;
+  if not found then raise exception 'Settings row missing'; end if;
+end $$;
+revoke all on function public.set_next_svs(date) from public, anon;
+grant execute on function public.set_next_svs(date) to authenticated;
 ```
 
 - `handle_new_user()`: the trigger function on `auth.users` insert (`on_auth_user_created`). It creates the `profiles` row (name from the signup metadata), copies `item_template` into `user_items` (have, target and free = 0) and adds one `user_packs` row per pack (freq 0). **If you add an item or pack type, make sure new and existing members get the rows.**
