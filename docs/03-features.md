@@ -84,6 +84,10 @@ Pack × item grid of quantities, with a first "Still short" row (`raw` per item)
   - Best buys for you: top 5 packs by `iv`.
   - Met targets drop out of both rankings.
 
+## Experts planner
+
+Upgrade planner → Experts. Relationship and skill levels for the 10 Dawn Academy Experts, totals for Books of Knowledge, sigils, Affinity, learning time and SvS points (sigils and books only). Push to Backpack sets Books, each Expert's own sigils and the General Expert Sigils still uncovered. Full rules and reference checks: `docs/experts-notes.md`.
+
 ## Languages (English, Spanish, Turkish, Norwegian)
 
 - A language menu sits at the top of the hero and in the footer. The choice is kept in `localStorage['fox-lang']`; on a first visit the browser language decides (es, tr, nb/nn/no, otherwise English). Nothing is stored in Supabase.

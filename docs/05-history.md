@@ -2,6 +2,10 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 6 Oct 2026
+
+- **Experts planner** (cache tag `20261006-experts`): catalogue extracted from WoSTools, mockup validated by Adrian, General Expert Sigils target = what own sigils do not cover (his choice).
+
 ## 5 Oct 2026
 
 - **SvS date editable by admins**: a date picker and Save on the Reference tab (admin only) calls `set_next_svs()`, then reads the date back before saying Saved. Front-end first built and tested, SQL run by Adrian before the deploy.

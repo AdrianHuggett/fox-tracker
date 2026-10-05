@@ -9,6 +9,7 @@
 | `style.css` | Theme variables, desktop table layout, then phone/tablet layouts in `@media (max-width:820px)` blocks. |
 | `item-*.png` | 38 item icons (24px display). Mapped in `ITEM_ART`; items without art fall back to `it.icon` (an emoji or text). |
 | `art-hero.jpg`, `art-footer.jpg`, `art-fox.png` | Hero banner, footer art, logo. |
+| `experts.js`, `experts-data.js`, `experts.css` | Dawn Academy Experts planner (`FOXExperts.mount`, bridge `mountExperts()` in `app.js`, plan saved as `fox_expert_plan` in the account metadata). Extraction and rules: `docs/experts-notes.md`. |
 | `i18n.js`, `i18n-data.js` | Language switcher: the engine, and one row per English text with its Spanish, Turkish and Norwegian translation (see "Languages" in `03-features.md`). |
 | `moonlight-festival.js` | **Dead**: not loaded anywhere. Safe to delete (ask first, as housekeeping). |
 | `.gitattributes` | `* text=auto eol=lf`. GitHub's web editor used to reintroduce CRLF; keep LF. |

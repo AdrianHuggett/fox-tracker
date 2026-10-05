@@ -618,6 +618,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-06-experts',date:'2026-10-06',title:'New Experts planner',points:[
+    'Upgrade planner now has Experts: plan relationship levels and skills for every Dawn Academy Expert, and see the sigils, Books of Knowledge and SvS points they need.',
+    'Push to Backpack sets your Books, each Expert’s own sigils, and the General Expert Sigils needed to cover the rest.']},
   {id:'2026-10-05-svsdate',date:'2026-10-05',title:'The SvS date is now set in the tracker',points:[
     'An admin can change the next SvS date on the Reference tab, so the countdown and every projection stay current.']},
   {id:'2026-10-05-nodays',date:'2026-10-05',title:'Backpack groups no longer show a day',points:[
@@ -1191,7 +1194,7 @@ function renderDash(){
 function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
 function render(){
-  if(gearPlanner&&U&&gearOwner===U.id)gearPlanner.refresh();if(warPlanner&&U&&warOwner===U.id)warPlanner.refresh();if(heroPlanner&&U&&heroOwner===U.id)heroPlanner.refresh();
+  if(gearPlanner&&U&&gearOwner===U.id)gearPlanner.refresh();if(warPlanner&&U&&warOwner===U.id)warPlanner.refresh();if(heroPlanner&&U&&heroOwner===U.id)heroPlanner.refresh();if(expertsPlanner&&U&&expertsOwner===U.id)expertsPlanner.refresh();
   if(charmPlanner&&U&&charmOwner===U.id)charmPlanner.refresh();
   if(buildingPlanner&&U&&buildingOwner===U.id) buildingPlanner.refresh();
   var key=focusKey(document.activeElement);
@@ -1343,7 +1346,7 @@ async function loadAll(){
   await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
-  showApp(); mountBuildings(); mountCharms(); mountGear();mountWar(); mountHero(); render(); say('saved');
+  showApp(); mountBuildings(); mountCharms(); mountGear();mountWar(); mountHero(); mountExperts(); render(); say('saved');
   restoreTab();
   maybeShowNews();
 }
@@ -1576,7 +1579,7 @@ function mountBuildings(){
 /* Per-account charms, saved separately from building plans. */
 
 /* Navigation groups use the existing page switch, including its access checks. */
-var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['hero','Hero Gear'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
+var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['experts','Experts'],['hero','Hero Gear'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
 function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'dash';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='dash'||page==='planner';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['planner','alliance','resources'].indexOf(group)>=0;}
 function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
@@ -1592,6 +1595,9 @@ function mountHero(){if(!window.FOXHero||!$('p-hero'))return;if(heroPlanner)hero
 
 var warPlanner=null,warOwner=null,WAR_NAMES={fcShards:'Fire Crystal Shards',steel:'Steel',refinedFC:'Refined Fire Crystals'};
 function warItem(key){return D.items.find(function(it){return it.name===WAR_NAMES[key];});}
+var expertsPlanner=null,expertsOwner=null;
+function expertsItem(name){return D.items.find(function(it){return it.name===name;});}
+function mountExperts(){if(!window.FOXExperts||!$('p-experts'))return;if(expertsPlanner)expertsPlanner.dispose();var owner=U.id;expertsOwner=owner;expertsPlanner=window.FOXExperts.mount($('p-experts'),{plan:U.user_metadata&&U.user_metadata.fox_expert_plan,stock:function(){var out={};D.items.forEach(function(it){if(/ Sigils$/.test(it.name)||it.name==='Books of Knowledge')out[it.name]={have:calcItem(it).have,target:n(it.target)};});return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_expert_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=expertsItem(c.name);if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
 function mountWar(){if(!window.FOXWar||!$('p-war'))return;if(warPlanner)warPlanner.dispose();var owner=U.id;warOwner=owner;warPlanner=window.FOXWar.mount($('p-war'),{plan:U.user_metadata&&U.user_metadata.fox_war_plan,stock:function(){var out={};Object.keys(WAR_NAMES).forEach(function(k){var it=warItem(k);if(it)out[k]={have:calcItem(it).have,target:it.target};});return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_war_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=warItem(c.key);if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
 
 var charmPlanner=null,charmOwner=null;
