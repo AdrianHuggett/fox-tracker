@@ -618,6 +618,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-05-nodays',date:'2026-10-05',title:'Backpack groups no longer show a day',points:[
+    'Group names on Backpack, such as Speedups and Chief Gear, no longer end with a Day number.']},
   {id:'2026-10-05-language',date:'2026-10-05',title:'Choose your language',points:[
     'The tracker now speaks Spanish, Turkish and Norwegian. Pick your language from the menu at the top of the page or in the footer.',
     'Item and building names stay as they are in the game. A few texts are still English while the translation grows; tell us if a word looks wrong.']},
@@ -841,7 +843,7 @@ function renderStock(){
       out.push('<tr class="grp"><td colspan="9">'+
         '<button class="gtog" type="button" data-gname="'+esc(g)+'" aria-expanded="'+open+'">'+
         '<span class="chev" aria-hidden="true"></span>'+
-        '<span class="gname">'+esc(g)+'</span>'+
+        '<span class="gname">'+esc(String(g).replace(/\s*\(Day\s*\d+\)\s*$/i,''))+'</span>'+
         '<span class="gmeta"><span class="gbar"><i style="width:'+pc+'%"></i></span>'+
         '<span class="gcount">'+st.f+'/'+st.n+'</span></span></button></td></tr>');
     }
