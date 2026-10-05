@@ -84,6 +84,16 @@ Pack × item grid of quantities, with a first "Still short" row (`raw` per item)
   - Best buys for you: top 5 packs by `iv`.
   - Met targets drop out of both rankings.
 
+## Languages (English, Spanish, Turkish, Norwegian)
+
+- A language menu sits at the top of the hero and in the footer. The choice is kept in `localStorage['fox-lang']`; on a first visit the browser language decides (es, tr, nb/nn/no, otherwise English). Nothing is stored in Supabase.
+- `i18n.js` never touches `app.js`. It walks the page, and for each text node and each `placeholder`, `title`, `aria-label`, `alt` and `data-label` attribute it looks the English text up in `i18n-data.js` (`window.I18N_ROWS`, one row per text: English, Spanish, Turkish, Norwegian). A MutationObserver translates whatever the app renders later. The English original is remembered, so switching back is exact.
+- Matching is on the exact English text with whitespace collapsed. Numbers in a text are written `{n}` and a month after a day is `{m}` (for example `{n} {m}` for 5 Oct); keep them in the same order in every language. A text with no row stays English, so a partly translated page is always safe.
+- Left in English on purpose: item names, building names, gear piece names and other in-game terms (the site joins data by item name), names and demo data, and a few help paragraphs whose sentence is split across inline tags.
+- CSS-generated text cannot be translated by the observer: the phone labels come from `data-label` attributes (handled), and the Chief Charms "Upgrade cost" label has per-language overrides at the end of `style.css`.
+- Norwegian is Bokmål (`<html lang="nb">`). The translations were drafted by Claude and still need a read-through by native speakers.
+- **When you add member-visible text**, add a row to `i18n-data.js` (es, tr, no). Prefer wording that works for 1 and for many (`pieces: {n}`) over a plural form.
+
 ## Reference tab
 
 Next SvS date and MUR rate (read-only), **My name** (edits the auth metadata name and the profiles copy), **My password** (see Auth), **My currency** (presets or a custom symbol and rate, saved to the profile), and the baseline value list.

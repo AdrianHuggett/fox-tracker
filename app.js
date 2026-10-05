@@ -618,6 +618,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-05-language',date:'2026-10-05',title:'Choose your language',points:[
+    'The tracker now speaks Spanish, Turkish and Norwegian. Pick your language from the menu at the top of the page or in the footer.',
+    'Item and building names stay as they are in the game. A few texts are still English while the translation grows; tell us if a word looks wrong.']},
   {id:'2026-10-05-steelicon',date:'2026-10-05',title:'Steel has its own icon',points:[
     'Steel now shows its in-game anvil icon on Backpack, in the Export image and in the War Academy planner.']},
   {id:'2026-10-05-export',date:'2026-10-05',title:'Export your Backpack as an image',points:[

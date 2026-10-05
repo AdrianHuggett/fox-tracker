@@ -19,7 +19,7 @@ var DICT={es:{},tr:{},no:{}};
 });
 var NUM=/\d+(?:[.,]\d+)*/g;
 var MON=/(\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g;
-var ATTRS=['placeholder','title','aria-label','alt'];
+var ATTRS=['placeholder','title','aria-label','alt','data-label'];
 var SKIP={SCRIPT:1,STYLE:1,NOSCRIPT:1,TEXTAREA:1};
 var lang='en';
 var origT=new WeakMap(), outT=new WeakMap(), recA=new WeakMap();

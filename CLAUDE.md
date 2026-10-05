@@ -34,7 +34,7 @@ This is a static web app (no build) for the FOX alliance in Whiteout Survival (S
 3. **Supabase changes need his explicit "oui"** before anything runs: explain what will change in one or two sentences, then wait. This applies to additive changes too, and doubly to anything that deletes or rewrites data or loosens permissions.
 4. **Secrets**: the anon key in `index.html` is public by design. Never ask for, read, print or store the **service role key** or the **DB password**; if a CLI needs them, Adrian types them himself. Never type passwords into anything for him, never create real accounts, and only use disposable test accounts that you delete afterwards.
 5. **Every deploy bumps the cache tag** on both `style.css?v=` and `app.js?v=` in `index.html` (format `YYYYMMDD-short`).
-6. **Every change members will notice gets a What's new entry** (the `UPDATES` array in `app.js`, newest first, new unique `id`).
+6. **Every change members will notice gets a What's new entry, and its new texts get a row in `i18n-data.js`** (Spanish, Turkish, Norwegian; see `docs/03-features.md`, "Languages"). The What's new entries live in the `UPDATES` array in `app.js` (newest first, new unique `id`).
 7. **Test before pushing**: syntax check plus `tools/smoke_test.py` at 1150px and 400px (see `docs/04-workflow.md`).
 8. **Verify after pushing** against the commit-SHA raw URL, not the branch URL (the CDN caches it for minutes).
 9. **Cost**: avoid dumping whole files into the conversation; read the parts you need. Say so when a task deserves a stronger model; otherwise stay economical.
