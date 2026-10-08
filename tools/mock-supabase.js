@@ -17,7 +17,10 @@ var DB = window.__DB = {
     {sort:6, grp:'Gear',   icon:'', name:'Hardened Alloy',     have:1000, target:5000, free:0}],
   user_packs: [{user_id:'u1', pack_id:1, freq:0}],
   user_exchanges: [{xid:'charm-g2d', qty:20}],
-  stock_history: [],
+  stock_history: [
+    {day:'2026-10-01',have:{'Design Plans':90},packs:{'1':1}},
+    {day:'2026-10-04',have:{'Design Plans':100},packs:{}}
+  ],
   profiles: [
     {id:'u1', name:'Adrian', is_admin:true,  r4_editor:false, currency_code:'GBP', currency_symbol:'£', currency_rate:1, created_at:'2026-09-01', last_seen:'2026-10-02'},
     {id:'u2', name:'Emi',    is_admin:false, r4_editor:true,  created_at:'2026-09-05', last_seen:'2026-09-25'}],

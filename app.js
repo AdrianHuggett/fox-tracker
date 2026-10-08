@@ -275,9 +275,13 @@ function packsDelivered(a,b,item){
   var pa=a.packs||{}, pb=b.packs||{}, seen={}, t=0;
   Object.keys(pa).concat(Object.keys(pb)).forEach(function(id){
     if(seen[id]) return; seen[id]=1;
-    var d=n(pb[id])-n(pa[id]); if(!d) return;
+    // A counter reset or correction is not a negative purchase or free income.
+    var d=n(pb[id])-n(pa[id]); if(d<=0) return;
     var c=D.contents[id]; if(c&&c[item]) t+=d*n(c[item]);
   });
+  // Pack contents use hours; these Backpack items use days.
+  if(['General Speedups','Training Speedups','Construction Speedups','Research Speedups',
+      'Healing Speedups','Expert Skill Learning Speedups'].indexOf(item)>=0) t/=24;
   return t;
 }
 function currentSnapshot(){
@@ -309,13 +313,13 @@ function recomputeFree(){
       var rise=n(list[i].have[k])-n(list[i-1].have[k])-packsDelivered(list[i-1],list[i],k);
       if(rise>0) earned+=rise;
     }
-    FREE_M[k]={rate:earned/span,span:span};
+    FREE_M[k]={rate:earned/span,span:span,earned:earned,since:a.day,until:b.day};
   });
 }
 function freeRate(it){ var m=FREE_M[it.name]; return m?m.rate:n(it.free); }
 function freeCell(it){
   var m=FREE_M[it.name];
-  if(m) return '<span title="Measured over '+plural(m.span,'day')+' of your updates">'+fmt(m.rate,2)+'</span>';
+  if(m) return '<span title="'+esc(fmt(m.earned,2)+' / '+plural(m.span,'day')+' ('+m.since+' to '+m.until+')')+'">'+fmt(m.rate,2)+'</span>';
   var v=n(it.free);
   return v?'<span class="mini" title="Starting estimate, used until you have '+FREE_MIN_DAYS+' days of updates">'+fmt(v,2)+'</span>'
           :'<span class="mini">\u2014</span>';
@@ -324,8 +328,8 @@ function renderFreeNote(){
   var el=$('free-note'); if(!el) return;
   if(!HIST_OK){ el.textContent=''; return; }
   if(Object.keys(FREE_M).length){
-    el.textContent='Measured over '+plural(HIST_SPAN,'day')+' of your updates, since '+prettyDay(HIST_SINCE)+
-      '. It uses your last 3 months, so it keeps up as your daily income changes.';
+    el.textContent='Estimated from recorded stock increases, minus recorded purchases, over '+plural(HIST_SPAN,'day')+
+      ' ('+HIST_SINCE+' to '+HIST[HIST.length-1].day+'). Spending, exchanges and corrections can affect this estimate. Hover over a rate to see its calculation.';
   }else{
     el.textContent='Measuring started '+prettyDay(HIST_SINCE||todayKey())+'. Once you have '+FREE_MIN_DAYS+
       ' days of updates, your own measured figure replaces the faded starting estimate.';
@@ -618,6 +622,10 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-09-freefix',date:'2026-10-09',title:'Free / day calculation corrected',points:[
+    'Reducing or resetting Bought no longer creates artificial free income. Pack speedups are converted from hours to Backpack days before being deducted.',
+    'Free / day is an estimate from your recorded stock changes. Hover over a rate to see the counted gain, elapsed days and dates.'
+  ]},
   {id:'2026-10-06-experts',date:'2026-10-06',title:'New Experts planner',points:[
     'Upgrade planner now has Experts: plan relationship levels and skills for every Dawn Academy Expert, and see the sigils, Books of Knowledge and SvS points they need.',
     'Push to Backpack sets your Books, each Expert’s own sigils, and the General Expert Sigils needed to cover the rest.']},

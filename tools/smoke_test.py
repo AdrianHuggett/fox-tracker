@@ -55,6 +55,10 @@ def run(p, width, name):
 
     # Feature checks: keep these in sync with docs/03-features.md
     open_tab(pg, 'stock'); pg.wait_for_timeout(300)
+    free = pg.locator('#stock tr[data-q="design plans"] td').nth(6)
+    assert free.text_content().strip() == '3.33', 'Bought reset must not inflate free income'
+    detail = free.locator('span').get_attribute('title')
+    assert '3 days' in detail and '2026-10-01 to 2026-10-04' in detail, detail
     proj = pg.eval_on_selector_all(
         '#stock tbody tr:not(.grp):not(.xch)',
         'rs=>Object.fromEntries(rs.map(r=>[r.children[1].innerText.trim(), r.children[7].innerText.trim()]))')

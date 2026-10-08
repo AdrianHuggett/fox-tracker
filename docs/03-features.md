@@ -23,6 +23,8 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 - `recomputeFree()`: for each item, from its first snapshot to its latest within the last 90 days (`FREE_WINDOW_DAYS`):
   `rate = Σ max(0, rise in Have between consecutive snapshots − items delivered by packs bought in that step) / days`. Only rises count, so spending never cancels earned income (changed 2 Oct 2026; before, it was first-vs-last snapshot, which dropped to 0 after spending).
   Pack deliveries use **today's** `pack_contents` × the change in pack counts, so correcting a pack's contents later applies to both ends of the window alike.
+  Only positive changes in each pack counter count as purchases. Counter reductions/resets contribute zero; they cannot create free income. Speedup contents are converted from hours to days before subtraction for all six Backpack speedup items.
+  This remains an estimate: unrecorded purchases, corrections, exchanges, spending between snapshots and delayed card rewards cannot be identified from stock snapshots alone. The tooltip shows counted positive gain / elapsed calendar days and the first/last dates. Missing dates still count in elapsed time; untouched items may contain carried-forward values from a different item's save.
 - An item needs at least 3 days of span (`FREE_MIN_DAYS`). Before that, `freeRate` falls back to `user_items.free` (shown faded, "starting estimate").
 - `renderFreeNote()` explains the measuring state above the Backpack table.
 
