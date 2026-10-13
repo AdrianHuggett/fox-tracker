@@ -30,6 +30,8 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 
 ## Backpack (`renderStock`)
 
+- Hero Shards displays only the 16 Gen 1–5 mythic heroes and generic Mythic Hero Shards. Epic/rare rows remain stored and included in stock snapshots; only their Backpack rows are hidden.
+
 - Grouped by `grp`, with foldable headers (a fill bar shows how many items have Have > 0).
 - Columns: icon, item, Have (input), Target (input), Remaining, Progress (bar + %), Free/day, Projected, Status pill (on track / behind / no target) and "N short by SvS day".
 - Filter chips: All / Behind / On track / No target (`data-state`), plus search.

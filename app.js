@@ -622,6 +622,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {"id": "2026-10-13-mythic-shards", "date": "2026-10-13", "title": "Mythic hero shards only", "points": ["Hero Shards now shows only the 16 mythic heroes from Gen 1 to 5 and generic Mythic Hero Shards. Hidden epic and rare quantities are preserved."]},
   {id:'2026-10-09-freefix',date:'2026-10-09',title:'Free / day calculation corrected',points:[
     'Reducing or resetting Bought no longer creates artificial free income. Pack speedups are converted from hours to Backpack days before being deducted.',
     'Free / day is an estimate from your recorded stock changes. Hover over a rate to see the counted gain, elapsed days and dates.'
@@ -841,15 +842,20 @@ function inp(val,cls,attrs){
     (val===null||val===undefined?'':val)+'" '+(attrs||'')+'>';
 }
 function renderStock(){
+  // Keep hidden quantities in memory and snapshots; only narrow the Backpack view.
+  var mythicShards=['Mythic Hero Shards','Natalia','Jeronimo','Molly','Zinman','Flint','Philly','Alonso','Logan','Mia','Greg','Ahmose','Reina','Lynn','Hector','Norah','Gwen'];
+  function visible(it){ return !/Hero Shards/i.test(it.grp||'') || mythicShards.indexOf(it.name)!==-1; }
   /* Count each group first so its header can say how much of it you have filled in. */
   var stats={};
   D.items.forEach(function(it){
+    if(!visible(it)) return;
     var k=it.grp||'';
     if(!stats[k]) stats[k]={n:0,f:0};
     stats[k].n++; if(n(it.have)>0) stats[k].f++;
   });
   var out=[], g=null;
   D.items.forEach(function(it,idx){
+    if(!visible(it)) return;
     if(it.grp!==g){
       g=it.grp;
       var st=stats[g]||{n:0,f:0}, pc=st.n?Math.round(st.f/st.n*100):0, open=!FOLD[g];
