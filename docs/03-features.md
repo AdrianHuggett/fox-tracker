@@ -30,6 +30,8 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 
 ## Backpack (`renderStock`)
 
+- Steel's section follows Fire Crystal materials in the display order; saved item IDs are unchanged.
+
 - Hero Shards displays only the 16 Gen 1–5 mythic heroes and generic Mythic Hero Shards. Epic/rare rows remain stored and included in stock snapshots; only their Backpack rows are hidden.
 
 - Grouped by `grp`, with foldable headers (a fill bar shows how many items have Have > 0).

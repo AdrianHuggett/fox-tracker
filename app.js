@@ -622,6 +622,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {"id": "2026-10-13-steel-order", "date": "2026-10-13", "title": "Steel moved beside Fire Crystals", "points": ["The Steel section now appears immediately after Fire Crystal materials in Backpack."]},
   {"id": "2026-10-13-mythic-shards", "date": "2026-10-13", "title": "Mythic hero shards only", "points": ["Hero Shards now shows only the 16 mythic heroes from Gen 1 to 5 and generic Mythic Hero Shards. Hidden epic and rare quantities are preserved."]},
   {id:'2026-10-09-freefix',date:'2026-10-09',title:'Free / day calculation corrected',points:[
     'Reducing or resetting Bought no longer creates artificial free income. Pack speedups are converted from hours to Backpack days before being deducted.',
@@ -1350,6 +1351,12 @@ async function loadAll(){
   /* Keep added items with their existing Backpack group without changing saved IDs. */
   var groupOrder={};
   D.items.forEach(function(it,idx){ if(groupOrder[it.grp]===undefined) groupOrder[it.grp]=idx; });
+  // Put Steel's section immediately after Fire Crystal materials; preserve saved IDs.
+  var fireCrystalItem=D.items.find(function(it){ return it.name==='Fire Crystals'; });
+  var steelItem=D.items.find(function(it){ return it.name==='Steel'; });
+  if(fireCrystalItem && steelItem && fireCrystalItem.grp!==steelItem.grp){
+    groupOrder[steelItem.grp]=groupOrder[fireCrystalItem.grp]+0.5;
+  }
   D.items.sort(function(a,b){ return groupOrder[a.grp]-groupOrder[b.grp] || a.sort-b.sort; });
   uPacks={}; r[5].data.forEach(function(p){ uPacks[p.pack_id]=Number(p.freq); });
   var prof=r[6]&&r[6].data;

@@ -4,6 +4,9 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Steel moved beside Fire Crystals", "Acero junto a Cristales de fuego", "Çelik, Ateş Kristallerinin yanına taşındı", "Stål flyttet ved siden av ildkrystaller"],
+["The Steel section now appears immediately after Fire Crystal materials in Backpack.", "La sección de acero ahora aparece justo después de los materiales de Cristales de fuego en Mochila.", "Çelik bölümü artık Çantada Ateş Kristali malzemelerinin hemen ardından görünür.", "Stålseksjonen vises nå rett etter ildkrystallmaterialene i Ryggsekk."],
+
 ["Mythic hero shards only", "Solo fragmentos de héroes míticos", "Yalnızca mitik kahraman parçaları", "Bare mytiske helteskår"],
 ["Hero Shards now shows only the 16 mythic heroes from Gen 1 to 5 and generic Mythic Hero Shards. Hidden epic and rare quantities are preserved.", "Hero Shards ahora muestra solo los 16 héroes míticos de Gen 1 a 5 y los fragmentos míticos genéricos. Las cantidades épicas y raras ocultas se conservan.", "Hero Shards artık yalnızca 1–5. nesillerdeki 16 mitik kahramanı ve genel mitik kahraman parçalarını gösterir. Gizlenen destansı ve nadir miktarlar korunur.", "Hero Shards viser nå bare de 16 mytiske heltene fra generasjon 1 til 5 og generiske mytiske helteskår. Skjulte episke og sjeldne beholdninger bevares."],
 
