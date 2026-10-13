@@ -144,3 +144,7 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 - Saving status shows in `#sync` and as toasts ("saving…", "saved", "Not saved — check your connection…").
 - Folded groups are remembered in localStorage (the `FOLD` and `PACK_FOLD` keys).
 - Headroom: on phones the header slides away when scrolling down past 90px, and comes back on any upward scroll of more than 5px.
+
+## Rendering and memory
+
+Tables and upgrade planners render on first opening. Data changes invalidate all views, but only the active panel is refreshed immediately. Hidden views refresh on their next visit. This avoids rebuilding the pack matrix and six planners for every stock edit.

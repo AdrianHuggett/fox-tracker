@@ -622,6 +622,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {"id": "2026-10-13-memory", "date": "2026-10-13", "title": "Lighter page loading", "points": ["Hidden tables and upgrade planners now load when opened and refresh only when needed, reducing memory use while updating Backpack."]},
   {"id": "2026-10-13-steel-order", "date": "2026-10-13", "title": "Steel moved beside Fire Crystals", "points": ["The Steel section now appears immediately after Fire Crystal materials in Backpack."]},
   {"id": "2026-10-13-mythic-shards", "date": "2026-10-13", "title": "Mythic hero shards only", "points": ["Hero Shards now shows only the 16 mythic heroes from Gen 1 to 5 and generic Mythic Hero Shards. Hidden epic and rare quantities are preserved."]},
   {id:'2026-10-09-freefix',date:'2026-10-09',title:'Free / day calculation corrected',points:[
@@ -1208,13 +1209,35 @@ function renderDash(){
 }
 function focusKey(el){ if(!el||!el.dataset) return null;
   return [el.dataset.idx,el.dataset.pid,el.dataset.k].join('|'); }
+var dirtyPanels={};
+function renderActivePanel(){
+  if(!U) return;
+  var panel=document.querySelector('.panel.on');
+  var page=panel?panel.id.replace(/^p-/,''):'dash';
+  if(!dirtyPanels[page]) return;
+  delete dirtyPanels[page];
+  var views={dash:renderDash,stock:renderStock,packs:renderPacks,matrix:renderMatrix,ref:renderRef};
+  if(views[page]) views[page]();
+  var planners={
+    buildings:[buildingPlanner,buildingOwner,mountBuildings],
+    charms:[charmPlanner,charmOwner,mountCharms],
+    gear:[gearPlanner,gearOwner,mountGear],
+    war:[warPlanner,warOwner,mountWar],
+    hero:[heroPlanner,heroOwner,mountHero],
+    experts:[expertsPlanner,expertsOwner,mountExperts]
+  };
+  var planner=planners[page];
+  if(planner){
+    if(!planner[0] || planner[1]!==U.id) planner[2]();
+    else planner[0].refresh();
+  }
+  applyFilters(); bind();
+}
 function render(){
-  if(gearPlanner&&U&&gearOwner===U.id)gearPlanner.refresh();if(warPlanner&&U&&warOwner===U.id)warPlanner.refresh();if(heroPlanner&&U&&heroOwner===U.id)heroPlanner.refresh();if(expertsPlanner&&U&&expertsOwner===U.id)expertsPlanner.refresh();
-  if(charmPlanner&&U&&charmOwner===U.id)charmPlanner.refresh();
-  if(buildingPlanner&&U&&buildingOwner===U.id) buildingPlanner.refresh();
+  // Defer hidden tables and planners until their tab is opened.
+  ['dash','stock','packs','matrix','ref','buildings','charms','gear','war','hero','experts'].forEach(function(p){dirtyPanels[p]=true;});
   var key=focusKey(document.activeElement);
-  renderSvsWarn(); renderFreeNote();
-  renderTop(); renderDash(); renderStock(); renderPacks(); renderMatrix(); renderRef(); applyFilters(); bind();
+  renderSvsWarn(); renderFreeNote(); renderTop(); renderActivePanel();
   if(key){ var a=document.querySelectorAll('input.cell');
     for(var i=0;i<a.length;i++) if(focusKey(a[i])===key){ a[i].focus(); break; } }
 }
@@ -1271,6 +1294,7 @@ document.addEventListener('click',function(e){
       p.classList.toggle('on',p.id==='p-'+t.dataset.p); });
     try{ sessionStorage.setItem('fox-tab',t.dataset.p); }catch(err){}
     syncCategories(t.dataset.p);
+    renderActivePanel();
     if(t.dataset.p==='admin') loadMembers();
     if(t.dataset.p==='r4') loadR4();
     headroomShow();
@@ -1367,7 +1391,7 @@ async function loadAll(){
   await loadExch();
   touchProfile(); checkAdmin();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
-  showApp(); mountBuildings(); mountCharms(); mountGear();mountWar(); mountHero(); mountExperts(); render(); say('saved');
+  showApp(); render(); say('saved');
   restoreTab();
   maybeShowNews();
 }

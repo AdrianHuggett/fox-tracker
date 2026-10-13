@@ -4,6 +4,9 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Lighter page loading", "Carga de página más ligera", "Daha hafif sayfa yükleme", "Lettere sidelasting"],
+["Hidden tables and upgrade planners now load when opened and refresh only when needed, reducing memory use while updating Backpack.", "Las tablas y los planificadores ocultos ahora se cargan al abrirlos y se actualizan solo cuando es necesario, reduciendo el uso de memoria al actualizar Mochila.", "Gizli tablolar ve yükseltme planlayıcıları artık açıldıklarında yüklenir ve yalnızca gerektiğinde yenilenir; böylece Çanta güncellenirken bellek kullanımı azalır.", "Skjulte tabeller og oppgraderingsplanleggere lastes nå når de åpnes og oppdateres bare ved behov, slik at minnebruken reduseres når Ryggsekk oppdateres."],
+
 ["Steel moved beside Fire Crystals", "Acero junto a Cristales de fuego", "Çelik, Ateş Kristallerinin yanına taşındı", "Stål flyttet ved siden av ildkrystaller"],
 ["The Steel section now appears immediately after Fire Crystal materials in Backpack.", "La sección de acero ahora aparece justo después de los materiales de Cristales de fuego en Mochila.", "Çelik bölümü artık Çantada Ateş Kristali malzemelerinin hemen ardından görünür.", "Stålseksjonen vises nå rett etter ildkrystallmaterialene i Ryggsekk."],
 
