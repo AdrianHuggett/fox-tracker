@@ -622,6 +622,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-14-experts-tile',date:'2026-10-14',title:'Experts planner is ready',points:['Removed the duplicate Coming soon tile. Open Experts from All planners to plan relationships, skills, materials and SvS points.']},
   {id:'2026-10-14-pets',date:'2026-10-14',title:'New Pets planner',points:['Plan all 14 pets from current to target level, including advancement materials, Pet Food, unlock requirements and SvS points.','Review and push material targets to Backpack. Pet plans save to your account.']},
   {"id": "2026-10-13-memory", "date": "2026-10-13", "title": "Lighter page loading", "points": ["Hidden tables and upgrade planners now load when opened and refresh only when needed, reducing memory use while updating Backpack."]},
   {"id": "2026-10-13-steel-order", "date": "2026-10-13", "title": "Steel moved beside Fire Crystals", "points": ["The Steel section now appears immediately after Fire Crystal materials in Backpack."]},

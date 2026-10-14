@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 14 Oct 2026
 
+- Confirmed the existing Experts planner still uses the current WoSTools catalogue chunk and removed a duplicate disabled Experts tile from All planners.
 - Pets planner prepared from WoSTools' public pet catalogue: all 14 pets, level and advancement costs, unlock warnings, material and Wild Mark SvS points, account plan save, and Backpack Target transfer. Source conventions and limits are recorded in `docs/pets-notes.md`.
 
 ## 6 Oct 2026
