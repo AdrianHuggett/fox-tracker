@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Upgrade planner cleaned up","Planificador de mejoras ordenado","Yükseltme planlayıcısı düzenlendi","Oppgraderingsplanleggeren er ryddet opp"],
+["Removed the unavailable Troops tile from All planners.","Se eliminó la tarjeta de Tropas no disponible de Todos los planificadores.","Kullanılamayan Birlikler kutucuğu Tüm planlayıcılardan kaldırıldı.","Den utilgjengelige Tropper-flisen er fjernet fra Alle planleggere."],
 ["Experts planner is ready","El planificador de expertos está listo","Uzman planlayıcısı hazır","Ekspertplanleggeren er klar"],
 ["Removed the duplicate Coming soon tile. Open Experts from All planners to plan relationships, skills, materials and SvS points.","Se eliminó la tarjeta duplicada «Próximamente». Abre Expertos desde Todos los planificadores para planificar relaciones, habilidades, materiales y puntos SvS.","Yinelenen Yakında kutucuğu kaldırıldı. İlişkileri, becerileri, malzemeleri ve SvS puanlarını planlamak için Tüm planlayıcılardan Uzmanlar'ı aç.","Den doble Kommer snart-flisen er fjernet. Åpne Eksperter fra Alle planleggere for å planlegge relasjoner, ferdigheter, materialer og SvS-poeng."],
 ["New Pets planner","Nuevo planificador de mascotas","Yeni Evcil Hayvan planlayıcısı","Ny planlegger for kjæledyr"],
