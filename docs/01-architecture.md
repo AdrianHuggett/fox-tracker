@@ -11,6 +11,7 @@
 | `art-hero.jpg`, `art-footer.jpg`, `art-fox.png` | Hero banner, footer art, logo. |
 | `experts.js`, `experts-data.js`, `experts.css` | Dawn Academy Experts planner (`FOXExperts.mount`, bridge `mountExperts()` in `app.js`, plan saved as `fox_expert_plan` in the account metadata). Extraction and rules: `docs/experts-notes.md`. |
 | `i18n.js`, `i18n-data.js` | Language switcher: the engine, and one row per English text with its Spanish, Turkish and Norwegian translation (see "Languages" in `03-features.md`). |
+| `pets-data.js`, `pets.js`, `pets.css` | Pets planner: public 14-pet catalogue, cost calculations, personal plan, and Backpack Target bridge. See `docs/pets-notes.md`. |
 | `moonlight-festival.js` | **Dead**: not loaded anywhere. Safe to delete (ask first, as housekeeping). |
 | `.gitattributes` | `* text=auto eol=lf`. GitHub's web editor used to reintroduce CRLF; keep LF. |
 | `README.md` | Title only. |

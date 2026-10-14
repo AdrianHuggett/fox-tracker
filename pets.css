@@ -1,0 +1,56 @@
+#p-pets{color:#d6e8f3}
+#p-pets h1{margin:0 0 8px;font:700 28px 'Chakra Petch',sans-serif;color:#f6fbff}
+#p-pets h2{margin:0 0 14px;font:700 17px 'Chakra Petch',sans-serif}
+#p-pets .pet-lead,#p-pets .pet-small,#p-pets .pet-status,#p-pets .pet-source{color:#9bb5c8;font-size:13px;line-height:1.55}
+#p-pets .pet-lead{margin:0 0 22px}
+#p-pets .pet-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;align-items:start}
+#p-pets .pet-plan,#p-pets .pet-summary>section{background:#061626;border:1px solid #204353;border-radius:10px}
+#p-pets .pet-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px;border-bottom:1px solid #204353}
+#p-pets .pet-heading strong{display:block;font-size:18px}
+#p-pets .pet-heading small,#p-pets .pet-name small,#p-pets .pet-row-cost small{display:block;color:#9bb5c8;font-size:11px;margin-top:3px}
+#p-pets button{background:#0c2535;color:#c4dfef;border:1px solid #285064;border-radius:5px;padding:8px 12px;cursor:pointer;font:inherit}
+#p-pets button:hover{border-color:#28c2e6;color:#fff}
+#p-pets button:disabled{opacity:.5;cursor:not-allowed}
+#p-pets button[aria-pressed=true],#p-pets button[aria-selected=true]{background:#12364b;border-color:#27c3e6;color:#6cddf5}
+#p-pets .pet-status{padding:0 16px;margin:8px 0;min-height:19px}
+#p-pets .pet-tabs{display:flex;gap:5px;overflow-x:auto;padding:10px 14px;border-bottom:1px solid #204353}
+#p-pets .pet-tabs button{white-space:nowrap;font-size:12px}
+#p-pets .pet-tabs small{opacity:.7}
+#p-pets .pet-row{display:grid;grid-template-columns:minmax(140px,1fr) minmax(170px,1.1fr) minmax(145px,.9fr);align-items:center;gap:12px;padding:15px 16px;border-top:1px solid #173748}
+#p-pets .pet-name strong{font-size:14px;color:#f4faff}
+#p-pets .pet-levels{display:flex;align-items:center;gap:7px}
+#p-pets .pet-levels label{flex:1;min-width:0;font-size:10px;text-transform:uppercase;color:#9bb5c8}
+#p-pets select,#p-pets input{box-sizing:border-box;width:100%;margin-top:4px;border:1px solid #31566a;border-radius:5px;background:#0a2637;color:#f6faff;padding:7px 5px;font:inherit}
+#p-pets .pet-levels label:last-child select{background:#1c1737;border-color:#51406d}
+#p-pets .pet-row-cost{text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+#p-pets .pet-row-cost strong{font-size:14px;color:#f5fbff}
+#p-pets .pet-row-cost span,#p-pets .pet-recap{color:#9bb5c8;font-size:12px}
+#p-pets .pet-empty{padding:16px;color:#9bb5c8}
+#p-pets .pet-summary{display:grid;gap:16px}
+#p-pets .pet-summary>section{padding:18px}
+#p-pets .pet-material{display:flex;align-items:center;gap:12px;margin:14px 0}
+#p-pets .pet-material img,#p-pets .pet-food-icon{width:30px;height:30px;object-fit:contain;font-size:25px;flex:none}
+#p-pets .pet-material strong{display:block;color:#f6fbff;font-size:23px;line-height:1.1;font-variant-numeric:tabular-nums}
+#p-pets .pet-material span:not(.pet-food-icon){display:block;font-size:12px;color:#b6cede}
+#p-pets .pet-material small{display:block;font-size:11px;color:#9bb5c8;margin-top:2px}
+#p-pets .pet-extra{border-top:1px solid #204353;padding:12px 0}
+#p-pets .pet-extra summary{cursor:pointer;color:#65d8f6;font-size:13px}
+#p-pets .pet-extra-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#p-pets .pet-extra-inputs label{font-size:11px;color:#9bb5c8}
+#p-pets .pet-extra-inputs label:last-child{grid-column:1/-1}
+#p-pets .pet-warning{padding:12px;background:#35271d;border:1px solid #8e652c;border-radius:6px;font-size:12px;color:#ffdaa1}
+#p-pets .pet-warning p{margin:7px 0 0}
+#p-pets .pet-primary{background:#27c3e6!important;color:#03121d!important;font-weight:700!important}
+#p-pets #pet-push{width:100%;margin-top:16px;padding:12px}
+#p-pets .pet-points{font:700 27px 'Chakra Petch',sans-serif;color:#27c3e6}
+#p-pets .pet-points small{font-size:13px}
+#p-pets .pet-source{margin:18px 0}
+#p-pets .pet-source a{color:#4ed7f6}
+#p-pets dialog{max-width:460px;width:calc(100% - 32px);border:1px solid #285064;border-radius:10px;background:#081b2a;color:#d6e8f3;padding:22px}
+#p-pets dialog::backdrop{background:#000b}
+#p-pets .pet-target{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #204353;padding:7px 0;font-size:13px}
+#p-pets .pet-target strong{white-space:nowrap}
+#p-pets .pet-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+#p-pets .pet-error{color:#ffb5a3;font-size:12px}
+@media(max-width:980px){#p-pets .pet-layout{grid-template-columns:1fr}#p-pets .pet-summary{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){#p-pets .pet-summary{grid-template-columns:1fr}#p-pets .pet-row{grid-template-columns:1fr 1fr;gap:10px}#p-pets .pet-name{grid-column:1/-1}#p-pets .pet-levels{min-width:0}#p-pets .pet-row-cost{font-size:11px}#p-pets .pet-row-cost strong{font-size:12px}#p-pets .pet-heading{padding:12px}#p-pets .pet-row{padding:12px}}

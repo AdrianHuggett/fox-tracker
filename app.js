@@ -622,6 +622,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-14-pets',date:'2026-10-14',title:'New Pets planner',points:['Plan all 14 pets from current to target level, including advancement materials, Pet Food, unlock requirements and SvS points.','Review and push material targets to Backpack. Pet plans save to your account.']},
   {"id": "2026-10-13-memory", "date": "2026-10-13", "title": "Lighter page loading", "points": ["Hidden tables and upgrade planners now load when opened and refresh only when needed, reducing memory use while updating Backpack."]},
   {"id": "2026-10-13-steel-order", "date": "2026-10-13", "title": "Steel moved beside Fire Crystals", "points": ["The Steel section now appears immediately after Fire Crystal materials in Backpack."]},
   {"id": "2026-10-13-mythic-shards", "date": "2026-10-13", "title": "Mythic hero shards only", "points": ["Hero Shards now shows only the 16 mythic heroes from Gen 1 to 5 and generic Mythic Hero Shards. Hidden epic and rare quantities are preserved."]},
@@ -1223,6 +1224,7 @@ function renderActivePanel(){
     charms:[charmPlanner,charmOwner,mountCharms],
     gear:[gearPlanner,gearOwner,mountGear],
     war:[warPlanner,warOwner,mountWar],
+    pets:[petsPlanner,petsOwner,mountPets],
     hero:[heroPlanner,heroOwner,mountHero],
     experts:[expertsPlanner,expertsOwner,mountExperts]
   };
@@ -1235,7 +1237,7 @@ function renderActivePanel(){
 }
 function render(){
   // Defer hidden tables and planners until their tab is opened.
-  ['dash','stock','packs','matrix','ref','buildings','charms','gear','war','hero','experts'].forEach(function(p){dirtyPanels[p]=true;});
+  ['dash','stock','packs','matrix','ref','buildings','charms','gear','war','hero','experts','pets'].forEach(function(p){dirtyPanels[p]=true;});
   var key=focusKey(document.activeElement);
   renderSvsWarn(); renderFreeNote(); renderTop(); renderActivePanel();
   if(key){ var a=document.querySelectorAll('input.cell');
@@ -1624,7 +1626,7 @@ function mountBuildings(){
 /* Per-account charms, saved separately from building plans. */
 
 /* Navigation groups use the existing page switch, including its access checks. */
-var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['experts','Experts'],['hero','Hero Gear'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
+var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
 function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'dash';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='dash'||page==='planner';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['planner','alliance','resources'].indexOf(group)>=0;}
 function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
@@ -1645,6 +1647,42 @@ function expertsItem(name){return D.items.find(function(it){return it.name===nam
 function mountExperts(){if(!window.FOXExperts||!$('p-experts'))return;if(expertsPlanner)expertsPlanner.dispose();var owner=U.id;expertsOwner=owner;expertsPlanner=window.FOXExperts.mount($('p-experts'),{plan:U.user_metadata&&U.user_metadata.fox_expert_plan,stock:function(){var out={};D.items.forEach(function(it){if(/ Sigils$/.test(it.name)||it.name==='Books of Knowledge')out[it.name]={have:calcItem(it).have,target:n(it.target)};});return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_expert_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=expertsItem(c.name);if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
 function mountWar(){if(!window.FOXWar||!$('p-war'))return;if(warPlanner)warPlanner.dispose();var owner=U.id;warOwner=owner;warPlanner=window.FOXWar.mount($('p-war'),{plan:U.user_metadata&&U.user_metadata.fox_war_plan,stock:function(){var out={};Object.keys(WAR_NAMES).forEach(function(k){var it=warItem(k);if(it)out[k]={have:calcItem(it).have,target:it.target};});return out;},savePlan:async function(plan){if(!U||U.id!==owner)throw new Error('Please sign in again.');var r=await SB.auth.updateUser({data:{fox_war_plan:plan}});if(r.error)throw r.error;if(U&&U.id===owner)U=r.data.user;},applyTargets:async function(changes){if(!U||U.id!==owner)throw new Error('Please sign in again.');var applied=0;try{for(var k=0;k<changes.length;k++){var c=changes[k],it=warItem(c.key);if(!it||!Number.isSafeInteger(c.target)||c.target<0)throw new Error('Required material is missing from your Backpack.');clearTimeout(timers['i'+it.sort+'target']);var r=await SB.from('user_items').update({target:c.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');it.target=c.target;applied++;}}catch(e){render();throw new Error(applied?'Some targets were saved before the connection failed. Review them and retry.':e.message);}render();say('saved');toast('Backpack targets updated.');}});}
 
+var petsPlanner=null,petsOwner=null;
+function mountPets(){
+  if(!window.FOXPets||!$('p-pets'))return;
+  if(petsPlanner)petsPlanner.dispose();
+  var owner=U.id;petsOwner=owner;
+  petsPlanner=window.FOXPets.mount($('p-pets'),{
+    plan:U.user_metadata&&U.user_metadata.fox_pet_plan,
+    stock:function(){
+      var names=['Pet Food','Taming Manuals','Energizing Potions','Strengthening Serum','Common Wild Marks','Advanced Wild Marks'],out={};
+      names.forEach(function(name){var it=D.items.find(function(x){return x.name===name;});if(it)out[name]={have:calcItem(it).have,target:n(it.target)};});
+      return out;
+    },
+    savePlan:async function(plan){
+      if(!U||U.id!==owner)throw new Error('Please sign in again.');
+      var r=await SB.auth.updateUser({data:{fox_pet_plan:plan}});
+      if(r.error)throw r.error;
+      if(U&&U.id===owner)U=r.data.user;
+    },
+    applyTargets:async function(changes){
+      if(!U||U.id!==owner)throw new Error('Please sign in again.');
+      var items=changes.map(function(c){return {change:c,item:D.items.find(function(x){return x.name===c.name;})};});
+      if(items.some(function(x){return !x.item||!Number.isSafeInteger(x.change.target)||x.change.target<0;}))throw new Error('A required material is missing from your Backpack.');
+      var applied=0;
+      try{
+        for(var k=0;k<items.length;k++){
+          var it=items[k].item;
+          clearTimeout(timers['i'+it.sort+'target']);
+          var r=await SB.from('user_items').update({target:items[k].change.target}).eq('sort',it.sort).eq('user_id',owner).select('sort');
+          if(r.error||!r.data||r.data.length!==1)throw new Error('Target could not be saved.');
+          it.target=items[k].change.target;applied++;
+        }
+      }catch(e){render();throw new Error(applied?'Some targets were saved. Review them before retrying.':e.message);}
+      render();say('saved');toast('Pet targets updated in Backpack.');
+    }
+  });
+}
 var charmPlanner=null,charmOwner=null;
 function charmItem(key){var names={guides:['Charm Guides'],designs:['Charm Designs'],secrets:['Jewel Secrets','Charm Secrets']};return D.items.find(function(it){return names[key]&&names[key].indexOf(it.name)>=0;});}
 function mountCharms(){

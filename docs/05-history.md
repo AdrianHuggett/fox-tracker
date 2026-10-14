@@ -2,6 +2,10 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 14 Oct 2026
+
+- Pets planner prepared from WoSTools' public pet catalogue: all 14 pets, level and advancement costs, unlock warnings, material and Wild Mark SvS points, account plan save, and Backpack Target transfer. Source conventions and limits are recorded in `docs/pets-notes.md`.
+
 ## 6 Oct 2026
 
 - **Experts planner** (cache tag `20261006-experts`): catalogue extracted from WoSTools, mockup validated by Adrian, General Expert Sigils target = what own sigils do not cover (his choice).

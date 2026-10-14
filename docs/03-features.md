@@ -90,6 +90,10 @@ Pack × item grid of quantities, with a first "Still short" row (`raw` per item)
   - Best buys for you: top 5 packs by `iv`.
   - Met targets drop out of both rankings.
 
+## Pets planner
+
+Upgrade planner → Pets covers the 14 WoSTools pets across five rarity tiers. Choose current and target levels, including the separate unadvanced and advanced states at each tenth level. The planner sums Pet Food, Taming Manuals, Energizing Potions, Strengthening Serum, and advancement score. Common and Advanced Wild Marks can be entered as planned SvS spend. It estimates how many custom chests would cover missing advancement materials and warns when the previous pet does not meet an unlock requirement. Push to Backpack sets positive material targets to the full plan costs without changing Have. The plan is stored in account metadata as `fox_pet_plan`. See `docs/pets-notes.md` for source, examples, and limits.
+
 ## Experts planner
 
 Upgrade planner → Experts. Relationship and skill levels for the 10 Dawn Academy Experts, totals for Books of Knowledge, sigils, Affinity, learning time and SvS points (sigils and books only). Push to Backpack sets Books, each Expert's own sigils and the General Expert Sigils still uncovered. Full rules and reference checks: `docs/experts-notes.md`.
