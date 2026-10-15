@@ -4,6 +4,10 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Hero Gear planner simplified","Planificador de Hero Gear simplificado","Hero Gear planlayıcısı sadeleştirildi","Hero Gear-planleggeren er forenklet"],
+["Widget planning was removed from Hero Gear. Totals and SvS points now cover the four gear pieces only.","Se eliminó la planificación de widgets de Hero Gear. Los totales y puntos SvS ahora incluyen solo las cuatro piezas de equipo.","Widget planlaması Hero Gear'dan kaldırıldı. Toplamlar ve SvS puanları artık yalnızca dört ekipman parçasını kapsıyor.","Widget-planlegging er fjernet fra Hero Gear. Totaler og SvS-poeng omfatter nå bare de fire utstyrsdelene."],
+["Plan Enhancement and Mastery Forging. Turn your costs into Backpack targets.","Planifica Enhancement y Mastery Forging. Convierte tus costes en objetivos de la mochila.","Enhancement ve Mastery Forging'i planla. Maliyetlerini çanta hedeflerine dönüştür.","Planlegg Enhancement og Mastery Forging. Gjør kostnadene dine om til ryggsekkmål."],
+["Review the targets before applying.","Revisa los objetivos antes de aplicarlos.","Uygulamadan önce hedefleri gözden geçir.","Se gjennom målene før du bruker dem."],
 ["R4 assignment gaps highlighted","Asignaciones R4 pendientes destacadas","Eksik R4 görevlendirmeleri vurgulandı","Manglende R4-tildelinger er fremhevet"],
 ["Tasks with no R4 assigned are red; tasks with exactly one R4 are orange.","Las tareas sin R4 asignado aparecen en rojo; las que tienen exactamente un R4, en naranja.","Atanmış R4'ü olmayan görevler kırmızı, yalnızca bir R4'ü olanlar turuncu gösterilir.","Oppgaver uten tildelt R4 vises i rødt; oppgaver med nøyaktig én R4 vises i oransje."],
 ["Upgrade planner cleaned up","Planificador de mejoras ordenado","Yükseltme planlayıcısı düzenlendi","Oppgraderingsplanleggeren er ryddet opp"],

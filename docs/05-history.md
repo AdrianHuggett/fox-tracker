@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 15 Oct 2026
 
+- Removed the Widgets section from the Hero Gear planner and excluded widget costs and points from its totals, while preserving saved legacy widget values.
 - R4 task rows now highlight assignment gaps: red with no assigned R4, orange with one, and a numeric badge for both states.
 
 ## 14 Oct 2026

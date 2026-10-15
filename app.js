@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-15-hero-widgets',date:'2026-10-15',title:'Hero Gear planner simplified',points:['Widget planning was removed from Hero Gear. Totals and SvS points now cover the four gear pieces only.']},
   {id:'2026-10-15-r4-coverage',date:'2026-10-15',title:'R4 assignment gaps highlighted',points:['Tasks with no R4 assigned are red; tasks with exactly one R4 are orange.']},
   {id:'2026-10-14-troops-tile',date:'2026-10-14',title:'Upgrade planner cleaned up',points:['Removed the unavailable Troops tile from All planners.']},
   {id:'2026-10-14-experts-tile',date:'2026-10-14',title:'Experts planner is ready',points:['Removed the duplicate Coming soon tile. Open Experts from All planners to plan relationships, skills, materials and SvS points.']},
