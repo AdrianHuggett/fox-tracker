@@ -3,6 +3,7 @@
 Newest first. The commit hashes are on `main`.
 
 ## 15 Oct 2026
+- Replaced the Hero Gear planner tile's line icon with a transparent boot cutout from Adrian's screenshot, without the level badge or card background.
 - Replaced the War Academy, Pets and Chief Gear planner tile line icons with transparent cutouts from Adrian's screenshots.
 - Replaced the Experts planner tile's line icon with a transparent cluster of Adrian's three Expert portraits, without their frames or level labels.
 - Replaced the Chief Charms planner tile's line icon with a transparent cluster of Adrian's three charm gems, arranged in a slight overlap.

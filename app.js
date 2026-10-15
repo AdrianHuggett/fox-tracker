@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-15-hero-gear-tile',date:'2026-10-15',title:'Hero Gear tile updated',points:['The Hero Gear planner tile now shows an in-game boot without its level badge or card background.']},
   {id:'2026-10-15-more-planner-art',date:'2026-10-15',title:'More planner tiles updated',points:['War Academy, Pets and Chief Gear now show their in-game artwork.']},
   {id:'2026-10-15-experts-tile',date:'2026-10-15',title:'Experts tile updated',points:['The Experts planner tile now shows three Expert portraits together.']},
   {id:'2026-10-15-charms-tile',date:'2026-10-15',title:'Chief Charms tile updated',points:['The Chief Charms planner tile now shows the three charms together.']},

@@ -12,6 +12,7 @@
 | `tile-chief-charms.png` | Transparent three-charm cluster for the Chief Charms planner tile. |
 | `tile-experts.png` | Transparent three-portrait cluster for the Experts planner tile. |
 | `tile-war-academy.png`, `tile-pets.png`, `tile-chief-gear.png` | Transparent game artwork for their corresponding planner tiles. |
+| `tile-hero-gear.png` | Transparent boot artwork for the Hero Gear planner tile. |
 | `art-hero.jpg`, `art-footer.jpg`, `art-fox.png` | Hero banner, footer art, logo. |
 | `experts.js`, `experts-data.js`, `experts.css` | Dawn Academy Experts planner (`FOXExperts.mount`, bridge `mountExperts()` in `app.js`, plan saved as `fox_expert_plan` in the account metadata). Extraction and rules: `docs/experts-notes.md`. |
 | `i18n.js`, `i18n-data.js` | Language switcher: the engine, and one row per English text with its Spanish, Turkish and Norwegian translation (see "Languages" in `03-features.md`). |

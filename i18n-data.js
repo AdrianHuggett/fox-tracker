@@ -531,6 +531,8 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["Hero Gear tile updated","Tarjeta de Hero Gear actualizada","Hero Gear kutucuğu güncellendi","Hero Gear-flisen er oppdatert"],
+["The Hero Gear planner tile now shows an in-game boot without its level badge or card background.","La tarjeta de Hero Gear ahora muestra una bota del juego sin insignia de nivel ni fondo de tarjeta.","Hero Gear planlayıcısı kutucuğu artık seviye rozeti ve kart arka planı olmadan oyun içi bir bot gösteriyor.","Hero Gear-flisen viser nå en støvel fra spillet uten nivåmerke eller kortbakgrunn."],
 ["More planner tiles updated","Más tarjetas del planificador actualizadas","Daha fazla planlayıcı kutucuğu güncellendi","Flere planleggerfliser er oppdatert"],
 ["War Academy, Pets and Chief Gear now show their in-game artwork.","War Academy, Pets y Chief Gear ahora muestran sus imágenes del juego.","War Academy, Pets ve Chief Gear artık oyun içi görsellerini gösteriyor.","War Academy, Pets og Chief Gear viser nå spillbildene sine."],
 ["Experts tile updated","Tarjeta de expertos actualizada","Uzmanlar kutucuğu güncellendi","Ekspertflisen er oppdatert"],
