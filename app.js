@@ -623,6 +623,9 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-15-more-planner-art',date:'2026-10-15',title:'More planner tiles updated',points:['War Academy, Pets and Chief Gear now show their in-game artwork.']},
+  {id:'2026-10-15-experts-tile',date:'2026-10-15',title:'Experts tile updated',points:['The Experts planner tile now shows three Expert portraits together.']},
+  {id:'2026-10-15-charms-tile',date:'2026-10-15',title:'Chief Charms tile updated',points:['The Chief Charms planner tile now shows the three charms together.']},
   {id:'2026-10-15-furnace-tile',date:'2026-10-15',title:'Buildings tile updated',points:['The Buildings planner tile now shows a clean Furnace image.']},
   {id:'2026-10-15-widgets-planner',date:'2026-10-15',title:'New Widgets planner',points:['Plan Widgets for all 16 mythic heroes from Gen 1 to 5. Save current and target levels, then review and push each hero’s widget target to Backpack.']},
   {id:'2026-10-15-hero-widgets',date:'2026-10-15',title:'Hero Gear planner simplified',points:['Widget planning was removed from Hero Gear. Totals and SvS points now cover the four gear pieces only.']},

@@ -531,6 +531,12 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["More planner tiles updated","Más tarjetas del planificador actualizadas","Daha fazla planlayıcı kutucuğu güncellendi","Flere planleggerfliser er oppdatert"],
+["War Academy, Pets and Chief Gear now show their in-game artwork.","War Academy, Pets y Chief Gear ahora muestran sus imágenes del juego.","War Academy, Pets ve Chief Gear artık oyun içi görsellerini gösteriyor.","War Academy, Pets og Chief Gear viser nå spillbildene sine."],
+["Experts tile updated","Tarjeta de expertos actualizada","Uzmanlar kutucuğu güncellendi","Ekspertflisen er oppdatert"],
+["The Experts planner tile now shows three Expert portraits together.","La tarjeta de expertos ahora muestra juntos los retratos de tres expertos.","Uzmanlar planlayıcısı kutucuğu artık üç uzman portresini birlikte gösteriyor.","Ekspertflisen viser nå tre ekspertportretter samlet."],
+["Chief Charms tile updated","Tarjeta de Chief Charms actualizada","Chief Charms kutucuğu güncellendi","Chief Charms-flisen er oppdatert"],
+["The Chief Charms planner tile now shows the three charms together.","La tarjeta de Chief Charms ahora muestra los tres charms juntos.","Chief Charms planlayıcısı kutucuğu artık üç charmı birlikte gösteriyor.","Chief Charms-flisen viser nå de tre charmene samlet."],
 ["Buildings tile updated","Tarjeta de edificios actualizada","Binalar kutucuğu güncellendi","Bygningsflisen er oppdatert"],
 ["The Buildings planner tile now shows a clean Furnace image.","La tarjeta de edificios ahora muestra una imagen limpia del Furnace.","Binalar planlayıcısı kutucuğu artık temiz bir Furnace görseli gösteriyor.","Bygningsflisen viser nå et rent bilde av Furnace."],
 ["New Widgets planner","Nuevo planificador de widgets","Yeni Widget planlayıcısı","Ny Widget-planlegger"],

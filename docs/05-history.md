@@ -3,6 +3,9 @@
 Newest first. The commit hashes are on `main`.
 
 ## 15 Oct 2026
+- Replaced the War Academy, Pets and Chief Gear planner tile line icons with transparent cutouts from Adrian's screenshots.
+- Replaced the Experts planner tile's line icon with a transparent cluster of Adrian's three Expert portraits, without their frames or level labels.
+- Replaced the Chief Charms planner tile's line icon with a transparent cluster of Adrian's three charm gems, arranged in a slight overlap.
 - Replaced the Buildings planner tile's line icon with a transparent Furnace cutout from Adrian's screenshot, without its nameplate or background.
 - Added a standalone Widgets planner tile for all 16 Gen 1–5 mythic heroes, with current and target levels, per-hero material costs, account save, and reviewed Backpack Target transfer. Source conventions are in `docs/widgets-notes.md`.
 
