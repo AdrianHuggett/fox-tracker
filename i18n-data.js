@@ -531,6 +531,8 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["Buildings tile updated","Tarjeta de edificios actualizada","Binalar kutucuğu güncellendi","Bygningsflisen er oppdatert"],
+["The Buildings planner tile now shows a clean Furnace image.","La tarjeta de edificios ahora muestra una imagen limpia del Furnace.","Binalar planlayıcısı kutucuğu artık temiz bir Furnace görseli gösteriyor.","Bygningsflisen viser nå et rent bilde av Furnace."],
 ["New Widgets planner","Nuevo planificador de widgets","Yeni Widget planlayıcısı","Ny Widget-planlegger"],
 ["Widgets","Widgets","Widget'lar","Widgeter"],
 ["Plan Widgets.","Planifica los widgets.","Widget'ları planla.","Planlegg widgeter."],
