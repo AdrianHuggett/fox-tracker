@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["R4 assignment gaps highlighted","Asignaciones R4 pendientes destacadas","Eksik R4 görevlendirmeleri vurgulandı","Manglende R4-tildelinger er fremhevet"],
+["Tasks with no R4 assigned are red; tasks with exactly one R4 are orange.","Las tareas sin R4 asignado aparecen en rojo; las que tienen exactamente un R4, en naranja.","Atanmış R4'ü olmayan görevler kırmızı, yalnızca bir R4'ü olanlar turuncu gösterilir.","Oppgaver uten tildelt R4 vises i rødt; oppgaver med nøyaktig én R4 vises i oransje."],
 ["Upgrade planner cleaned up","Planificador de mejoras ordenado","Yükseltme planlayıcısı düzenlendi","Oppgraderingsplanleggeren er ryddet opp"],
 ["Removed the unavailable Troops tile from All planners.","Se eliminó la tarjeta de Tropas no disponible de Todos los planificadores.","Kullanılamayan Birlikler kutucuğu Tüm planlayıcılardan kaldırıldı.","Den utilgjengelige Tropper-flisen er fjernet fra Alle planleggere."],
 ["Experts planner is ready","El planificador de expertos está listo","Uzman planlayıcısı hazır","Ekspertplanleggeren er klar"],

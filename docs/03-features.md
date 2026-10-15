@@ -114,6 +114,7 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 
 ## R4 roles
 
+- Every task row shows assignment coverage: red for zero assigned R4s and orange for exactly one. The count includes both Main and Assist roles; tasks with two or more keep the normal style. A numeric badge makes the status readable without relying on color.
 - `r4_members` (names) × `r4_tasks` (grouped into fixed `R4_SECTIONS` in order, then any other section). Each cell is the member's role for the task.
 - **View**: ✓ orange = Main, ✓ grey = Assist. Each task row also shows "Main …, Assist …", its frequency and remarks, and its UTC time with the viewer's local time below. Search covers task names and people.
 - **Workload cards** (`#r4-load`, under the table): one card per R4 with Leads N and Backs up M. Tapping a card sets the search to that name (and scrolls up); tapping it again clears it.

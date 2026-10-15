@@ -415,6 +415,7 @@ function renderR4(){
       esc(sec)+(adm?'<button type="button" class="r4btn r4addt" data-r4="addtask" data-s="'+esc(sec)+'">Add task</button>':'')+'</td></tr>');
     list.forEach(function(t,ti){
       var w=r4Who(t);
+  var assigned=w.main.length+w.help.length, coverage=assigned===0?'none':(assigned===1?'single':'');
       if(!w.main.length&&!w.help.length) open++;
       var loc=r4Local(t.time_utc);
       /* On a phone a list of every name says less than "All R4s" does. */
@@ -430,8 +431,8 @@ function renderR4(){
           '" aria-label="'+esc(m.name+', '+t.name+': '+word+'. Tap to change')+'"><span class="r4n">'+esc(m.name)+'</span></button></td>';
         return '<td class="r4c">'+(r?'<span class="r4dot '+r+'" role="img" aria-label="'+esc(m.name+': '+word)+'" title="'+esc(m.name+': '+word)+'"></span>':'')+'</td>';
       }).join('');
-      out.push('<tr data-q="'+esc((t.name+' '+w.main.join(' ')+' '+w.help.join(' ')+' '+t.remarks).toLowerCase())+'">'+
-        '<td class="r4task">'+(adm?r4In(t,'name','Task name',80):esc(t.name))+'<div class="r4who">'+who+'</div>'+
+  out.push('<tr class="r4taskrow'+(coverage?' r4coverage-'+coverage:'')+'" data-q="'+esc((t.name+' '+w.main.join(' ')+' '+w.help.join(' ')+' '+t.remarks).toLowerCase())+'">'+
+   '<td class="r4task">'+(adm?r4In(t,'name','Task name',80):esc(t.name))+(coverage?'<span class="r4coverage-label">'+assigned+' R4</span>':'')+'<div class="r4who">'+who+'</div>'+
           ((t.freq||t.remarks)&&!dots?'<div class="r4meta">'+esc([t.freq,t.remarks].filter(Boolean).join(' \u00b7 '))+'</div>':'')+'</td>'+cells+
         '<td class="r4freq">'+(adm?r4In(t,'freq','Frequency',40):esc(t.freq||'—'))+'</td>'+
         '<td class="r4rem">'+(adm?r4In(t,'remarks','Remarks',200):esc(t.remarks||''))+'</td>'+
@@ -622,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-15-r4-coverage',date:'2026-10-15',title:'R4 assignment gaps highlighted',points:['Tasks with no R4 assigned are red; tasks with exactly one R4 are orange.']},
   {id:'2026-10-14-troops-tile',date:'2026-10-14',title:'Upgrade planner cleaned up',points:['Removed the unavailable Troops tile from All planners.']},
   {id:'2026-10-14-experts-tile',date:'2026-10-14',title:'Experts planner is ready',points:['Removed the duplicate Coming soon tile. Open Experts from All planners to plan relationships, skills, materials and SvS points.']},
   {id:'2026-10-14-pets',date:'2026-10-14',title:'New Pets planner',points:['Plan all 14 pets from current to target level, including advancement materials, Pet Food, unlock requirements and SvS points.','Review and push material targets to Backpack. Pet plans save to your account.']},

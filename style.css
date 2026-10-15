@@ -648,6 +648,13 @@ footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
 #r4 th.r4m{text-align:center;padding:10px 2px;min-width:34px;font-size:9.5px;letter-spacing:.03em}
 #r4 td.r4c{text-align:center;padding:5px 2px}
 #r4 td.r4task{white-space:nowrap;padding-left:28px;color:#BFD0E2}
+#r4 tr.r4coverage-none>td{background:rgba(255,89,70,.14)}
+#r4 tr.r4coverage-single>td{background:rgba(255,122,61,.12)}
+#r4 tr.r4coverage-none>td.r4task{box-shadow:inset 4px 0 var(--coral);color:#FFD0CA}
+#r4 tr.r4coverage-single>td.r4task{box-shadow:inset 4px 0 var(--orange);color:#FFD4B5}
+#r4 .r4coverage-label{display:inline-block;margin-left:9px;padding:1px 6px;border-radius:4px;font:700 10px "Chakra Petch",sans-serif;vertical-align:1px}
+#r4 tr.r4coverage-none .r4coverage-label{background:var(--coral);color:#04141C}
+#r4 tr.r4coverage-single .r4coverage-label{background:var(--orange);color:#04141C}
 #r4 .r4meta{display:none}
 /* Shrink the fixed-content columns to their content so the spare width goes to
    the task names and remarks, which are the ones that wrap. */
@@ -711,6 +718,10 @@ footer .nlink{align-self:flex-start;font-size:12px;margin-bottom:4px}
  #r4 tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:start;
   padding:7px 12px 7px 28px;border-bottom:1px solid var(--line2)}
  #r4 tbody tr>td{display:block;border:0;padding:0;min-width:0;max-width:none}
+ #r4 tbody tr.r4coverage-none{background:rgba(255,89,70,.14);border-left:4px solid var(--coral);padding-left:24px}
+ #r4 tbody tr.r4coverage-single{background:rgba(255,122,61,.12);border-left:4px solid var(--orange);padding-left:24px}
+ #r4 tbody tr.r4coverage-none>td,#r4 tbody tr.r4coverage-single>td{background:transparent}
+ #r4 tbody tr.r4coverage-none>td.r4task,#r4 tbody tr.r4coverage-single>td.r4task{box-shadow:none}
  #r4 tbody tr.r4sec{display:block;padding:0}
  #r4 tbody tr.r4sec>td{padding:6px 12px}
  #r4 td.r4task{grid-column:1;white-space:normal;font-size:13.5px;line-height:1.3;color:#BFD0E2}
