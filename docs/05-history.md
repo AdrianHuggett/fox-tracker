@@ -3,6 +3,7 @@
 Newest first. The commit hashes are on `main`.
 
 ## 15 Oct 2026
+- Added a standalone Widgets planner tile for all 16 Gen 1–5 mythic heroes, with current and target levels, per-hero material costs, account save, and reviewed Backpack Target transfer. Source conventions are in `docs/widgets-notes.md`.
 
 - Removed the Widgets section from the Hero Gear planner and excluded widget costs and points from its totals, while preserving saved legacy widget values.
 - R4 task rows now highlight assignment gaps: red with no assigned R4, orange with one, and a numeric badge for both states.

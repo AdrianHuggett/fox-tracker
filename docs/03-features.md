@@ -94,6 +94,10 @@ Pack × item grid of quantities, with a first "Still short" row (`raw` per item)
 
 Upgrade planner → Hero Gear plans Enhancement and Mastery Forging for the four gear pieces in each set. Its material totals and SvS points exclude Widgets. Legacy widget levels remain in saved account plans so editing a gear plan does not erase earlier data, but they are not shown or used by this planner.
 
+## Widgets planner
+
+Upgrade planner → Widgets covers all 16 mythic heroes in Gen 1–5, shown in five generation tabs with Gen 1 selected initially. Each hero has a current widget level and target level from 0 to 10. The planner shows the cumulative cost difference, the corresponding Backpack Have and shortfall, and total SvS points. The plan is saved in account metadata as `fox_widget_plan`. Push to Backpack previews the per-hero target quantity and updates only heroes with a positive planned upgrade. See `docs/widgets-notes.md` for the roster and source values.
+
 ## Pets planner
 
 Upgrade planner → Pets covers the 14 WoSTools pets across five rarity tiers. Choose current and target levels, including the separate unadvanced and advanced states at each tenth level. The planner sums Pet Food, Taming Manuals, Energizing Potions, Strengthening Serum, and advancement score. Common and Advanced Wild Marks can be entered as planned SvS spend. It estimates how many custom chests would cover missing advancement materials and warns when the previous pet does not meet an unlock requirement. Push to Backpack sets positive material targets to the full plan costs without changing Have. The plan is stored in account metadata as `fox_pet_plan`. See `docs/pets-notes.md` for source, examples, and limits.

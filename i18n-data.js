@@ -531,6 +531,25 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["New Widgets planner","Nuevo planificador de widgets","Yeni Widget planlayıcısı","Ny Widget-planlegger"],
+["Widgets","Widgets","Widget'lar","Widgeter"],
+["Plan Widgets.","Planifica los widgets.","Widget'ları planla.","Planlegg widgeter."],
+["Set the current and target widget level for each Gen 1–5 mythic hero. Each hero has a separate Backpack target.","Define el nivel actual y objetivo de widgets para cada héroe mítico de las generaciones 1–5. Cada héroe tiene su propio objetivo en la mochila.","1–5. nesil her efsanevi kahraman için mevcut ve hedef Widget seviyesini belirle. Her kahramanın ayrı bir Çanta hedefi vardır.","Angi nåværende og ønsket Widget-nivå for hver mytiske helt fra generasjon 1–5. Hver helt har sitt eget Ryggsekk-mål."],
+["Widgets plan","Plan de widgets","Widget planı","Widget-plan"],
+["Widgets required","Widgets necesarios","Gerekli Widget'lar","Widgeter som kreves"],
+["Still needed","Aún faltan","Hâlâ gereken","Trengs fortsatt"],
+["Heroes planned","Héroes planificados","Planlanan kahramanlar","Planlagte helter"],
+["Hero generation","Generación de héroes","Kahraman nesli","Heltegenerasjon"],
+["Push to Backpack Target","Enviar al objetivo de Mochila","Çanta hedefine aktar","Overfør til Ryggsekk-mål"],
+["Targets are widget quantities for each hero. Heroes without an upgrade keep their existing Backpack targets.","Los objetivos son cantidades de widgets para cada héroe. Los héroes sin mejora conservan sus objetivos actuales en la mochila.","Hedefler her kahraman için Widget miktarıdır. Yükseltme yapılmayan kahramanların Çanta hedefleri korunur.","Målene er antall widgeter per helt. Helter uten oppgradering beholder sine nåværende Ryggsekk-mål."],
+["Update Backpack targets?","¿Actualizar los objetivos de la Mochila?","Çanta hedefleri güncellensin mi?","Oppdatere Ryggsekk-mål?"],
+["Review the widget target for each planned hero.","Revisa el objetivo de widgets de cada héroe planificado.","Planlanan her kahramanın Widget hedefini gözden geçir.","Se gjennom Widget-målet for hver planlagte helt."],
+["Current Backpack quantities stay unchanged.","Las cantidades actuales en la Mochila no cambian.","Mevcut Çanta miktarları değişmez.","Nåværende antall i Ryggsekken endres ikke."],
+["Keep targets","Mantener objetivos","Hedefleri koru","Behold mål"],
+["Apply targets","Aplicar objetivos","Hedefleri uygula","Bruk mål"],
+["Plan saved to your account.","Plan guardado en tu cuenta.","Plan hesabına kaydedildi.","Planen er lagret på kontoen din."],
+["Save your plan to keep these levels in your account.","Guarda el plan para conservar estos niveles en tu cuenta.","Bu seviyeleri hesabında tutmak için planını kaydet.","Lagre planen for å beholde disse nivåene på kontoen din."],
+["Missing Backpack items: {n}.","Faltan objetos en la Mochila: {n}.","Çantada eksik öğeler: {n}.","Mangler i Ryggsekken: {n}."],
 ["{n} {m} {n}","{n} {m} {n}","{n} {m} {n}","{n}. {m} {n}"],
 ["{n} {m}","{n} {m}","{n} {m}","{n}. {m}"]
 ];
