@@ -623,6 +623,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+
+  {id:'2026-10-16-fortress-rewards',date:'2026-10-16',title:'Fortress rewards planner',points:['Select the fortresses and strongholds controlled this round, then plan their 40 or 100 chests and special rewards for alliance members.','Assign rewards manually or generate a participation or rotation proposal, then copy or download the distribution.']},
   {id:'2026-10-16-widget-generations',date:'2026-10-16',title:'Widget generations in Backpack',points:['Each hero Widget in Backpack now shows its generation beside the item name.']},
   {id:'2026-10-16-sticky-planner-nav',date:'2026-10-16',title:'Planner tabs stay visible',points:['The planner page tabs now stay on screen while you scroll.']},
   {id:'2026-10-16-backpack-fold-all',date:'2026-10-16',title:'Backpack category controls',points:['Expand or collapse all Backpack categories in one click.']},
@@ -1323,6 +1325,7 @@ document.addEventListener('click',function(e){
     renderActivePanel();
     if(t.dataset.p==='admin') loadMembers();
     if(t.dataset.p==='r4') loadR4();
+    if(t.dataset.p==='fortress'&&window.FOXFortress) window.FOXFortress.mount($('p-fortress'),U&&U.id);
     if(t.dataset.p==='foxnews') window.FOXNews.mount(SB,ADMIN);
     headroomShow();
     return; }
@@ -1669,7 +1672,7 @@ function mountBuildings(){
   if(window.ResizeObserver)new ResizeObserver(syncHeaderHeight).observe(header);
   else window.addEventListener('resize',syncHeaderHeight);
 })();
-var categoryLast={prep:'dash',alliance:'r4',resources:'matrix'},categoryPages={foxnews:[['foxnews','FOX News']],prep:[['dash','Dashboard'],['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
+var categoryLast={prep:'dash',alliance:'r4',resources:'matrix'},categoryPages={foxnews:[['foxnews','FOX News']],prep:[['dash','Dashboard'],['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles'],['fortress','Fortress rewards']],resources:[['matrix','Pack contents'],['ref','Reference']]};
 function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var heroTitle=document.querySelector('.hero h1');if(heroTitle)heroTitle.innerHTML='<span class="fox">FOX</span> '+(page==='foxnews'?'News':'Prep Tracker');var heroSub=document.querySelector('.hero .sub');if(heroSub){if(!heroSub.dataset.prepText)heroSub.dataset.prepText=heroSub.textContent;heroSub.textContent=page==='foxnews'?'Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.':heroSub.dataset.prepText;}var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'prep';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='planner'||page==='foxnews';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['foxnews','planner','alliance','resources'].indexOf(group)>=0;}
 function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
