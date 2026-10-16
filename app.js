@@ -623,7 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
-  {id:'2026-10-16-fortress-contribution',date:'2026-10-16',title:'Contribution in Fortress rewards',points:['Set each R1–R3 member’s contribution from 1 to 4. R4/R5 do not need a rating.','Automatic distribution now weights the remaining rewards by contribution after giving R4/R5 their maximum.']},
+  {id:'2026-10-16-fortress-contribution',date:'2026-10-16',hidden:true,title:'Contribution in Fortress rewards',points:['Set each R1–R3 member’s contribution from 1 to 4. R4/R5 do not need a rating.','Automatic distribution now weights the remaining rewards by contribution after giving R4/R5 their maximum.']},
   {id:'2026-10-16-fortress-leaders-first',date:'2026-10-16',title:'Leaders first in Fortress rewards',points:['The member list now shows the R5 first, followed by all R4 members. Everyone else keeps their previous order.']},
   {id:'2026-10-16-fortress-member-columns',date:'2026-10-16',title:'Simplified FOX member list',points:['The Fortress rewards member list now shows only the member name, Exclude checkbox, and role.']},
 
@@ -743,10 +743,11 @@ function newsHtml(list){
 }
 function markNewsSeen(){ try{ if(UPDATES.length) localStorage.setItem(NEWS_KEY,UPDATES[0].id); }catch(e){} }
 function openNews(list){
+  list=list.filter(function(u){ return !u.hidden; });
   var d=$('news'); if(!d||!list.length) return;
   $('news-list').innerHTML=newsHtml(list);
   $('news-list').scrollTop=0;
-  $('news-all').hidden=list.length>=UPDATES.length;
+  $('news-all').hidden=list.length>=UPDATES.filter(function(u){ return !u.hidden; }).length;
   if(d.showModal){ if(!d.open) d.showModal(); } else d.setAttribute('open','');
 }
 function closeNews(){
@@ -764,7 +765,9 @@ function maybeShowNews(){
   if(seen===UPDATES[0].id) return;
   var i=-1;
   for(var k=0;k<UPDATES.length;k++) if(UPDATES[k].id===seen){ i=k; break; }
-  openNews(i>0?UPDATES.slice(0,i):UPDATES.slice(0,3));
+  var newest=i>0?UPDATES.slice(0,i):UPDATES.slice(0,3);
+  if(!newest.some(function(u){ return !u.hidden; })){ markNewsSeen(); return; }
+  openNews(newest);
 }
 function wireNews(){
   var d=$('news'); if(!d) return;
