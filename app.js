@@ -624,6 +624,8 @@ document.addEventListener('keydown',function(e){
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
 
+  {id:'2026-10-16-fortress-simple-distribution',date:'2026-10-16',title:'Simpler Fortress rewards distribution',points:['Removed the Participation and Previous rewards columns from the FOX roster.','The automatic proposal gives R4/R5 their maximum first, then splits the remaining rewards evenly among included members.']},
+
   {id:'2026-10-16-fortress-caps',date:'2026-10-16',title:'Fortress reward limits',points:['Known per-player limits are filled in automatically: one standard chest per Fortress, two per Stronghold, ten 1h Speedups at Fortresses No. 4, 8 and 12, and three Pet Chests at Stronghold No. 1.','Other reward limits remain editable until confirmed in game.']},
 
   {id:'2026-10-16-fortress-roster',date:'2026-10-16',title:'FOX roster in Fortress rewards',points:['The Fortress rewards page now includes the 97 members shown in the alliance ranking, with their R1–R5 roles and power snapshot.','Find and edit members while keeping existing reward allocations. Ricky Lahey remains excluded from calculations.']},
