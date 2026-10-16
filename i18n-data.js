@@ -4,6 +4,7 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.","Mantente al día con Whiteout Survival: actualizaciones, anuncios de los desarrolladores y puntos clave, todo en un solo lugar.","Whiteout Survival gelişmelerini takip edin: oyun güncellemeleri, geliştirici duyuruları ve önemli bilgiler tek bir yerde.","Hold deg oppdatert på Whiteout Survival: spilloppdateringer, utviklerkunngjøringer og hovedpunkter, samlet på ett sted."],
 ["FOX News","Noticias FOX","FOX Haberleri","FOX-nyheter"],
 ["Alliance announcements and selected Whiteout Survival news.","Anuncios de la alianza y noticias seleccionadas de Whiteout Survival.","İttifak duyuruları ve seçilmiş Whiteout Survival haberleri.","Alliansekunngjøringer og utvalgte Whiteout Survival-nyheter."],
 ["FOX announcements","Anuncios FOX","FOX duyuruları","FOX-kunngjøringer"],
