@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-fox-news',date:'2026-10-16',title:'FOX News',points:['Alliance announcements and selected Whiteout Survival news.']},
   {id:'2026-10-15-hero-gear-tile',date:'2026-10-15',title:'Hero Gear tile updated',points:['The Hero Gear planner tile now shows an in-game boot without its level badge or card background.']},
   {id:'2026-10-15-more-planner-art',date:'2026-10-15',title:'More planner tiles updated',points:['War Academy, Pets and Chief Gear now show their in-game artwork.']},
   {id:'2026-10-15-experts-tile',date:'2026-10-15',title:'Experts tile updated',points:['The Experts planner tile now shows three Expert portraits together.']},
@@ -1131,6 +1132,7 @@ function checkAdmin(){
       R4ED=ADMIN||!!(r&&r.data&&r.data.r4_editor);
       var at=$('tab-admin'); if(at) at.hidden=!ADMIN; syncCategories();
       if(R4.loaded) renderR4();
+      if($('p-foxnews').classList.contains('on')) window.FOXNews.mount(SB,ADMIN);
       renderRef();
       /* A refresh on the Members tab clicks it before this answer arrives, so the
          list is fetched here once admin rights are known. */
@@ -1311,6 +1313,7 @@ document.addEventListener('click',function(e){
     renderActivePanel();
     if(t.dataset.p==='admin') loadMembers();
     if(t.dataset.p==='r4') loadR4();
+    if(t.dataset.p==='foxnews') window.FOXNews.mount(SB,ADMIN);
     headroomShow();
     return; }
   var pt=t.closest&&t.closest('#packs .gtog');
@@ -1422,8 +1425,8 @@ function isReload(){
 }
 function restoreTab(){
   try{
-    if(!isReload()){ sessionStorage.setItem('fox-tab','dash'); return; }
-    var tb=sessionStorage.getItem('fox-tab');
+    if(!isReload()){ sessionStorage.setItem('fox-tab','foxnews'); var landing=document.querySelector('#navtabs button[data-p="foxnews"]'); if(landing) landing.click(); return; }
+    var tb=sessionStorage.getItem('fox-tab')||'foxnews';
     if(!tb||tb==='dash') return;
     var b=document.querySelector('nav.tabs button[data-p="'+tb+'"]');
     if(b) b.click();
@@ -1638,8 +1641,8 @@ function mountBuildings(){
 /* Per-account charms, saved separately from building plans. */
 
 /* Navigation groups use the existing page switch, including its access checks. */
-var categoryLast={prep:'stock',alliance:'r4',resources:'matrix'},categoryPages={dash:[['dash','Dashboard']],prep:[['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
-function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'dash';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='dash'||page==='planner';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['planner','alliance','resources'].indexOf(group)>=0;}
+var categoryLast={prep:'dash',alliance:'r4',resources:'matrix'},categoryPages={foxnews:[['foxnews','FOX News']],prep:[['dash','Dashboard'],['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles']],resources:[['matrix','Pack contents'],['ref','Reference']]};
+function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var heroTitle=document.querySelector('.hero h1');if(heroTitle)heroTitle.innerHTML='<span class="fox">FOX</span> '+(page==='foxnews'?'News':'Prep Tracker');var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'prep';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='planner'||page==='foxnews';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['foxnews','planner','alliance','resources'].indexOf(group)>=0;}
 function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
 if($('category-sub'))$('category-sub').onclick=function(e){var b=e.target.closest('[data-page]');if(b)goCategoryPage(b.dataset.page);};

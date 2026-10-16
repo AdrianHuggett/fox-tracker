@@ -4,6 +4,11 @@
    window.__MOCK_NO_SESSION = true before load to start on the sign-in screen. */
 (function(){
 var DB = window.__DB = {
+  alliance_news: [
+    {id:6,title:'September Developer Feedback',body:'Planned changes — subject to change; not confirmed live.\nBank deposits and Rush Job: reduced to 23 hours. Advanced Training and Dawn Alliance Commendation: 47 hours.\nCross-State chats: keep existing groups after transferring; higher group creation limit.\nRally leaders and R4/R5: remove all garrison troops in one action.\nHalloween 2026: permanent festival name card planned at 40 million points or a top-25 ranking.\nSvS Field Triage: see which allies used Rebirth Tomes to help revive your troops.',category:'game',pinned:false,source_url:'https://www.whiteoutsurvival.wiki/september-developer-feedback-3/',created_at:'2026-09-30T00:00:00Z'},
+    {id:4,title:'How pack promotion percentages work',body:'Pack percentages use the total value of all included items.\nContents and prices are those shown in the in-game store.\nFOX tip: compare the items with your upgrade needs before buying.',category:'game',pinned:false,source_url:'https://whiteoutsurvival.centurygames.com/newsDetail/?id=36',created_at:'2026-10-15T00:00:00Z'},
+    {id:5,title:'Find your purchase history and receipts',body:'Android: Play Store → Profile → Payments & subscriptions → Budget & history.\niOS: Settings → Media & Purchases → Purchase History.\nFind email receipts using “Century Games”, “Whiteout Survival”, “Purchase” or “Receipt”.\nMissing items? Keep your order details ready for support.',category:'game',pinned:false,source_url:'https://whiteoutsurvival.centurygames.com/newsDetail/?id=32',created_at:'2026-08-17T00:00:00Z'},
+  ],
   settings: [{id:1, next_svs:'2026-10-20', mur:63.4}],
   baselines: [{item:'Charm Designs', usd:0.5}, {item:'Design Plans', usd:2}, {item:'Hardened Alloy', usd:0.01}],
   packs: [{id:1, sort:1, sec:'Daily', grp:'Daily deals', name:'Test pack', icon:'·', price:4.99, pack_value:180, occurrence:'daily'}],

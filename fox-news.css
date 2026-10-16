@@ -1,0 +1,37 @@
+#p-foxnews { max-width: 1120px; margin-inline: auto; }
+.fox-news-heading,.fox-news-actions,#fox-news-filters { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.fox-news-heading { justify-content:space-between; }
+#p-foxnews button,#p-foxnews select { min-height:44px; }
+#p-foxnews button { border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink); padding:10px 16px; font:inherit; cursor:pointer; }
+#p-foxnews button:hover { border-color:var(--ice); }
+#p-foxnews button:disabled { opacity:.55; cursor:wait; }
+#fox-news-filters { margin:20px 0; }
+#fox-news-filters [aria-pressed="true"],#fox-news-save { color:var(--ground); background:var(--ice); }
+#fox-news-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px; padding:8px 0 40px; }
+.fox-news-post { position:relative; padding:0 28px 28px; border:1px solid var(--line); border-radius:16px; background:var(--panel); overflow:hidden; box-shadow:0 12px 28px #0003; }
+.fox-news-banner { display:block; width:calc(100% + 56px); height:220px; margin:0 -28px 24px; object-fit:cover; }
+.fox-banner-alliance { --news-banner:url('news-alliance.png'); }
+.fox-banner-packs { --news-banner:url('news-packs.png'); }
+.fox-banner-world { --news-banner:url('news-world.png'); }
+.fox-banner-receipts { --news-banner:url('news-receipts.png'); }
+.fox-banner-developer { --news-banner:url('news-developer-feedback.png'); }
+.fox-news-post h3 { margin:14px 0; font-size:1.65rem; line-height:1.2; overflow-wrap:anywhere; }
+.fox-news-meta { color:var(--muted); font-size:.875rem; }
+.fox-news-meta strong { color:var(--ice); }
+.fox-news-body { overflow-wrap:anywhere; max-width:72ch; line-height:1.6; padding-left:20px; margin:20px 0 24px; }
+.fox-news-body li { padding-left:4px; margin-bottom:12px; }
+.fox-news-body li::marker { color:var(--ice); }
+.fox-news-post a { color:var(--ice); text-underline-offset:4px; overflow-wrap:anywhere; }
+.fox-news-actions { margin-top:16px; }
+#fox-news-compose { padding:20px; border:1px solid var(--line); margin-block:20px; }
+#fox-news-compose summary { cursor:pointer; font-weight:600; min-height:44px; }
+#fox-news-form { display:grid; gap:16px; margin-top:16px; }
+#fox-news-form label { display:grid; gap:6px; }
+#fox-news-form input:not([type="checkbox"]),#fox-news-form textarea,#fox-news-form select { width:100%; box-sizing:border-box; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:12px; font:inherit; font-size:16px; }
+#fox-news-form .fox-news-pin { display:flex; align-items:center; }
+#p-foxnews :focus-visible { outline:2px solid var(--ice); outline-offset:3px; }
+@media(max-width:700px) {
+ #fox-news-list { grid-template-columns:1fr; gap:22px; }
+ .fox-news-post { padding:0 22px 26px; border-radius:12px; }
+ .fox-news-banner { width:calc(100% + 44px); height:200px; margin:0 -22px 22px; }
+}

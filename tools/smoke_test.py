@@ -14,12 +14,13 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
-TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin']
-CATEGORIES = {'dash':'dash', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance'}
+TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foxnews']
+CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance'}
+CATEGORIES['foxnews'] = 'foxnews'
 
 def open_tab(pg, tab):
     pg.click(f'#category-nav button[data-category="{CATEGORIES[tab]}"]')
-    if tab != 'dash':
+    if tab != 'foxnews':
         button = pg.locator(f'#category-sub button[data-page="{tab}"]')
         if button.count() == 0:
             return False
