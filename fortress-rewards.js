@@ -81,6 +81,11 @@
     save();
   }
   function includedMembers() { return state.members.filter(function (member) { return !member.excluded; }); }
+  function alphabeticalMembers() {
+    return includedMembers().sort(function (a, b) {
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true });
+    });
+  }
   function fullMembers() { return includedMembers().filter(function (member) { return member.role === 'r4' || member.role === 'r5'; }); }
   function integer(value) {
     var n = Number(value);
@@ -234,7 +239,7 @@
       return '<option value="' + reward.id + '"' + (reward.id === activeReward.id ? ' selected' : '') + '>' + escapeHTML(reward.name) + '</option>';
     }).join('') + '</select></label>' : '';
     var allocationRows = activeReward ? '<div class="fr-alloc-card"><h4>' + escapeHTML(activeReward.name) + '<span>' + rewardTotal(activeReward) + ' / ' + integer(activeReward.quantity) + '</span></h4>' +
-      (includedMembers().length ? '<div class="fr-alloc-grid">' + includedMembers().map(function (member) {
+      (includedMembers().length ? '<div class="fr-alloc-grid">' + alphabeticalMembers().map(function (member) {
         var value = assigned(activeReward, member), over = integer(activeReward.cap) && value > integer(activeReward.cap);
         return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + ((member.role === 'r4' || member.role === 'r5') ? ' <em>' + member.role.toUpperCase() + '</em>' : '') + '</span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
       }).join('') + '</div>' : '<p class="fr-empty">Add members to assign rewards.</p>') + '</div>' : '';
