@@ -24,6 +24,13 @@ const path = require('path');
   for(const [group,tab] of [['prep','dash'],['prep','stock'],['prep','packs'],['resources','matrix'],['resources','ref'],['alliance','r4'],['alliance','admin']]) {
    await page.locator(`[data-category="${group}"]`).click();
    await page.locator(`#category-sub [data-page="${tab}"]`).click();
+   if(tab==='stock') {
+    await page.locator('[data-stock-fold="collapse"]').click();
+    if(await page.locator('#stock .gtog[aria-expanded="true"]').count()) throw Error('Collapse all failed');
+    if(await page.locator('#stock tbody tr[data-gn]:not(.hide)').count()) throw Error('Collapsed rows still visible');
+    await page.locator('[data-stock-fold="expand"]').click();
+    if(await page.locator('#stock .gtog[aria-expanded="false"]').count()) throw Error('Expand all failed');
+   }
    await page.waitForTimeout(150);
   }
   if(errors.length) throw Error(errors.join('\n'));

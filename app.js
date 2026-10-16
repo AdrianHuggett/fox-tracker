@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-backpack-fold-all',date:'2026-10-16',title:'Backpack category controls',points:['Expand or collapse all Backpack categories in one click.']},
   {id:'2026-10-16-news-intro',date:'2026-10-16',title:'FOX News',points:['Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.']},
   {id:'2026-10-16-fox-news',date:'2026-10-16',title:'FOX News',points:['Alliance announcements and selected Whiteout Survival news.']},
   {id:'2026-10-15-hero-gear-tile',date:'2026-10-15',title:'Hero Gear tile updated',points:['The Hero Gear planner tile now shows an in-game boot without its level badge or card background.']},
@@ -1324,6 +1325,16 @@ document.addEventListener('click',function(e){
     pt.setAttribute('aria-expanded',String(!PACK_FOLD[section]));
     try{ localStorage.setItem('fox-pack-fold',JSON.stringify(PACK_FOLD)); }catch(err){}
     applyFilters(); return;
+  }
+  var allGroups=t.closest&&t.closest('[data-stock-fold]');
+  if(allGroups){
+    var collapse=allGroups.dataset.stockFold==='collapse';
+    FOLD={};
+    D.items.forEach(function(it){if(collapse) FOLD[it.grp]=1;});
+    [].forEach.call(document.querySelectorAll('#stock .gtog'),function(button){button.setAttribute('aria-expanded',String(!collapse));});
+    try{localStorage.setItem('fox-fold',JSON.stringify(FOLD));}catch(err){}
+    applyFilters();
+    return;
   }
   var gt=t.closest&&t.closest('#stock .gtog');
   if(gt){
