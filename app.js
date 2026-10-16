@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-fortress-r4-access',date:'2026-10-16',hidden:true,title:'Fortress rewards access',points:['The Fortress rewards page is available to R4 editors and the site admin.']},
   {id:'2026-10-16-fortress-contribution',date:'2026-10-16',hidden:true,title:'Contribution in Fortress rewards',points:['Set each R1–R3 member’s contribution from 1 to 4. R4/R5 do not need a rating.','Automatic distribution now weights the remaining rewards by contribution after giving R4/R5 their maximum.']},
   {id:'2026-10-16-fortress-leaders-first',date:'2026-10-16',title:'Leaders first in Fortress rewards',points:['The member list now shows the R5 first, followed by all R4 members. Everyone else keeps their previous order.']},
   {id:'2026-10-16-fortress-member-columns',date:'2026-10-16',title:'Simplified FOX member list',points:['The Fortress rewards member list now shows only the member name, Exclude checkbox, and role.']},
@@ -1150,21 +1151,16 @@ function touchProfile(){
 }
 /* Asked for on its own so a project without the admin column simply answers "no"
    and the tab stays hidden, rather than breaking the whole load. */
-function checkAdmin(){
-  if(!U||!SB) return;
-  try{
-    SB.from('profiles').select('is_admin,r4_editor').eq('id',U.id).maybeSingle().then(function(r){
-      ADMIN=!!(r&&r.data&&r.data.is_admin);
-      R4ED=ADMIN||!!(r&&r.data&&r.data.r4_editor);
-      var at=$('tab-admin'); if(at) at.hidden=!ADMIN; syncCategories();
-      if(R4.loaded) renderR4();
-      if($('p-foxnews').classList.contains('on')) window.FOXNews.mount(SB,ADMIN);
-      renderRef();
-      /* A refresh on the Members tab clicks it before this answer arrives, so the
-         list is fetched here once admin rights are known. */
-      var pa=$('p-admin'); if(ADMIN&&pa&&pa.classList.contains('on')) loadMembers();
-    },function(){});
-  }catch(e){}
+function checkAdmin(profile){
+  ADMIN=!!(profile&&profile.is_admin);
+  R4ED=ADMIN||!!(profile&&profile.r4_editor);
+  var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
+  var ft=$('tab-fortress'); if(ft) ft.hidden=!R4ED;
+  syncCategories();
+  if(R4.loaded) renderR4();
+  if($('p-foxnews').classList.contains('on')) window.FOXNews.mount(SB,ADMIN);
+  renderRef();
+  var pa=$('p-admin'); if(ADMIN&&pa&&pa.classList.contains('on')) loadMembers();
 }
 
 function renderTop(){
@@ -1330,6 +1326,7 @@ document.addEventListener('input',function(e){
 document.addEventListener('click',function(e){
   var t=e.target;
   if(t.matches('nav.tabs button[data-p]')){
+    if(t.dataset.p==='fortress'&&!R4ED) return;
     [].forEach.call(document.querySelectorAll('nav.tabs button[data-p]'),function(b){
       b.setAttribute('aria-selected',String(b===t)); });
     [].forEach.call(document.querySelectorAll('.panel'),function(p){
@@ -1416,7 +1413,7 @@ async function loadAll(){
     loadPackContents(),
     SB.from('user_items').select('*').order('sort'),
     SB.from('user_packs').select('*'),
-    SB.from('profiles').select('currency_code,currency_symbol,currency_rate').eq('id',U.id).maybeSingle()
+    SB.from('profiles').select('currency_code,currency_symbol,currency_rate,is_admin,r4_editor').eq('id',U.id).maybeSingle()
   ]);
   var err=r.find(function(x){ return x.error; });
   if(err){ fatal('Could not load your tracker',err.error.message); return; }
@@ -1443,7 +1440,7 @@ async function loadAll(){
   if(!D.items.length){ say('Your backpack is empty — ask Adrian to set your account up.',1); }
   await loadHistory();
   await loadExch();
-  touchProfile(); checkAdmin();
+  touchProfile(); checkAdmin(prof);
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
   showApp(); render(); say('saved');
   restoreTab();
@@ -1464,6 +1461,7 @@ function restoreTab(){
   try{
     if(!isReload()){ sessionStorage.setItem('fox-tab','foxnews'); var landing=document.querySelector('#navtabs button[data-p="foxnews"]'); if(landing) landing.click(); return; }
     var tb=sessionStorage.getItem('fox-tab')||'foxnews';
+    if(tb==='fortress'&&!R4ED) tb='r4';
     if(!tb||tb==='dash') return;
     var b=document.querySelector('nav.tabs button[data-p="'+tb+'"]');
     if(b) b.click();
@@ -1687,8 +1685,8 @@ function mountBuildings(){
   else window.addEventListener('resize',syncHeaderHeight);
 })();
 var categoryLast={prep:'dash',alliance:'r4',resources:'matrix'},categoryPages={foxnews:[['foxnews','FOX News']],prep:[['dash','Dashboard'],['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles'],['fortress','Fortress rewards']],resources:[['matrix','Pack contents'],['ref','Reference']]};
-function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var heroTitle=document.querySelector('.hero h1');if(heroTitle)heroTitle.innerHTML='<span class="fox">FOX</span> '+(page==='foxnews'?'News':'Prep Tracker');var heroSub=document.querySelector('.hero .sub');if(heroSub){if(!heroSub.dataset.prepText)heroSub.dataset.prepText=heroSub.textContent;heroSub.textContent=page==='foxnews'?'Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.':heroSub.dataset.prepText;}var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'prep';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return p[0]!=='admin'||ADMIN;}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='planner'||page==='foxnews';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['foxnews','planner','alliance','resources'].indexOf(group)>=0;}
-function goCategoryPage(page){if(page==='admin'&&!ADMIN)page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
+function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var heroTitle=document.querySelector('.hero h1');if(heroTitle)heroTitle.innerHTML='<span class="fox">FOX</span> '+(page==='foxnews'?'News':'Prep Tracker');var heroSub=document.querySelector('.hero .sub');if(heroSub){if(!heroSub.dataset.prepText)heroSub.dataset.prepText=heroSub.textContent;heroSub.textContent=page==='foxnews'?'Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.':heroSub.dataset.prepText;}var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'prep';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return (p[0]!=='admin'||ADMIN)&&(p[0]!=='fortress'||R4ED);}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='planner'||page==='foxnews';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['foxnews','planner','alliance','resources'].indexOf(group)>=0;}
+function goCategoryPage(page){if((page==='admin'&&!ADMIN)||(page==='fortress'&&!R4ED))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
 if($('category-sub'))$('category-sub').onclick=function(e){var b=e.target.closest('[data-page]');if(b)goCategoryPage(b.dataset.page);};
 if($('p-planner'))$('p-planner').onclick=function(e){var b=e.target.closest('[data-go]');if(b)goCategoryPage(b.dataset.go);};

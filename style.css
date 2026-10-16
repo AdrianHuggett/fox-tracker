@@ -50,6 +50,7 @@ nav.tabs button{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:
  background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);
  padding:0 11px;height:66px;cursor:pointer;white-space:nowrap;letter-spacing:.01em}
 nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[hidden]{display:none}
 nav.tabs button[aria-selected="true"]{color:var(--ice);border-bottom-color:var(--ice)}
 
 #userbar{display:flex;align-items:center;gap:10px;flex:none;margin-left:auto}
