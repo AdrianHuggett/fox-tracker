@@ -200,7 +200,11 @@
     var oldList = root.querySelector('.fr-members-scroll');
     var listScroll = oldList ? oldList.scrollTop : 0;
     var s = stats();
-    var memberRows = state.members.map(function (member) {
+    var memberRows = state.members.slice().sort(function (a, b) {
+      var aGroup = a.role === 'r5' ? 0 : a.role === 'r4' ? 1 : 2;
+      var bGroup = b.role === 'r5' ? 0 : b.role === 'r4' ? 1 : 2;
+      return aGroup - bGroup || state.members.indexOf(a) - state.members.indexOf(b);
+    }).map(function (member) {
       return '<tr data-member-name="' + escapeHTML(member.name.toLowerCase()) + '" class="' + (member.excluded ? 'fr-ignored' : '') + '"><th scope="row"><div class="fr-member-name"><input type="text" maxlength="60" value="' + escapeHTML(member.name) + '" data-member="' + member.id + '" data-field="name" aria-label="Member name"><button type="button" class="fr-remove" data-remove-member="' + member.id + '" aria-label="Remove ' + escapeHTML(member.name) + '">×</button></div></th>' +
         '<td><input type="checkbox" data-member="' + member.id + '" data-field="excluded" aria-label="Exclude ' + escapeHTML(member.name) + ' from calculations"' + (member.excluded ? ' checked' : '') + '></td>' +
         '<td><select data-member="' + member.id + '" data-field="role" aria-label="Role for ' + escapeHTML(member.name) + '">' + roleOptions(member) + '</select></td></tr>';
