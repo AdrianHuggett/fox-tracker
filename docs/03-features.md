@@ -90,6 +90,10 @@ Pack × item grid of quantities, with a first "Still short" row (`raw` per item)
   - Best buys for you: top 5 packs by `iv`.
   - Met targets drop out of both rankings.
 
+## Buildings planner
+
+The Buildings planner stores each completed FC sub-stage as an integer: FC 6 is 30, FC 6 · 3/5 is 33, and FC 7 is 35. Costs sum the remaining catalogue steps from current (inclusive) to target (exclusive). Partial labels use the completed FC level (`floor(stage/5)`), with the first four stages after Level 30 shown as Level 30 · 1/5 through 4/5. Saved partial-level choices made before 16 Oct 2026 should be reviewed because the old labels were one FC level ahead; their stored numeric stages were not changed.
+
 ## Hero Gear planner
 
 Upgrade planner → Hero Gear plans Enhancement and Mastery Forging for the four gear pieces in each set. Its material totals and SvS points exclude Widgets. Legacy widget levels remain in saved account plans so editing a gear plan does not erase earlier data, but they are not shown or used by this planner.

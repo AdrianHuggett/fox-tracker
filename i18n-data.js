@@ -563,6 +563,8 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["Building partial levels corrected","Niveles parciales de edificios corregidos","Binaların ara seviyeleri düzeltildi","Delnivåer for bygninger er rettet"],
+["Partial FC level labels now match completed stages. FC {n} · {n}/{n} to FC {n} counts only the final two stages. Review saved building plans with partial levels.","Las etiquetas de niveles FC parciales ahora coinciden con las etapas completadas. De FC {n} · {n}/{n} a FC {n} solo se cuentan las dos últimas etapas. Revisa los planes guardados con niveles parciales.","Ara FC seviye etiketleri artık tamamlanan aşamalarla eşleşiyor. FC {n} · {n}/{n}'ten FC {n}'ye yalnızca son iki aşama sayılır. Ara seviyeleri olan kayıtlı bina planlarını gözden geçir.","Etikettene for delnivåer i FC samsvarer nå med fullførte trinn. Fra FC {n} · {n}/{n} til FC {n} telles bare de to siste trinnene. Se gjennom lagrede byggeplaner med delnivåer."],
 ["Hero Gear tile updated","Tarjeta de Hero Gear actualizada","Hero Gear kutucuğu güncellendi","Hero Gear-flisen er oppdatert"],
 ["The Hero Gear planner tile now shows an in-game boot without its level badge or card background.","La tarjeta de Hero Gear ahora muestra una bota del juego sin insignia de nivel ni fondo de tarjeta.","Hero Gear planlayıcısı kutucuğu artık seviye rozeti ve kart arka planı olmadan oyun içi bir bot gösteriyor.","Hero Gear-flisen viser nå en støvel fra spillet uten nivåmerke eller kortbakgrunn."],
 ["More planner tiles updated","Más tarjetas del planificador actualizadas","Daha fazla planlayıcı kutucuğu güncellendi","Flere planleggerfliser er oppdatert"],

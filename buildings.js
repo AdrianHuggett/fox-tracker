@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 var catalog=window.FOX_BUILDING_DATA, buildings=catalog.buildings;
-function stage(n){return n===0?'Level 30':n%5?'FC '+Math.ceil(n/5)+' · '+(n%5)+'/5':'FC '+n/5;}
+function stage(n){return n===0?'Level 30':n%5?(n<5?'Level 30':'FC '+Math.floor(n/5))+' · '+(n%5)+'/5':'FC '+n/5;}
 function clean(rows){var seen={};return (Array.isArray(rows)?rows:[]).filter(function(r){var b=buildings.find(function(b){return b.id===r.id;});if(!b||seen[r.id]||!Number.isInteger(r.from)||!Number.isInteger(r.to)||r.from<b.start||r.to>50||r.to<=r.from)return false;seen[r.id]=true;return true;}).map(function(r){return {id:r.id,from:r.from,to:r.to};});}
 function calculate(rows){var total={fc:0,rfc:0,rows:[]};clean(rows).forEach(function(r){var b=buildings.find(function(b){return b.id===r.id;}),x={id:r.id,fc:0,rfc:0,requires:[]};for(var n=r.from;n<r.to;n++){var s=b.steps[n-b.start];x.fc+=s.fc;x.rfc+=s.rfc;if(s.requires&&x.requires.indexOf(s.requires)<0)x.requires.push(s.requires);}total.fc+=x.fc;total.rfc+=x.rfc;total.rows.push(x);});total.points=total.fc*2000+total.rfc*30000;return total;}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}

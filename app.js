@@ -626,6 +626,7 @@ var UPDATES=[
   {id:'2026-10-16-backpack-fold-all',date:'2026-10-16',title:'Backpack category controls',points:['Expand or collapse all Backpack categories in one click.']},
   {id:'2026-10-16-news-intro',date:'2026-10-16',title:'FOX News',points:['Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.']},
   {id:'2026-10-16-fox-news',date:'2026-10-16',title:'FOX News',points:['Alliance announcements and selected Whiteout Survival news.']},
+  {id:'2026-10-16-building-stages',date:'2026-10-16',title:'Building partial levels corrected',points:['Partial FC level labels now match completed stages. FC 6 · 3/5 to FC 7 counts only the final two stages. Review saved building plans with partial levels.']},
   {id:'2026-10-15-hero-gear-tile',date:'2026-10-15',title:'Hero Gear tile updated',points:['The Hero Gear planner tile now shows an in-game boot without its level badge or card background.']},
   {id:'2026-10-15-more-planner-art',date:'2026-10-15',title:'More planner tiles updated',points:['War Academy, Pets and Chief Gear now show their in-game artwork.']},
   {id:'2026-10-15-experts-tile',date:'2026-10-15',title:'Experts tile updated',points:['The Experts planner tile now shows three Expert portraits together.']},
