@@ -833,6 +833,8 @@ html[lang="nb"] #p-charms .cost:before,html[lang="nb"] #p-charms .phone .cost:be
 .fr-scroll{overflow-x:auto}.fr-card table{width:100%;border-collapse:collapse;text-align:left}.fr-card th,.fr-card td{border-bottom:1px solid var(--line);padding:7px 6px}
 .fr-card thead th{color:var(--muted);font-size:11px;font-weight:500;white-space:nowrap}.fr-card tbody th{font-weight:500;min-width:100px}
 .fr-card table input[type=number]{width:76px}.fr-card table input[type=text]{width:100%;min-width:150px}
+.fr-card table select{min-width:82px}.fr-card table input[type=checkbox]{accent-color:var(--coral)}
+.fr-card tr.fr-ignored{opacity:.55}.fr-alloc-grid em{font-style:normal;font-size:10px;color:var(--gold);margin-left:3px}
 .fr-remove{border:0;background:none;color:var(--muted);font-size:20px!important;padding:0 5px}.fr-remove:hover{color:var(--coral)}
 .fr-note{font-size:12px;color:var(--faint)!important;margin:11px 0 0!important}.fr-empty{padding:18px;border:1px dashed var(--line);border-radius:6px;text-align:center}
 .fr-controls{display:flex;align-items:end;gap:9px;flex-wrap:wrap}.fr-controls label{display:grid;gap:3px;color:var(--muted);font-size:12px}.fr-controls select{min-width:170px}

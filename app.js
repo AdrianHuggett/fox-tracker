@@ -624,6 +624,8 @@ document.addEventListener('keydown',function(e){
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
 
+  {id:'2026-10-16-fortress-leaders',date:'2026-10-16',title:'FOX leaders in Fortress rewards',points:['FOX R5 and R4 leaders are listed in Fortress rewards. Ricky Lahey is visible but excluded from distribution calculations.','Set each reward’s per-player maximum to give R4/R5 their full allocation before distributing the remainder.']},
+
   {id:'2026-10-16-fortress-rewards',date:'2026-10-16',title:'Fortress rewards planner',points:['Select the fortresses and strongholds controlled this round, then plan their 40 or 100 chests and special rewards for alliance members.','Assign rewards manually or generate a participation or rotation proposal, then copy or download the distribution.']},
   {id:'2026-10-16-widget-generations',date:'2026-10-16',title:'Widget generations in Backpack',points:['Each hero Widget in Backpack now shows its generation beside the item name.']},
   {id:'2026-10-16-sticky-planner-nav',date:'2026-10-16',title:'Planner tabs stay visible',points:['The planner page tabs now stay on screen while you scroll.']},

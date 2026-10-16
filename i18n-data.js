@@ -651,5 +651,13 @@ window.I18N_ROWS=[
 ["Distribution copied.","Reparto copiado.","Dağıtım kopyalandı.","Fordelingen er kopiert."],
 ["Copy failed. Use Download CSV.","No se pudo copiar. Usa Descargar CSV.","Kopyalanamadı. CSV indir seçeneğini kullanın.","Kopiering mislyktes. Bruk Last ned CSV."],
 ["Clipboard unavailable. Use Download CSV.","Portapapeles no disponible. Usa Descargar CSV.","Pano kullanılamıyor. CSV indir seçeneğini kullanın.","Utklippstavlen er utilgjengelig. Bruk Last ned CSV."],
-["Automatic proposals support up to 5,000 units per reward pool.","Las propuestas automáticas admiten hasta 5000 unidades por lote.","Otomatik öneriler ödül havuzu başına en fazla 5.000 birimi destekler.","Automatiske forslag støtter opptil 5 000 enheter per belønningspulje."]
+["Automatic proposals support up to 5,000 units per reward pool.","Las propuestas automáticas admiten hasta 5000 unidades por lote.","Otomatik öneriler ödül havuzu başına en fazla 5.000 birimi destekler.","Automatiske forslag støtter opptil 5 000 enheter per belønningspulje."],
+["R4/R5 receive the per-player maximum. Excluded members, including Ricky Lahey, are ignored. Paste one additional name per line.","R4/R5 reciben el máximo por jugador. Los miembros excluidos, incluido Ricky Lahey, no se cuentan. Pega un nombre adicional por línea.","R4/R5 oyuncu başına azami miktarı alır. Ricky Lahey dahil dışlanan üyeler hesaplanmaz. Her satıra bir üye daha yapıştırın.","R4/R5 får maksimum per spiller. Utelatte medlemmer, inkludert Ricky Lahey, tas ikke med. Lim inn ett nytt navn per linje."],
+["Role","Rol","Rol","Rolle"],
+["Exclude","Excluir","Hariç tut","Utelat"],
+["Enter the in-game per-player maximum for each pool before generating a full R4/R5 allocation.","Introduce el máximo por jugador del juego para cada lote antes de generar la asignación completa de R4/R5.","Tam R4/R5 dağıtımı oluşturmadan önce her havuz için oyundaki oyuncu başına azami miktarı girin.","Angi spillets maksimum per spiller for hver pulje før du lager full R4/R5-tildeling."],
+["{n} R4/R5 members are not at the maximum.","{n} miembros R4/R5 no tienen el máximo.","{n} R4/R5 üyesi azami miktarda değil.","{n} R4/R5-medlemmer har ikke maksimum."],
+["set the per-player maximum for R4/R5.","indica el máximo por jugador para R4/R5.","R4/R5 için oyuncu başına azami miktarı belirleyin.","angi maksimum per spiller for R4/R5."],
+["not enough rewards to give every R4/R5 the maximum.","no hay suficientes recompensas para dar el máximo a cada R4/R5.","Her R4/R5'e azami miktarı vermek için yeterli ödül yok.","ikke nok belønninger til å gi hver R4/R5 maksimum."],
+["enter a per-player limit and enough rewards for every R4/R5.","indica un límite por jugador y suficientes recompensas para cada R4/R5.","Oyuncu başına sınırı ve her R4/R5 için yeterli ödülü girin.","angi en grense per spiller og nok belønninger til hver R4/R5."]
 ];

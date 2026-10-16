@@ -22,7 +22,33 @@
     { id: 's3', label: 'Stronghold No. 3', amount: 600 },
     { id: 's4', label: 'Stronghold No. 4', amount: 150 }
   ];
-  function empty() { return { members: [], rewards: [], sites: [], allocation: {}, mode: 'manual' }; }
+  var LEADERS = [
+    { name: 'Jim Lahey', role: 'r5' },
+    { name: 'Lord Solo', role: 'r4' },
+    { name: 'ADRIAN', role: 'r4' },
+    { name: 'xxLUNAxx', role: 'r4' },
+    { name: 'SkyMnky', role: 'r4' },
+    { name: 'Talie', role: 'r4' },
+    { name: 'RiMa', role: 'r4' },
+    { name: 'PinkTaco', role: 'r4' },
+    { name: 'MayBJulian', role: 'r4' },
+    { name: 'Chlebooo69', role: 'r4' },
+    { name: 'icardifox', role: 'r4' },
+    { name: 'Ricky Lahey', role: 'r4', excluded: true }
+  ];
+  function empty() { return { members: [], rewards: [], sites: [], allocation: {}, mode: 'manual', leadersSeeded: false }; }
+  function seedLeaders() {
+    if (state.leadersSeeded) return;
+    LEADERS.forEach(function (leader) {
+      var member = state.members.find(function (m) { return m.name.toLowerCase() === leader.name.toLowerCase(); });
+      if (member) { member.role = leader.role; member.excluded = !!leader.excluded; }
+      else state.members.push({ id: id(), name: leader.name, role: leader.role, excluded: !!leader.excluded, score: 1, previous: 0 });
+    });
+    state.leadersSeeded = true;
+    save();
+  }
+  function includedMembers() { return state.members.filter(function (member) { return !member.excluded; }); }
+  function fullMembers() { return includedMembers().filter(function (member) { return member.role === 'r4' || member.role === 'r5'; }); }
   function integer(value) {
     var n = Number(value);
     return Number.isFinite(n) ? Math.max(0, Math.min(100000, Math.floor(n))) : 0;
@@ -40,15 +66,18 @@
         state.sites = Array.isArray(state.sites) ? state.sites : [];
         state.allocation = state.allocation || {};
         state.mode = ['manual', 'participation', 'rotation'].indexOf(state.mode) >= 0 ? state.mode : 'manual';
+        seedLeaders();
         return;
       }
     } catch (e) { /* Start with an empty draft if browser storage is unavailable. */ }
     state = empty();
+    seedLeaders();
   }
   function save() {
     try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (e) { /* Export remains available. */ }
   }
   function assigned(reward, member) {
+    if (member.excluded) return 0;
     return integer((state.allocation[reward.id] || {})[member.id]);
   }
   function setAssigned(reward, member, count) {
@@ -56,7 +85,7 @@
     state.allocation[reward.id][member.id] = integer(count);
   }
   function rewardTotal(reward) {
-    return state.members.reduce(function (sum, member) { return sum + assigned(reward, member); }, 0);
+    return includedMembers().reduce(function (sum, member) { return sum + assigned(reward, member); }, 0);
   }
   function memberTotal(member) {
     return state.rewards.reduce(function (sum, reward) { return sum + assigned(reward, member); }, 0);
@@ -68,10 +97,19 @@
       available += quantity;
       allocated += total;
       if (total > quantity) issues.push(reward.name + ': ' + (total - quantity) + ' above available quantity.');
-      state.members.forEach(function (member) {
+      includedMembers().forEach(function (member) {
         if (cap && assigned(reward, member) > cap)
           issues.push(member.name + ' / ' + reward.name + ': above per-player limit.');
       });
+      if (fullMembers().length) {
+        if (!cap) issues.push(reward.name + ': set the per-player maximum for R4/R5.');
+        else if (fullMembers().length * cap > quantity)
+          issues.push(reward.name + ': not enough rewards to give every R4/R5 the maximum.');
+        else {
+          var missing = fullMembers().filter(function (member) { return assigned(reward, member) !== cap; }).length;
+          if (missing) issues.push(reward.name + ': ' + missing + ' R4/R5 members are not at the maximum.');
+        }
+      }
     });
     return { available: available, allocated: allocated, issues: issues };
   }
@@ -80,13 +118,22 @@
       message('Automatic proposals support up to 5,000 units per reward pool.');
       return;
     }
+    var leaders = fullMembers();
+    var impossible = state.rewards.find(function (reward) {
+      return leaders.length && (!integer(reward.cap) || leaders.length * integer(reward.cap) > integer(reward.quantity));
+    });
+    if (impossible) {
+      message(impossible.name + ': enter a per-player limit and enough rewards for every R4/R5.');
+      return;
+    }
     var awarded = {};
-    state.members.forEach(function (member) { awarded[member.id] = 0; });
+    includedMembers().forEach(function (member) { awarded[member.id] = 0; });
     state.allocation = {};
     state.rewards.forEach(function (reward) {
       var quantity = integer(reward.quantity), cap = integer(reward.cap);
-      for (var unit = 0; unit < quantity; unit++) {
-        var candidates = state.members.filter(function (member) {
+      leaders.forEach(function (member) { setAssigned(reward, member, cap); awarded[member.id] += cap; });
+      for (var unit = leaders.length * cap; unit < quantity; unit++) {
+        var candidates = includedMembers().filter(function (member) {
           return (!cap || assigned(reward, member) < cap) &&
             (state.mode !== 'participation' || Number(member.score) > 0);
         });
@@ -114,7 +161,9 @@
     if (!root) return;
     var s = stats();
     var memberRows = state.members.map(function (member) {
-      return '<tr><th scope="row">' + escapeHTML(member.name) + '</th>' +
+      return '<tr class="' + (member.excluded ? 'fr-ignored' : '') + '"><th scope="row"><input type="text" maxlength="60" value="' + escapeHTML(member.name) + '" data-member="' + member.id + '" data-field="name" aria-label="Member name"></th>' +
+        '<td><select data-member="' + member.id + '" data-field="role" aria-label="Role for ' + escapeHTML(member.name) + '"><option value="member"' + (!member.role || member.role === 'member' ? ' selected' : '') + '>Member</option><option value="r4"' + (member.role === 'r4' ? ' selected' : '') + '>R4</option><option value="r5"' + (member.role === 'r5' ? ' selected' : '') + '>R5</option></select></td>' +
+        '<td><input type="checkbox" data-member="' + member.id + '" data-field="excluded" aria-label="Exclude ' + escapeHTML(member.name) + ' from calculations"' + (member.excluded ? ' checked' : '') + '></td>' +
         '<td><input type="number" min="0" max="100000" value="' + integer(member.score) + '" data-member="' + member.id + '" data-field="score" aria-label="Participation score for ' + escapeHTML(member.name) + '"></td>' +
         '<td><input type="number" min="0" max="100000" value="' + integer(member.previous) + '" data-member="' + member.id + '" data-field="previous" aria-label="Previous rewards for ' + escapeHTML(member.name) + '"></td>' +
         '<td><strong>' + memberTotal(member) + '</strong></td>' +
@@ -130,9 +179,9 @@
     }).join('');
     var allocationRows = state.rewards.map(function (reward) {
       return '<div class="fr-alloc-card"><h4>' + escapeHTML(reward.name) + '<span>' + rewardTotal(reward) + ' / ' + integer(reward.quantity) + '</span></h4>' +
-        (state.members.length ? '<div class="fr-alloc-grid">' + state.members.map(function (member) {
+        (includedMembers().length ? '<div class="fr-alloc-grid">' + includedMembers().map(function (member) {
           var value = assigned(reward, member), over = integer(reward.cap) && value > integer(reward.cap);
-          return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + '</span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + reward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(reward.name + ' for ' + member.name) + '"></label>';
+          return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + ((member.role === 'r4' || member.role === 'r5') ? ' <em>' + member.role.toUpperCase() + '</em>' : '') + '</span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + reward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(reward.name + ' for ' + member.name) + '"></label>';
         }).join('') + '</div>' : '<p class="fr-empty">Add members to assign rewards.</p>') + '</div>';
     }).join('');
     var siteCards = SITES.map(function (site) {
@@ -143,11 +192,11 @@
     root.innerHTML = '<div class="fr-head"><div><h2>Fortress rewards</h2><p>Prepare an alliance distribution, then copy it for R4/R5 assignment in game.</p></div><span class="fr-local">Saved in this browser</span></div>' +
       '<div class="fr-layout"><div class="fr-main">' +
       '<section class="fr-card"><div class="fr-card-head"><h3>Current sites</h3><span>' + state.sites.length + ' selected</span></div><p>Select only the fortresses and strongholds your alliance currently controls. Their chests and special rewards are added below.</p><div class="fr-sites">' + siteCards + '</div><p class="fr-note">Special reward names can be edited in the reward pools.</p></section>' +
-      '<section class="fr-card"><div class="fr-card-head"><h3>1. Members</h3><span>' + state.members.length + '</span></div><p>Paste one name per line. Existing names are kept.</p>' +
+      '<section class="fr-card"><div class="fr-card-head"><h3>1. Members</h3><span>' + state.members.length + '</span></div><p>R4/R5 receive the per-player maximum. Excluded members, including Ricky Lahey, are ignored. Paste one additional name per line.</p>' +
       '<div class="fr-add"><textarea id="fr-names" rows="3" placeholder="One member per line" aria-label="Member names"></textarea><button type="button" class="fr-primary" data-action="add-members">Add members</button></div>' +
-      (state.members.length ? '<div class="fr-scroll"><table><thead><tr><th>Member</th><th>Participation</th><th>Previous rewards</th><th>Assigned now</th><th></th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
+      (state.members.length ? '<div class="fr-scroll"><table><thead><tr><th>Member</th><th>Role</th><th>Exclude</th><th>Participation</th><th>Previous rewards</th><th>Assigned now</th><th></th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
       '<p class="fr-note">Participation is a relative score; previous rewards are used for rotation.</p></section>' +
-      '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter only rewards R4/R5 can assign. A limit of 0 means no per-player cap.</p>' +
+      '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before generating a full R4/R5 allocation.</p>' +
       '<div class="fr-add fr-add-reward"><input id="fr-reward-name" type="text" maxlength="80" placeholder="Reward name" aria-label="Reward name"><input id="fr-reward-quantity" type="number" min="1" max="100000" value="1" aria-label="Available quantity"><input id="fr-reward-cap" type="number" min="0" max="100000" value="0" aria-label="Per-player limit"><button type="button" class="fr-primary" data-action="add-reward">Add reward</button></div>' +
       (state.rewards.length ? '<div class="fr-scroll"><table><thead><tr><th>Reward</th><th>Available</th><th>Limit / player</th><th>Assigned</th><th></th></tr></thead><tbody>' + rewardRows + '</tbody></table></div>' : '<p class="fr-empty">No reward pools yet.</p>') + '</section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>3. Distribution</h3></div><div class="fr-controls"><label>Method<select id="fr-mode"><option value="manual"' + (state.mode === 'manual' ? ' selected' : '') + '>Manual</option><option value="participation"' + (state.mode === 'participation' ? ' selected' : '') + '>By participation</option><option value="rotation"' + (state.mode === 'rotation' ? ' selected' : '') + '>Fair rotation</option></select></label><button type="button" class="fr-primary" data-action="propose"' + (state.mode === 'manual' || !state.members.length || !state.rewards.length ? ' disabled' : '') + '>Generate proposal</button></div>' +
@@ -160,7 +209,7 @@
   function exportRows() {
     var rows = [];
     state.rewards.forEach(function (reward) {
-      state.members.forEach(function (member) {
+      includedMembers().forEach(function (member) {
         var count = assigned(reward, member);
         if (count) rows.push({ rewardId: reward.id, reward: reward.name, member: member.name, count: count });
       });
@@ -182,7 +231,7 @@
       var raw = root.querySelector('#fr-names').value;
       raw.split(/\r?\n/).map(function (name) { return name.trim().slice(0, 60); }).filter(Boolean).forEach(function (name) {
         if (!state.members.some(function (m) { return m.name.toLowerCase() === name.toLowerCase(); }))
-          state.members.push({ id: id(), name: name, score: 1, previous: 0 });
+          state.members.push({ id: id(), name: name, role: 'member', excluded: false, score: 1, previous: 0 });
       });
     } else if (button.dataset.action === 'add-reward') {
       var name = root.querySelector('#fr-reward-name').value.trim().slice(0, 80);
@@ -240,14 +289,21 @@
     } else if (target.id === 'fr-mode') state.mode = target.value;
     else if (target.dataset.member) {
       member = state.members.find(function (m) { return m.id === target.dataset.member; });
-      if (member) member[target.dataset.field] = integer(target.value);
+      if (member) {
+        if (target.dataset.field === 'name') member.name = target.value.trim().slice(0, 60) || member.name;
+        else if (target.dataset.field === 'role') member.role = ['member', 'r4', 'r5'].indexOf(target.value) >= 0 ? target.value : 'member';
+        else if (target.dataset.field === 'excluded') {
+          member.excluded = target.checked;
+          if (member.excluded) Object.keys(state.allocation).forEach(function (key) { delete state.allocation[key][member.id]; });
+        } else member[target.dataset.field] = integer(target.value);
+      }
     } else if (target.dataset.reward) {
       reward = state.rewards.find(function (r) { return r.id === target.dataset.reward; });
       if (reward) reward[target.dataset.field] = target.dataset.field === 'name' ? (target.value.trim().slice(0, 80) || reward.name) : integer(target.value);
     } else if (target.dataset.cellReward && target.dataset.cellMember) {
       reward = state.rewards.find(function (r) { return r.id === target.dataset.cellReward; });
       member = state.members.find(function (m) { return m.id === target.dataset.cellMember; });
-      if (reward && member) setAssigned(reward, member, target.value);
+      if (reward && member && !member.excluded) setAssigned(reward, member, target.value);
     } else return;
     save(); render();
   }
