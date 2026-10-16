@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-fortress-reward-count-filter',date:'2026-10-16',hidden:true,title:'Filter Fortress rewards by count',points:['Hide players assigned a chosen reward count in the current distribution view without changing their allocations.']},
   {id:'2026-10-16-fortress-admin-restore',date:'2026-10-16',hidden:true,title:'Restore Fortress rewards access',points:['Site admins can open their saved Fortress rewards drafts again.']},
   {id:'2026-10-16-fortress-alphabetical-allocation',date:'2026-10-16',hidden:true,title:'Alphabetical reward allocation',points:['The player list for each reward pool is sorted alphabetically by name.']},
   {id:'2026-10-16-fortress-r4-access',date:'2026-10-16',hidden:true,title:'Fortress rewards access',points:['The Fortress rewards page is available to accounts with R4 editor access.']},

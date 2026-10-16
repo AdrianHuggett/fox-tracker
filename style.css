@@ -842,8 +842,10 @@ html[lang="nb"] #p-charms .cost:before,html[lang="nb"] #p-charms .phone .cost:be
 .fr-remove{border:0;background:none;color:var(--muted);font-size:20px!important;padding:0 5px}.fr-remove:hover{color:var(--coral)}
 .fr-note{font-size:12px;color:var(--faint)!important;margin:11px 0 0!important}.fr-empty{padding:18px;border:1px dashed var(--line);border-radius:6px;text-align:center}
 .fr-controls{display:flex;align-items:end;gap:9px;flex-wrap:wrap}.fr-controls label{display:grid;gap:3px;color:var(--muted);font-size:12px}.fr-controls select{min-width:170px}
+.fr-filter-count{color:var(--muted);font-size:12px;padding-bottom:10px}
 .fr-alloc-card{border-top:1px solid var(--line);padding:16px 0 6px}.fr-alloc-card h4{display:flex;justify-content:space-between;gap:15px;margin:0 0 10px;font-size:14px}.fr-alloc-card h4 span{color:var(--ice)}
 .fr-alloc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.fr-alloc-grid label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 7px;background:var(--surface);border-radius:5px;font-size:12px}
+.fr-alloc-grid label[hidden]{display:none}
 .fr-alloc-grid label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fr-alloc-grid input{width:68px;flex:none;text-align:right}
 .fr-bad{color:var(--coral)!important}.fr-bad input{border-color:var(--coral)!important}
 .fr-summary{position:sticky;top:110px}.fr-summary h3{margin-bottom:16px}.fr-numbers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fr-numbers div{padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:6px}.fr-numbers strong,.fr-numbers span{display:block}.fr-numbers strong{font-size:24px;line-height:1.1;color:var(--ice)}.fr-numbers span{font-size:11px;color:var(--muted)}
