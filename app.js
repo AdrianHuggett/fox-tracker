@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-fortress-admin-restore',date:'2026-10-16',hidden:true,title:'Restore Fortress rewards access',points:['Site admins can open their saved Fortress rewards drafts again.']},
   {id:'2026-10-16-fortress-alphabetical-allocation',date:'2026-10-16',hidden:true,title:'Alphabetical reward allocation',points:['The player list for each reward pool is sorted alphabetically by name.']},
   {id:'2026-10-16-fortress-r4-access',date:'2026-10-16',hidden:true,title:'Fortress rewards access',points:['The Fortress rewards page is available to accounts with R4 editor access.']},
   {id:'2026-10-16-fortress-contribution',date:'2026-10-16',hidden:true,title:'Contribution in Fortress rewards',points:['Set each R1–R3 member’s contribution from 1 to 4. R4/R5 do not need a rating.','Automatic distribution now weights the remaining rewards by contribution after giving R4/R5 their maximum.']},
@@ -1155,7 +1156,7 @@ function touchProfile(){
 function checkAdmin(profile){
   ADMIN=!!(profile&&profile.is_admin);
   R4ED=ADMIN||!!(profile&&profile.r4_editor);
-  FORTRESS_ACCESS=!!(profile&&profile.r4_editor);
+  FORTRESS_ACCESS=ADMIN||!!(profile&&profile.r4_editor);
   var at=$('tab-admin'); if(at) at.hidden=!ADMIN;
   var ft=$('tab-fortress'); if(ft) ft.hidden=!FORTRESS_ACCESS;
   syncCategories();
