@@ -23,7 +23,7 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--ground);color:var(--ink);
  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14.5px;line-height:1.55;
- -webkit-font-smoothing:antialiased;overflow-x:hidden}
+ -webkit-font-smoothing:antialiased;overflow-x:clip}
 img{max-width:100%}
 .wrap{max-width:var(--wrap);margin:0 auto;padding:0 18px}
 .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}

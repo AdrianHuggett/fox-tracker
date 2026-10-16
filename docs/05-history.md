@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 16 Oct 2026
 
+- Kept the page navigation for planners sticky below the header, including when the phone header hides during downward scrolling. The header height is measured so the bar does not overlap it when it returns.
 - Corrected the Building planner's partial-level labels. An internal stage index of 33 is FC 6 · 3/5, so FC 6 · 3/5 → FC 7 sums only the final two stages (360 FC, 45 RFC). The prior `ceil(n/5)` label showed that index as FC 7 · 3/5, causing members to select an earlier index and see excess costs. Saved numeric stage indices are preserved; members should review any saved partial-level selections.
 
 ## 15 Oct 2026

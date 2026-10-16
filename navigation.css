@@ -3,6 +3,10 @@
 .legacy-tabs{display:none!important}#category-nav button{white-space:nowrap}#category-subwrap{position:relative;z-index:2;height:42px;box-sizing:border-box;margin-bottom:-42px;background:var(--panel);border-bottom:1px solid var(--line)}#category-subwrap[hidden]{display:block;visibility:hidden}#category-sub{display:flex;gap:24px;height:42px;align-items:center;box-sizing:border-box;padding-top:0;padding-bottom:0}#category-sub button{height:42px;box-sizing:border-box;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);padding:10px 0;font:inherit;font-size:12px;cursor:pointer}#category-sub button[aria-selected=true]{color:var(--ice);border-bottom-color:var(--ice)}#category-sub button:focus-visible{outline:2px solid var(--ice);outline-offset:-3px}.statspanel[hidden]{display:none!important}#p-planner{padding-top:8px}#p-planner h1{font-size:26px;margin:0 0 6px}#p-planner .lead{color:var(--muted);font-size:13px;margin:0 0 22px}#p-planner .planner-grid{margin-left:0}@media(max-width:760px){#category-nav,#category-sub{overflow-x:auto;scrollbar-width:none}#category-nav::-webkit-scrollbar,#category-sub::-webkit-scrollbar{display:none}#category-sub{white-space:nowrap}}
 /* Preserve the Furnace cutout inside the planner's existing icon frame. */
 .tile-art img.furnace-icon{width:100%;height:100%;object-fit:contain}
+
+/* Keep the planner page links available while the page scrolls. */
+#category-subwrap{position:sticky;top:var(--fox-header-height,68px);z-index:59}
+@media(max-width:820px){header.top.hr-off+#category-subwrap{top:0}}
 .tile-art img.charms-icon{width:100%;height:100%;object-fit:contain}
 .tile-art img.experts-icon{width:100%;height:100%;object-fit:contain}
 .tile-art img.war-icon,.tile-art img.pets-icon,.tile-art img.gear-icon{width:100%;height:100%;object-fit:contain}

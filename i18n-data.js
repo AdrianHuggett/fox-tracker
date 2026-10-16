@@ -563,6 +563,8 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["Planner tabs stay visible","Las pestañas del planificador permanecen visibles","Planlayıcı sekmeleri görünür kalır","Planleggerfanene forblir synlige"],
+["The planner page tabs now stay on screen while you scroll.","Las pestañas del planificador permanecen en pantalla al desplazarte.","Planlayıcı sayfası sekmeleri kaydırırken ekranda kalır.","Fanene på planleggersidene blir værende på skjermen når du blar."],
 ["Building partial levels corrected","Niveles parciales de edificios corregidos","Binaların ara seviyeleri düzeltildi","Delnivåer for bygninger er rettet"],
 ["Partial FC level labels now match completed stages. FC {n} · {n}/{n} to FC {n} counts only the final two stages. Review saved building plans with partial levels.","Las etiquetas de niveles FC parciales ahora coinciden con las etapas completadas. De FC {n} · {n}/{n} a FC {n} solo se cuentan las dos últimas etapas. Revisa los planes guardados con niveles parciales.","Ara FC seviye etiketleri artık tamamlanan aşamalarla eşleşiyor. FC {n} · {n}/{n}'ten FC {n}'ye yalnızca son iki aşama sayılır. Ara seviyeleri olan kayıtlı bina planlarını gözden geçir.","Etikettene for delnivåer i FC samsvarer nå med fullførte trinn. Fra FC {n} · {n}/{n} til FC {n} telles bare de to siste trinnene. Se gjennom lagrede byggeplaner med delnivåer."],
 ["Hero Gear tile updated","Tarjeta de Hero Gear actualizada","Hero Gear kutucuğu güncellendi","Hero Gear-flisen er oppdatert"],
