@@ -833,6 +833,9 @@ html[lang="nb"] #p-charms .cost:before,html[lang="nb"] #p-charms .phone .cost:be
 .fr-scroll{overflow-x:auto}.fr-card table{width:100%;border-collapse:collapse;text-align:left}.fr-card th,.fr-card td{border-bottom:1px solid var(--line);padding:7px 6px}
 .fr-card thead th{color:var(--muted);font-size:11px;font-weight:500;white-space:nowrap}.fr-card tbody th{font-weight:500;min-width:100px}
 .fr-card table input[type=number]{width:76px}.fr-card table input[type=text]{width:100%;min-width:150px}
+.fr-card table input.fr-power{width:145px}.fr-rank{color:var(--muted);font-family:"IBM Plex Mono",monospace}
+.fr-members-scroll{max-height:490px;overflow:auto}.fr-members-scroll thead{position:sticky;top:0;background:var(--panel);z-index:1}
+#fr-member-search{width:100%;margin:0 0 9px}
 .fr-card table select{min-width:82px}.fr-card table input[type=checkbox]{accent-color:var(--coral)}
 .fr-card tr.fr-ignored{opacity:.55}.fr-alloc-grid em{font-style:normal;font-size:10px;color:var(--gold);margin-left:3px}
 .fr-remove{border:0;background:none;color:var(--muted);font-size:20px!important;padding:0 5px}.fr-remove:hover{color:var(--coral)}
