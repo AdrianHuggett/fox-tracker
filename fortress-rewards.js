@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var root, state, storageKey, hiddenCount = '';
+  var root, state, storageKey, shownCount = '';
   var nextId = 1;
   function id() { return String(Date.now()) + '-' + String(nextId++); }
   var SITES = [
@@ -258,7 +258,7 @@
       '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before generating a full R4/R5 allocation.</p>' +
       '<div class="fr-add fr-add-reward"><input id="fr-reward-name" type="text" maxlength="80" placeholder="Reward name" aria-label="Reward name"><input id="fr-reward-quantity" type="number" min="1" max="100000" value="1" aria-label="Available quantity"><input id="fr-reward-cap" type="number" min="0" max="100000" value="0" aria-label="Per-player limit"><button type="button" class="fr-primary" data-action="add-reward">Add reward</button></div>' +
       (state.rewards.length ? '<div class="fr-scroll"><table><thead><tr><th>Reward</th><th>Available</th><th>Limit / player</th><th>Assigned</th><th></th></tr></thead><tbody>' + rewardRows + '</tbody></table></div>' : '<p class="fr-empty">No reward pools yet.</p>') + '</section>' +
-      '<section class="fr-card"><div class="fr-card-head"><h3>3. Distribution</h3></div><div class="fr-controls">' + rewardPicker + '<label>Hide players with<select id="fr-hide-count" aria-label="Hide players with this reward count"></select></label><button type="button" class="fr-primary" data-action="propose"' + (!includedMembers().length || !state.rewards.length ? ' disabled' : '') + '>Distribute by contribution</button><span id="fr-filter-count" class="fr-filter-count" aria-live="polite"></span></div>' +
+      '<section class="fr-card"><div class="fr-card-head"><h3>3. Distribution</h3></div><div class="fr-controls">' + rewardPicker + '<label>Show players with<select id="fr-show-count" aria-label="Show players with this reward count"></select></label><button type="button" class="fr-primary" data-action="propose"' + (!includedMembers().length || !state.rewards.length ? ' disabled' : '') + '>Distribute by contribution</button><span id="fr-filter-count" class="fr-filter-count" aria-live="polite"></span></div>' +
       '<p class="fr-note">R4/R5 receive their per-player maximum first. Remaining rewards are weighted by each member’s contribution, within the per-player limits. This replaces current allocations; you can edit the numbers below.</p>' +
       (allocationRows || '<p class="fr-empty">Add members and reward pools to start.</p>') + '</section></div>' +
       '<aside class="fr-card fr-summary"><h3>Distribution summary</h3><div class="fr-numbers"><div><strong>' + s.allocated + '</strong><span>Assigned</span></div><div><strong>' + Math.max(0, s.available - s.allocated) + '</strong><span>Remaining</span></div></div>' +
@@ -271,19 +271,19 @@
     applyAllocationFilter();
   }
   function applyAllocationFilter() {
-    var select = root.querySelector('#fr-hide-count');
+    var select = root.querySelector('#fr-show-count');
     if (!select) return;
     var rows = [].slice.call(root.querySelectorAll('.fr-alloc-grid label'));
     var counts = {};
     rows.forEach(function (row) { counts[integer(row.querySelector('input').value)] = true; });
-    if (hiddenCount !== '') counts[integer(hiddenCount)] = true;
+    if (shownCount !== '') counts[integer(shownCount)] = true;
     select.innerHTML = '<option value="">Show all</option>' + Object.keys(counts).map(Number).sort(function (a, b) { return a - b; }).map(function (count) {
       return '<option value="' + count + '">' + count + (count === 1 ? ' reward' : ' rewards') + '</option>';
     }).join('');
-    select.value = hiddenCount;
+    select.value = shownCount;
     var shown = 0;
     rows.forEach(function (row) {
-      row.hidden = hiddenCount !== '' && integer(row.querySelector('input').value) === integer(hiddenCount);
+      row.hidden = shownCount !== '' && integer(row.querySelector('input').value) !== integer(shownCount);
       if (!row.hidden) shown++;
     });
     var counter = root.querySelector('#fr-filter-count');
@@ -360,7 +360,7 @@
   }
   function onChange(event) {
     var target = event.target, member, reward;
-    if (target.id === 'fr-hide-count') { hiddenCount = target.value; applyAllocationFilter(); return; }
+    if (target.id === 'fr-show-count') { shownCount = target.value; applyAllocationFilter(); return; }
     if (target.dataset.site) {
       var site = SITES.find(function (item) { return item.id === target.dataset.site; });
       if (!site) return;
