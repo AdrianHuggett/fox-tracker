@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-fortress-member-columns',date:'2026-10-16',title:'Simplified FOX member list',points:['The Fortress rewards member list now shows only the member name, Exclude checkbox, and role.']},
 
   {id:'2026-10-16-fortress-simple-distribution',date:'2026-10-16',title:'Simpler Fortress rewards distribution',points:['Removed the Participation and Previous rewards columns from the FOX roster.','The automatic proposal gives R4/R5 their maximum first, then splits the remaining rewards evenly among included members.']},
 
