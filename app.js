@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-16-widget-generations',date:'2026-10-16',title:'Widget generations in Backpack',points:['Each hero Widget in Backpack now shows its generation beside the item name.']},
   {id:'2026-10-16-sticky-planner-nav',date:'2026-10-16',title:'Planner tabs stay visible',points:['The planner page tabs now stay on screen while you scroll.']},
   {id:'2026-10-16-backpack-fold-all',date:'2026-10-16',title:'Backpack category controls',points:['Expand or collapse all Backpack categories in one click.']},
   {id:'2026-10-16-news-intro',date:'2026-10-16',title:'FOX News',points:['Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.']},
@@ -860,6 +861,10 @@ function inp(val,cls,attrs){
   return '<input class="cell '+(cls||'')+'" type="number" step="any" value="'+
     (val===null||val===undefined?'':val)+'" '+(attrs||'')+'>';
 }
+var widgetGenerations=Object.create(null);
+(window.WIDGETS_DATA&&window.WIDGETS_DATA.heroes||[]).forEach(function(hero){
+  widgetGenerations[hero.name+' widget']=hero.generation;
+});
 function renderStock(){
   // Keep hidden quantities in memory and snapshots; only narrow the Backpack view.
   var mythicShards=['Mythic Hero Shards','Natalia','Jeronimo','Molly','Zinman','Flint','Philly','Alonso','Logan','Mia','Greg','Ahmose','Reina','Lynn','Hector','Norah','Gwen'];
@@ -892,8 +897,9 @@ function renderStock(){
     var w=c.pct===null?0:Math.max(0,Math.min(100,c.pct*100));
     /* the pill already says "on track"; only the shortfall adds anything */
     var rc=(c.tgt>0 && !c.ok && c.left>0)?fmt(c.left)+' short by SvS day':'';
-    out.push('<tr data-state="'+state+'" data-q="'+esc(it.name.toLowerCase())+'" data-gn="'+esc(g)+'">'+
-      '<td class="ic">'+itemIcon(it)+'</td><td class="nm">'+esc(it.name)+'</td>'+
+    var widgetGen=widgetGenerations[it.name];
+    out.push('<tr data-state="'+state+'" data-q="'+esc((it.name+(widgetGen?' Gen '+widgetGen:'')).toLowerCase())+'" data-gn="'+esc(g)+'">'+
+      '<td class="ic">'+itemIcon(it)+'</td><td class="nm">'+esc(it.name)+(widgetGen?'<span class="stock-gen">Gen '+widgetGen+'</span>':'')+'</td>'+
       '<td data-label="Have">'+inp(it.have,'','data-idx="'+idx+'" data-k="have" aria-label="'+esc(it.name)+' have"')+'</td>'+
       '<td data-label="Target">'+inp(it.target,'t2','data-idx="'+idx+'" data-k="target" aria-label="'+esc(it.name)+' target"')+'</td>'+
       '<td class="num">'+(c.tgt>0?fmt(c.raw):'<span class="mini">\u2014</span>')+'</td>'+

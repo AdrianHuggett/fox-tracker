@@ -30,6 +30,7 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 
 ## Backpack (`renderStock`)
 
+- Hero Widget item names display a generation label from `WIDGETS_DATA.heroes`; the stored item names and targets remain unchanged.
 - Steel's section follows Fire Crystal materials in the display order; saved item IDs are unchanged.
 
 - Hero Shards displays only the 16 Gen 1–5 mythic heroes and generic Mythic Hero Shards. Epic/rare rows remain stored and included in stock snapshots; only their Backpack rows are hidden.

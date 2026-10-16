@@ -563,6 +563,9 @@ window.I18N_ROWS=[
 ["books","books","kitap","bøker"],
 
 /* dates: {m} is the month name */
+["Gen {n}","Gen {n}","Nesil {n}","Gen {n}"],
+["Widget generations in Backpack","Generaciones de widgets en la mochila","Çantadaki Widget nesilleri","Widget-generasjoner i Ryggsekken"],
+["Each hero Widget in Backpack now shows its generation beside the item name.","Cada widget de héroe en la mochila ahora muestra su generación junto al nombre del objeto.","Çantadaki her kahraman Widget'ının nesli artık eşya adının yanında gösterilir.","Hver helte-widget i Ryggsekken viser nå generasjonen ved siden av gjenstandsnavnet."],
 ["Planner tabs stay visible","Las pestañas del planificador permanecen visibles","Planlayıcı sekmeleri görünür kalır","Planleggerfanene forblir synlige"],
 ["The planner page tabs now stay on screen while you scroll.","Las pestañas del planificador permanecen en pantalla al desplazarte.","Planlayıcı sayfası sekmeleri kaydırırken ekranda kalır.","Fanene på planleggersidene blir værende på skjermen når du blar."],
 ["Building partial levels corrected","Niveles parciales de edificios corregidos","Binaların ara seviyeleri düzeltildi","Delnivåer for bygninger er rettet"],
