@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-17-language-picker-position',date:'2026-10-17',hidden:true,title:'Language selector position',points:['The language selector now sits below the overlapping page navigation.']},
   {id:'2026-10-17-hide-fortress-history',date:'2026-10-17',hidden:true,title:'Trim Fortress rewards changelog',points:['Older Fortress rewards implementation notes no longer appear in What’s new.']},
   {id:'2026-10-16-fortress-show-count-filter',date:'2026-10-16',hidden:true,title:'Show Fortress rewards by count',points:['The distribution filter now shows only players with the selected reward count.']},
   {id:'2026-10-16-fortress-reward-count-filter',date:'2026-10-16',hidden:true,title:'Filter Fortress rewards by count',points:['Hide players assigned a chosen reward count in the current distribution view without changing their allocations.']},
