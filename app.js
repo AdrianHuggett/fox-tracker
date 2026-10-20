@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-21-october-game-update-news',date:'2026-10-21',title:'October game update in FOX News',points:['FOX News now summarizes the October 20 game update, including alliance tools, Bear Hunt rewards and upcoming events, with a link to the full announcement.']},
   {id:'2026-10-18-chief-gear-target-icons',date:'2026-10-18',title:'Chief Gear target icons',points:['Each Chief Gear piece now shows the icon for its target rarity, tier, and star level in the upgrade plan.']},
   {id:'2026-10-17-language-picker-position',date:'2026-10-17',hidden:true,title:'Language selector position',points:['The language selector now sits below the overlapping page navigation.']},
   {id:'2026-10-17-hide-fortress-history',date:'2026-10-17',hidden:true,title:'Trim Fortress rewards changelog',points:['Older Fortress rewards implementation notes no longer appear in What’s new.']},

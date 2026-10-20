@@ -1,5 +1,15 @@
 /* Curated game news. */
 window.FOX_NEWS_POSTS = [
+{
+  "id": 7,
+  "title": "October 20 update: alliance tools and upcoming events",
+  "body": "R4/R5: Alliance Mail is available once the alliance reaches Lv. 5, with an officer chat shortcut. Authorized leaders can expel all garrison squads at once; R4 can also expel the Alliance Leader's squads.\nBear Hunt adds higher damage reward tiers. During SvS Revival, you can see which allies helped revive troops.\nRush Job and the 5% Bank deposit now use 23-hour timers; Advanced Training and Dawn Alliance Commendation use 1 day and 23 hours.\nAlliance Mobilization may add Pet, Expert and Fire Crystal Points missions as your State progresses.\nNew Gifts and Popularity features are included. Gifts do not grant combat bonuses.\nComing to eligible States: Expert Justus on October 26, Expedition Arena on November 2, and Mergeventure on November 6.",
+  "category": "game",
+  "pinned": false,
+  "source_url": "https://www.whiteoutsurvival.wiki/sneak-peek/101898521en/",
+  "created_at": "2026-10-20T00:00:00Z",
+  "banner": "news-developer-feedback.png"
+},
   {
     "id": 6,
     "title": "September Developer Feedback",
