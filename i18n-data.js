@@ -4,6 +4,10 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Foundry planner","Planificador de Foundry","Foundry planlayıcı","Foundry-planlegger"],
+["Foundry Battle planner","Planificador de Foundry Battle","Foundry Battle planlayıcı","Foundry Battle-planlegger"],
+["R4s and admins can plan Foundry Battles on the real map in Alliance → Foundry planner: arrows, rally leaders, loot gatherers, building control and notes, phase by phase.","Los R4 y administradores pueden planificar Foundry Battle en el mapa real en Alianza → Planificador de Foundry: flechas, líderes de rally, recolectores de botín, control de edificios y notas, fase por fase.","R4'ler ve yöneticiler Foundry Battle'ı gerçek harita üzerinde İttifak → Foundry planlayıcı bölümünde planlayabilir: oklar, ralli liderleri, ganimet toplayıcılar, bina kontrolü ve notlar, aşama aşama.","R4-er og administratorer kan planlegge Foundry Battle på det ekte kartet under Alliansen → Foundry-planlegger: piler, rallyledere, byttesamlere, bygningskontroll og notater, fase for fase."],
+["Legion 1 and Legion 2 each have their own plan, and Create plan turns it into a text plan and a JPEG to share.","La Legión 1 y la Legión 2 tienen cada una su propio plan, y Create plan lo convierte en un plan de texto y un JPEG para compartir.","Lejyon 1 ve Lejyon 2'nin her birinin kendi planı vardır; Create plan onu paylaşmak için bir metin planına ve bir JPEG'e dönüştürür.","Legion 1 og Legion 2 har hver sin plan, og Create plan gjør den om til en tekstplan og en JPEG du kan dele."],
 ["Expand all","Expandir todo","Tümünü genişlet","Utvid alle"],
 ["Collapse all","Contraer todo","Tümünü daralt","Skjul alle"],
 ["Backpack category controls","Controles de categorías de la mochila","Çanta kategori kontrolleri","Kategorikontroller for ryggsekken"],

@@ -854,3 +854,7 @@ html[lang="nb"] #p-charms .cost:before,html[lang="nb"] #p-charms .phone .cost:be
 @media(max-width:900px){.fr-layout{grid-template-columns:1fr}.fr-summary{position:static}.fr-sites{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){#p-fortress{padding-top:18px}.fr-head{display:block}.fr-local{display:inline-block;margin-top:10px}.fr-sites{grid-template-columns:repeat(2,minmax(0,1fr))}.fr-alloc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fr-add{flex-wrap:wrap}.fr-add textarea,.fr-add-reward input:first-child{flex-basis:100%}}
 @media(max-width:390px){.fr-sites,.fr-alloc-grid{grid-template-columns:1fr}}
+
+/* Foundry Battle planner (Alliance tab): the planner page sits in an iframe that fills the screen below the header */
+.foundry-frame{display:block;width:100%;height:calc(100vh - 150px);min-height:640px;border:1px solid var(--line);border-radius:12px;background:#0a1119}
+@media (max-width:820px){.foundry-frame{height:calc(100vh - 110px);min-height:560px}}
