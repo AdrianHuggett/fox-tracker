@@ -2,6 +2,10 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 26 Oct 2026
+
+- Added the Foundry planner to the Alliance tab for R4s and admins (`foundry.html` in an iframe, built and tested as a Claude artifact first). Kept it self-contained to avoid CSS clashes with `style.css` and to keep `app.js` changes to the tab wiring only. Plans stay in each browser's localStorage; a shared Supabase table can come later if the R4s want one live plan.
+
 ## 16 Oct 2026
 
 - Added each Hero Widget's generation beside its Backpack item name using the Widgets planner roster; item IDs and saved quantities are unchanged.

@@ -136,6 +136,15 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
   - Admin: the same, plus inline text inputs (name, frequency, remarks, UTC time), Add task per section, × remove task (confirm), ▲▼ move within a section (`r4Move`: swap, then renumber the section's `sort` from its lowest value, saving only the rows that changed), and a "Manage the R4 list" card (rename, remove with confirm, add).
   - Table classes: `.adm` = tick editing (chips on phones), `.full` = admin editing.
 
+## Foundry planner (R4 and admin only)
+
+`foundry.html` is a self-contained page (its own CSS and JS, map image embedded as base64) loaded in an iframe by `mountFoundry()` the first time the Alliance → Foundry planner tab opens. Access follows `FORTRESS_ACCESS` (admin or `profiles.r4_editor`), like Fortress rewards. Nothing is stored in Supabase: each viewer's plans live in their own browser (`localStorage`, keys `fox-foundry-war-room-v4-L1` / `-L2`, plus `-legion` for the selected legion), so plans are shared between R4s with the "Copy plan code" / "Load pasted code" buttons.
+
+- Legion 1 and Legion 2 each have a separate plan. Three phases (0–15, 15–30, 30–60 min) each have their own drawings, building ownership and note box.
+- Tools: Select (tap a building to cycle FOX → Enemy → Nobody; drag to box-select; Ctrl+C/V copy and paste across phases), Attack and Route arrows (colour, four sizes, text along the arrow, draggable end dots), Pen, Text, Erase. Players are placed from the team lists (⭐ rally leaders full size, others half size) and are always drawn above arrows.
+- Create plan builds a text plan per phase (FOX buildings, closed buildings, rally leaders with their target building and the players closest to them, loot gatherers, notes, team list) and one JPEG with the three phase maps; both download as files.
+- The page is English only: `i18n.js` does not reach inside the iframe.
+
 ## Members (admin only)
 
 - Lists every profile: name (+ admin pill), signed up, last seen ("just now", "1 week ago", …), status pill (active today / this week / quiet / gone quiet), and an **R4 editor** toggle chip (not on admin rows) that calls `set_r4_editor`.
