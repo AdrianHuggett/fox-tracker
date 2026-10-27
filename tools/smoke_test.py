@@ -14,8 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
-TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foxnews']
-CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance'}
+TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'foxnews']
+CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance'}
 CATEGORIES['foxnews'] = 'foxnews'
 
 def open_tab(pg, tab):
