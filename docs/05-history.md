@@ -2,6 +2,11 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 30 Oct 2026
+
+- Canyon planner: added Path (L) and Dotted (D) tools, polylines that end with an arrowhead (item type `path`, `style` solid or dotted, `points` list). Tap to add points; tap the last point again, double-click or press Enter to finish; Esc cancels. Every point is a drag handle when the path is selected; the label sits on the longest segment. Create plan treats a path like an arrow (start near a rally leader, target at its end).
+- Canyon planner: arrows, paths and arrowheads get a thin dark outline (#0a131d, 1.5 units each side) so they stay visible on the light map.
+
 ## 29 Oct 2026
 
 - Canyon planner: added a white layer over the map image with a "White mask" slider (0–90 %, default 30 %). The value is a per-viewer setting in `localStorage` (`fox-canyon-war-room-v1-mask`), not part of the plan, and the Create plan JPEG uses the current value.
