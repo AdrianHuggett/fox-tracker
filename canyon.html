@@ -62,7 +62,7 @@ h1 span { color: var(--fox); }
 .maskctl output { font: 500 11px var(--mono); min-width: 4ch; color: var(--fg); }
 svg#map { display: block; width: 100%; height: auto; max-height: calc(100vh - 150px); aspect-ratio: 1000 / 738; margin: 0 auto; touch-action: none; user-select: none; -webkit-user-select: none; }
 svg#map.t-select { cursor: default; }
-svg#map.t-attack, svg#map.t-route, svg#map.t-pen, svg#map.t-marker, svg#map.t-text { cursor: crosshair; }
+svg#map.t-attack, svg#map.t-route, svg#map.t-path, svg#map.t-dpath, svg#map.t-pen, svg#map.t-marker, svg#map.t-text { cursor: crosshair; }
 svg#map.t-eraser { cursor: not-allowed; }
 svg#map.editmap .bld { cursor: move; }
 
@@ -164,6 +164,10 @@ svg#map.t-roster { cursor: crosshair; }
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M2 14L12 4"/><path d="M6 3h7v7" fill="currentColor" stroke="none"/><path d="M7 3h6v6z" fill="currentColor" stroke="none"/></svg>Attack<kbd>A</kbd></button>
       <button type="button" class="tool" data-tool="route" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2.5 2"><path d="M2 14L12 4"/><path d="M7 3h6v6z" fill="currentColor" stroke="none"/></svg>Route<kbd>R</kbd></button>
+      <button type="button" class="tool" data-tool="path" aria-pressed="false">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 14l3-7 5 4 2-6"/><path d="M9.6 4.6L13 2l.6 4.2z" fill="currentColor" stroke="none"/></svg>Path<kbd>L</kbd></button>
+      <button type="button" class="tool" data-tool="dpath" aria-pressed="false">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1 3.4"><path d="M2 14l3-7 5 4 2-6"/><path d="M9.6 4.6L13 2l.6 4.2z" fill="currentColor" stroke="none"/></svg>Dotted<kbd>D</kbd></button>
       <button type="button" class="tool" data-tool="pen" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c3-6 5 2 8-3s3-5 4-6"/></svg>Pen<kbd>P</kbd></button>
       <button type="button" class="tool" data-tool="text" aria-pressed="false">
@@ -362,18 +366,32 @@ svg#map.t-roster { cursor: crosshair; }
   function selIds() { return multi.size ? [...multi] : selected ? [selected] : []; }
   function center(it) {
     if (it.type === 'arrow') return [(it.x1 + it.x2) / 2, (it.y1 + it.y2) / 2];
-    if (it.type === 'pen') { const n = it.points.length; return [it.points.reduce((a, q) => a + q[0], 0) / n, it.points.reduce((a, q) => a + q[1], 0) / n]; }
+    if (it.type === 'pen' || it.type === 'path') { const n = it.points.length; return [it.points.reduce((a, q) => a + q[0], 0) / n, it.points.reduce((a, q) => a + q[1], 0) / n]; }
     return [it.x, it.y];
   }
   function shift(it, dx, dy) {
     if (it.type === 'arrow') { it.x1 += dx; it.y1 += dy; it.x2 += dx; it.y2 += dy; }
-    else if (it.type === 'pen') { it.points = it.points.map(([x, y]) => [x + dx, y + dy]); }
+    else if (it.type === 'pen' || it.type === 'path') { it.points = it.points.map(([x, y]) => [x + dx, y + dy]); }
     else { it.x += dx; it.y += dy; }
   }
   let undoStack = [];
   let pending = null;
   if (!state.roster) state.roster = DEFAULT_ROSTER;
   let drag = null;
+  let pathDraft = null; // polyline being drawn: { points: [[x, y], ...] }
+  function pathPreview(cur) {
+    if (!pathDraft) { $('#preview').innerHTML = ''; return; }
+    const pts = cur ? pathDraft.points.concat([[cur.x, cur.y]]) : pathDraft.points;
+    $('#preview').innerHTML = (pts.length > 1 ? itemSvg({ id: 0, type: 'path', style: pathDraft.style, color, size, points: pts }, false) : '') +
+      pathDraft.points.map((q) => `<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="#ffffff" stroke="#0a131d" stroke-width="2"/>`).join('');
+  }
+  function finishPath() {
+    const d = pathDraft; pathDraft = null; $('#preview').innerHTML = '';
+    if (!d || d.points.length < 2) return;
+    snapshot(); const id = newId();
+    state.items.push({ id, phase, type: 'path', style: d.style, color, size, points: d.points });
+    clearSel(); selected = id; save(); render();
+  }
 
   function legionKey() { return KEY + '-L' + legion; }
   function load() {
@@ -414,7 +432,7 @@ svg#map.t-roster { cursor: crosshair; }
   function buildDefs() {
     let d = '';
     Object.entries(COLORS).forEach(([k, c]) => {
-      d += `<marker id="ah-${k}" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;
+      d += `<marker id="ah-${k}" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto-start-reverse" style="overflow:visible"><path d="M0,0 L10,5 L0,10 z" fill="${c}" stroke="#0a131d" stroke-width="0.9" stroke-linejoin="round"/></marker>`;
     });
     d += `<radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1c3550" stop-opacity=".9"/><stop offset="1" stop-color="#0d1824" stop-opacity="0"/></radialGradient>`;
     d += `<pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#21364d" stroke-width="1"/></pattern>`;
@@ -507,10 +525,26 @@ svg#map.t-roster { cursor: crosshair; }
       return `<g${idAttr}>
         <line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="transparent" stroke-width="${hit}" stroke-linecap="round"/>
         ${sel ? `<line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="#ffffff" stroke-opacity=".35" stroke-width="${w + 10}" stroke-linecap="round"/>` : ''}
+        <line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="#0a131d" stroke-width="${w + 3}" stroke-linecap="round"${dash}/>
         <line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${dash} marker-end="url(#ah-${it.color})"/>
         ${it.label ? arrowLabel(it, c, w) : ''}
         ${sel && selected === it.id && !multi.size ? [1, 2].map((h) => { const hx = h === 1 ? it.x1 : it.x2, hy = h === 1 ? it.y1 : it.y2;
           return `<g data-handle="${h}" style="cursor:grab"><circle cx="${hx}" cy="${hy}" r="20" fill="transparent"/><circle cx="${hx}" cy="${hy}" r="9" fill="#ffffff" stroke="#0a131d" stroke-width="3"/><circle cx="${hx}" cy="${hy}" r="3.5" fill="${c}"/></g>`; }).join('') : ''}
+      </g>`;
+    }
+    if (it.type === 'path') {
+      const w = 6 * (SIZES[it.size] || 1);
+      const pts = it.points.map((q) => q[0] + ',' + q[1]).join(' ');
+      // the label sits on the longest segment, parallel to it
+      let seg = null, sl = -1;
+      for (let i = 1; i < it.points.length; i++) { const a = it.points[i - 1], b = it.points[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > sl) { sl = l; seg = { x1: a[0], y1: a[1], x2: b[0], y2: b[1], size: it.size, label: it.label }; } }
+      return `<g${idAttr}>
+        <polyline points="${pts}" fill="none" stroke="transparent" stroke-width="${Math.max(28, w + 20)}" stroke-linecap="round" stroke-linejoin="round"/>
+        ${sel ? `<polyline points="${pts}" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="${w + 10}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+        <polyline points="${pts}" fill="none" stroke="#0a131d" stroke-width="${w + 3}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''}/>
+        <polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''} marker-end="url(#ah-${it.color})"/>
+        ${it.label && seg ? arrowLabel(seg, c, w) : ''}
+        ${sel && selected === it.id && !multi.size ? it.points.map((q, i) => `<g data-handle="${i + 1}" style="cursor:grab"><circle cx="${q[0]}" cy="${q[1]}" r="18" fill="transparent"/><circle cx="${q[0]}" cy="${q[1]}" r="${i === it.points.length - 1 || i === 0 ? 9 : 7}" fill="#ffffff" stroke="#0a131d" stroke-width="3"/><circle cx="${q[0]}" cy="${q[1]}" r="3" fill="${c}"/></g>`).join('') : ''}
       </g>`;
     }
     if (it.type === 'pen') {
@@ -698,7 +732,7 @@ svg#map.t-roster { cursor: crosshair; }
     document.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.color === color)));
     document.querySelectorAll('.sizebtn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.size === size)));
     $('#label').hidden = tool !== 'text';
-    const selArrow = state.items.find((i) => i.id === selected && i.type === 'arrow');
+    const selArrow = state.items.find((i) => i.id === selected && (i.type === 'arrow' || i.type === 'path'));
     const at = $('#arrowText');
     at.disabled = !selArrow;
     at.placeholder = selArrow ? 'e.g. Rally here at 20:00' : 'Draw or select an arrow first';
@@ -715,6 +749,7 @@ svg#map.t-roster { cursor: crosshair; }
   document.addEventListener('click', (e) => {
     const t = e.target.closest('button');
     if (!t) return;
+    if (pathDraft && (t.dataset.tool || t.dataset.phase || t.dataset.legion || t.dataset.player)) finishPath();
     if (t.dataset.remove) {
       const teams = teamsFull(); const tm = teams.find((x) => x.team === t.dataset.team);
       snapshot(); tm.players = tm.players.filter((pl) => pl.name !== t.dataset.remove); saveTeams(teams); render(); return;
@@ -734,7 +769,7 @@ svg#map.t-roster { cursor: crosshair; }
     else if (t.dataset.tool) { tool = t.dataset.tool; pending = null; render(); }
     else if (t.dataset.size) {
       size = t.dataset.size;
-      const its = state.items.filter((i) => selIds().includes(i.id) && (i.type === 'arrow' || i.type === 'pen'));
+      const its = state.items.filter((i) => selIds().includes(i.id) && (i.type === 'arrow' || i.type === 'pen' || i.type === 'path'));
       if (its.length) { snapshot(); its.forEach((i) => { i.size = size; }); save(); }
       render();
     }
@@ -754,7 +789,7 @@ svg#map.t-roster { cursor: crosshair; }
   });
   $('#arrowText').addEventListener('focus', () => { if (!$('#arrowText').disabled) snapshot(); });
   $('#arrowText').addEventListener('input', () => {
-    const it = state.items.find((i) => i.id === selected && i.type === 'arrow');
+    const it = state.items.find((i) => i.id === selected && (i.type === 'arrow' || i.type === 'path'));
     if (!it) return;
     it.label = $('#arrowText').value.trim(); save(); renderItems();
   });
@@ -828,7 +863,9 @@ svg#map.t-roster { cursor: crosshair; }
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !$('#planOverlay').hidden) { $('#planOverlay').hidden = true; return; }
     if (e.target.matches('input, textarea, select')) return;
+    if (pathDraft && (e.key === 'Enter' || e.key === 'Escape')) { e.preventDefault(); if (e.key === 'Enter') finishPath(); else { pathDraft = null; pathPreview(); } return; }
     if (e.key === 'Escape' && pending) { pending = null; tool = 'select'; render(); return; }
+    const map0 = { v: 1, a: 1, r: 1, l: 1, d: 1, p: 1, t: 1, e: 1 };
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
     if (e.key === 'Delete' || e.key === 'Backspace') { if (selIds().length) { e.preventDefault(); deleteSelected(); } return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') { e.preventDefault(); copySel(); return; }
@@ -836,7 +873,8 @@ svg#map.t-roster { cursor: crosshair; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') { e.preventDefault(); clearSel(); state.items.filter((i) => i.phase === phase).forEach((i) => multi.add(i.id)); tool = 'select'; render(); return; }
     if (e.key === 'Escape' && selIds().length) { clearSel(); render(); return; }
     if (pending) return;
-    const map = { v: 'select', a: 'attack', r: 'route', p: 'pen', t: 'text', e: 'eraser' };
+    if (pathDraft && map0[e.key.toLowerCase()]) finishPath();
+    const map = { v: 'select', a: 'attack', r: 'route', l: 'path', d: 'dpath', p: 'pen', t: 'text', e: 'eraser' };
     const k = e.key.toLowerCase();
     if (map[k] && !e.ctrlKey && !e.metaKey && !e.altKey) { tool = map[k]; render(); }
     if (['1', '2', '3'].includes(e.key)) { phase = +e.key; clearSel(); render(); }
@@ -860,8 +898,9 @@ svg#map.t-roster { cursor: crosshair; }
   // the building a rally leader goes for: the end of the nearest arrow of their team that starts near them, else the closest building
   function rallyTarget(r, items, ph) {
     let arrow = null, ad = 1e9;
-    items.filter((i) => i.type === 'arrow' && i.color === r.color).forEach((a) => { const d = Math.hypot(a.x1 - r.x, a.y1 - r.y); if (d < 300 && d < ad) { ad = d; arrow = a; } });
-    return arrow ? nearestBuilding(arrow.x2, arrow.y2, ph) : nearestBuilding(r.x, r.y, ph);
+    const ends = (a) => a.type === 'path' ? [a.points[0], a.points[a.points.length - 1]] : [[a.x1, a.y1], [a.x2, a.y2]];
+    items.filter((i) => (i.type === 'arrow' || i.type === 'path') && i.color === r.color).forEach((a) => { const s = ends(a)[0], d = Math.hypot(s[0] - r.x, s[1] - r.y); if (d < 300 && d < ad) { ad = d; arrow = a; } });
+    return arrow ? nearestBuilding(ends(arrow)[1][0], ends(arrow)[1][1], ph) : nearestBuilding(r.x, r.y, ph);
   }
   function where(n) { return /^(near|open)/.test(n) ? (n.startsWith('open') ? 'in ' + n : n) : 'at ' + n; }
   function colorName(k) { return COLOR_NAMES[k] || 'Note'; }
@@ -1066,6 +1105,15 @@ svg#map.t-roster { cursor: crosshair; }
       return;
     }
     if (tool === 'attack' || tool === 'route') { drag = { mode: 'arrow', x1: p.x, y1: p.y, x2: p.x, y2: p.y }; return; }
+    if (tool === 'path' || tool === 'dpath') {
+      if (!pathDraft) { pathDraft = { points: [[p.x, p.y]], style: tool === 'dpath' ? 'dotted' : 'solid' }; clearSel(); renderItems(); toast('Tap to add points. Tap the last point again or press Enter to finish.'); }
+      else {
+        const last = pathDraft.points[pathDraft.points.length - 1];
+        if (Math.hypot(p.x - last[0], p.y - last[1]) < 12) { finishPath(); return; }
+        pathDraft.points.push([p.x, p.y]);
+      }
+      pathPreview(); return;
+    }
     if (tool === 'pen') { drag = { mode: 'pen', points: [[p.x, p.y]] }; return; }
     if (tool === 'marker') {
       snapshot(); const id = newId();
@@ -1082,6 +1130,7 @@ svg#map.t-roster { cursor: crosshair; }
   });
 
   svg.addEventListener('pointermove', (e) => {
+    if ((tool === 'path' || tool === 'dpath') && pathDraft && !drag) { pathPreview(pt(e)); return; }
     if (!drag) return;
     const p = pt(e);
     if (drag.mode === 'erase') {
@@ -1095,7 +1144,8 @@ svg#map.t-roster { cursor: crosshair; }
     }
     if (drag.mode === 'handle') {
       const it = state.items.find((i) => i.id === selected); if (!it) return;
-      if (drag.end === 1) { it.x1 = p.x; it.y1 = p.y; } else { it.x2 = p.x; it.y2 = p.y; }
+      if (it.type === 'path') it.points[drag.end - 1] = [p.x, p.y];
+      else if (drag.end === 1) { it.x1 = p.x; it.y1 = p.y; } else { it.x2 = p.x; it.y2 = p.y; }
       drag.moved = true; renderItems(); return;
     }
     if (drag.mode === 'move') {
