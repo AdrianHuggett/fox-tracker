@@ -145,6 +145,16 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 - Create plan builds a text plan per phase (FOX buildings, closed buildings, rally leaders with their target building and the players closest to them, loot gatherers, notes, team list) and one JPEG with the three phase maps; both download as files.
 - The page is English only: `i18n.js` does not reach inside the iframe.
 
+## Layout planner (every member)
+
+`layout.html` is a self-contained page (own CSS and JS) loaded in an iframe by `mountLayout()` the first time Alliance → Layout planner opens. Every signed-in member sees it. Nothing is stored in Supabase: each member's layout lives in their own browser (`localStorage` keys `fox-layout-v1`, `fox-layout-locks`, `fox-layout-rot`, `fox-layout-gen`, each suffixed with `-<account id>`). `mountLayout()` passes the id in the URL hash (`#u=…`, never sent to the server), so two accounts on one browser keep separate layouts. Layouts move between members or devices with "Copy layout code" (`FOXLAYOUT:` + base64 JSON) and the import box, which also reads WOS Nerds layout-planner links.
+
+- Map items: cities (2×2), FOX and NGT flags (1×1, territory 7×7), Bear Traps (3×3), FOX and NGT HQs (3×3, territory 15×15), nodes (2×2) and obstacles. Each kind can be locked; locked items cannot be moved, deleted or cleared. Select area, Ctrl-click, copy and paste, undo, rotate the view in 45° steps, and X:Y entry in game coordinates (anchor X:411 Y:530 by default).
+- Each city shows its march time to the nearest trap of its alliance: `ceil(5 + d·1300/(1300+d)·20/11)` seconds, with `d` the distance between the city and trap centres. Red cities are outside their alliance's territory; overlapping territories are shaded.
+- Generate seats the number of players set on each trap's slider (default 30) as close to the trap as possible, only on ground covered by that alliance. It starts from a pinwheel spiral of complete rings, then every city slides to the closest free spot (farthest first) until nothing moves. A banner in the way slides into the tile the city leaves, or is replaced by up to two banners elsewhere. Banners no city needs are dropped, except those within 5 tiles of a trap, which fill tiles no city fits. Banners never touch the other alliance's ground, and locked items never move.
+- "Load joint plan" loads the joint FOX + NGT plan of 26 Oct 2026 (4 Bear Traps, 2 HQs). The first visit starts from Adrian's WOS Nerds map.
+- The page is English only: `i18n.js` does not reach inside the iframe.
+
 ## Members (admin only)
 
 - Lists every profile: name (+ admin pill), signed up, last seen ("just now", "1 week ago", …), status pill (active today / this week / quiet / gone quiet), and an **R4 editor** toggle chip (not on admin rows) that calls `set_r4_editor`.

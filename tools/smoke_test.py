@@ -14,8 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
-TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'foxnews']
-CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance'}
+TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'layout', 'foxnews']
+CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance', 'layout':'alliance'}
 CATEGORIES['foxnews'] = 'foxnews'
 
 def open_tab(pg, tab):
@@ -66,6 +66,15 @@ def run(p, width, name):
     print(f'[{name}] projected:', proj)
     open_tab(pg, 'r4'); pg.wait_for_timeout(400)
     print(f'[{name}] r4 workload:', pg.inner_text('#r4-load').replace('\n', ' | ') if pg.query_selector('#r4-load') else 'missing')
+    # Layout planner: the iframe loads, Generate seats players, and the layout is saved under the account's own key
+    open_tab(pg, 'layout'); pg.wait_for_timeout(800)
+    lf = pg.frame_locator('#p-layout iframe')
+    lf.locator('#genBtn').click(); pg.wait_for_timeout(1500)
+    gen = lf.locator('#genMsg').text_content()
+    assert 'players' in gen and 'failed' not in gen, gen
+    keys = next(f for f in pg.frames if 'layout.html' in f.url).evaluate("Object.keys(localStorage).filter(k=>k.indexOf('fox-layout-v1')===0)")
+    assert keys and all(k.startswith('fox-layout-v1-') for k in keys), keys
+    print(f'[{name}] layout:', gen[:120], keys)
 
     b.close()
     return errs

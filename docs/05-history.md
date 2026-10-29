@@ -2,6 +2,11 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 29 Oct 2026
+
+- Added the Layout planner to the Alliance tab for every member (`layout.html` in an iframe, built and tuned with Adrian as a Claude artifact first, 25–29 Oct). Same pattern as the Foundry planner: self-contained, no Supabase. Each member's layout stays in their own browser under keys suffixed with their account id, so members never overwrite each other; a shared Supabase table can come later if the alliance wants one official layout.
+- The generator went from rows, to a pinwheel spiral, to spiral plus compaction after Adrian showed by hand that sliding a group of cities one tile pushes the corner holes outward (closer cities, fewer banners).
+
 ## 26 Oct 2026
 
 - Added the Foundry planner to the Alliance tab for R4s and admins (`foundry.html` in an iframe, built and tested as a Claude artifact first). Kept it self-contained to avoid CSS clashes with `style.css` and to keep `app.js` changes to the tab wiring only. Plans stay in each browser's localStorage; a shared Supabase table can come later if the R4s want one live plan.
