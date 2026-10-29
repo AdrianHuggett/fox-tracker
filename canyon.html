@@ -627,6 +627,7 @@ svg#map.t-roster { cursor: crosshair; }
 
   const NOTE = { x: 700, y: 482, w: 285, h: 225 };
   const NS = 0.8, NX = NOTE.x + NOTE.w * (1 - NS); // box drawn at 80%, right edge kept in place
+  function notePos() { const q = state.notePos; return q && isFinite(q.x) && isFinite(q.y) ? [q.x, q.y] : [NX, NOTE.y]; }
   let measureCtx = null;
   function wrapText(text, maxW, font) {
     if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d');
@@ -644,11 +645,11 @@ svg#map.t-roster { cursor: crosshair; }
   // box grows with the text: title + 20px per line, from a short empty box up to the bottom of the map
   function noteHeight(text) {
     const n = text.trim() ? wrapText(text, NOTE.w - 24, NOTE_FONT).length : 1;
-    return Math.min((730 - NOTE.y) / NS, Math.max(76, 44 + n * 20 + 12));
+    return Math.min((730 - Math.min(notePos()[1], 650)) / NS, Math.max(76, 44 + n * 20 + 12));
   }
   function placeNoteEditor() {
     const ta = $('#phaseNote'), sr = svg.getBoundingClientRect(), wr = svg.parentElement.getBoundingClientRect(), k = sr.width / 1000;
-    Object.assign(ta.style, { left: (sr.left - wr.left + (NX + 12 * NS) * k) + 'px', top: (sr.top - wr.top + (NOTE.y + 34 * NS) * k) + 'px',
+    Object.assign(ta.style, { left: (sr.left - wr.left + (notePos()[0] + 12 * NS) * k) + 'px', top: (sr.top - wr.top + (notePos()[1] + 34 * NS) * k) + 'px',
       width: ((NOTE.w - 24) * NS * k) + 'px', height: ((noteHeight(ta.value) - 44) * NS * k) + 'px', fontSize: (15 * NS * k) + 'px' });
   }
   function openNoteEditor() {
@@ -660,14 +661,14 @@ svg#map.t-roster { cursor: crosshair; }
   window.addEventListener('resize', () => { if (noteEditing) placeNoteEditor(); });
   function noteSvg(ph, interactive) {
     const note = interactive && noteEditing ? '' : ((state.notes || {})[ph] || '').trim();
-    if (interactive && noteEditing) return `<g data-note="1" transform="translate(${NX},${NOTE.y}) scale(${NS})"><rect width="${NOTE.w}" height="${noteHeight($('#phaseNote').value)}" rx="6" fill="#0a131d" fill-opacity=".9" stroke="#7fd3f5" stroke-width="2"/><text x="12" y="24" fill="#ff8a8d" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="16" letter-spacing="1.5">PHASE ${ph} NOTES</text></g>`;
+    if (interactive && noteEditing) return `<g data-note="1" transform="translate(${notePos()[0]},${notePos()[1]}) scale(${NS})"><rect width="${NOTE.w}" height="${noteHeight($('#phaseNote').value)}" rx="6" fill="#0a131d" fill-opacity=".9" stroke="#7fd3f5" stroke-width="2"/><text x="12" y="24" fill="#ff8a8d" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="16" letter-spacing="1.5">PHASE ${ph} NOTES</text></g>`;
     if (!note && !interactive) return '';
-    const lines = note ? wrapText(note, NOTE.w - 24, NOTE_FONT) : ['Tap here to write notes for this phase'];
+    const lines = note ? wrapText(note, NOTE.w - 24, NOTE_FONT) : ['Tap to write notes, drag to move this box'];
     const H = noteHeight(note);
     const max = Math.floor((H - 46) / 20);
     const shown = lines.slice(0, max);
     if (lines.length > max) shown[max - 1] = shown[max - 1].replace(/.{0,2}$/, '') + '…';
-    return `<g ${interactive ? 'data-note="1" style="cursor:pointer"' : ''} transform="translate(${NX},${NOTE.y}) scale(${NS})">
+    return `<g ${interactive ? 'data-note="1" style="cursor:move"' : ''} transform="translate(${notePos()[0]},${notePos()[1]}) scale(${NS})">
       <rect width="${NOTE.w}" height="${H}" rx="6" fill="#0a131d" fill-opacity=".82" stroke="#ff5a5f" stroke-width="2"/>
       <text x="12" y="24" fill="#ff8a8d" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="16" letter-spacing="1.5">PHASE ${ph} NOTES</text>
       ${shown.map((l, i) => `<text x="12" y="${48 + i * 20}" fill="${note ? '#ffd9da' : '#8ba1b7'}" font-family="Barlow, sans-serif" font-weight="600" font-size="15"${note ? '' : ' font-style="italic"'}>${esc(l)}</text>`).join('')}
@@ -1072,7 +1073,7 @@ svg#map.t-roster { cursor: crosshair; }
     const itemEl = e.target.closest('[data-id]');
     const bEl = e.target.closest('[data-b]');
     svg.setPointerCapture(e.pointerId);
-    if (tool === 'select' && e.target.closest('[data-note]')) { e.preventDefault(); if (!noteEditing) openNoteEditor(); return; }
+    if (tool === 'select' && e.target.closest('[data-note]')) { e.preventDefault(); if (!noteEditing) { const [nx, ny] = notePos(); drag = { mode: 'note', start: p, ox: p.x - nx, oy: p.y - ny, moved: false }; } return; }
     const hEl = e.target.closest('[data-handle]');
     if (hEl && itemEl && +itemEl.dataset.id === selected && !multi.size) {
       snapshot(); drag = { mode: 'handle', end: +hEl.dataset.handle, moved: false }; return;
@@ -1139,6 +1140,12 @@ svg#map.t-roster { cursor: crosshair; }
       if (itemEl) { snapshot(); state.items = state.items.filter((i) => i.id !== +itemEl.dataset.id); save(); renderItems(); }
       return;
     }
+    if (drag.mode === 'note') {
+      if (!drag.moved && Math.hypot(p.x - drag.start.x, p.y - drag.start.y) < 6) return;
+      if (!drag.moved) { drag.moved = true; snapshot(); }
+      state.notePos = { x: Math.round(Math.max(0, Math.min(1000 - NOTE.w * NS, p.x - drag.ox))), y: Math.round(Math.max(0, Math.min(738 - 40, p.y - drag.oy))) };
+      $('#note').innerHTML = noteSvg(phase, true); return;
+    }
     if (drag.mode === 'bld') {
       state.positions[drag.id] = { x: p.x - drag.ox, y: p.y - drag.oy }; renderBuildings(); return;
     }
@@ -1191,6 +1198,7 @@ svg#map.t-roster { cursor: crosshair; }
     } else if (d.mode === 'move' || d.mode === 'handle') {
       if (!d.moved) undoStack.pop();
       save(); render();
+    } else if (d.mode === 'note') { if (d.moved) save(); else openNoteEditor();
     } else if (d.mode === 'bld') { save(); render(); }
     else if (d.mode === 'box') {
       const x0 = Math.min(d.start.x, d.cur.x), x1 = Math.max(d.start.x, d.cur.x), y0 = Math.min(d.start.y, d.cur.y), y1 = Math.max(d.start.y, d.cur.y);
