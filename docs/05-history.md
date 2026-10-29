@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 30 Oct 2026
 
+- Canyon planner fix: in the Create plan JPEG the notes box text ran past the box, because an SVG drawn as an image cannot use the web font (Barlow) and fell back to a wider font. The exported note now wraps and draws with Arial/Helvetica at 94 % of the width.
 - Canyon planner: the phase notes box can be dragged with the Select tool (6-unit threshold; a tap still opens the editor). Its top-left corner is stored in the plan as `notePos` (shared by all phases, included in plan codes, undoable).
 - Canyon planner: added Path (L) and Dotted (D) tools, polylines that end with an arrowhead (item type `path`, `style` solid or dotted, `points` list). Tap to add points; tap the last point again, double-click or press Enter to finish; Esc cancels. Every point is a drag handle when the path is selected; the label sits on the longest segment. Create plan treats a path like an arrow (start near a rally leader, target at its end).
 - Canyon planner: arrows, paths and arrowheads get a thin dark outline (#0a131d, 1.5 units each side) so they stay visible on the light map.
