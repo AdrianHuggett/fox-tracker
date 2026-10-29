@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 29 Oct 2026
 
+- Added the Canyon planner to the Alliance tab for R4s and admins (`canyon.html` in an iframe). It is the Foundry planner's code with the Lost Canyon map: 94 buildings at the positions read from the WoSTools Canyon Clash Planner, chips drawn over the codes printed on the map, Fortresses closed until 20:00 and the Frozen Citadel until 40:00, and an "Our territory" button instead of "Swap sides". Plans use their own localStorage keys (`fox-canyon-war-room-v1-L1` / `-L2`).
 - Added the Layout planner to the Alliance tab for every member (`layout.html` in an iframe, built and tuned with Adrian as a Claude artifact first, 25–29 Oct). Same pattern as the Foundry planner: self-contained, no Supabase. Each member's layout stays in their own browser under keys suffixed with their account id, so members never overwrite each other; a shared Supabase table can come later if the alliance wants one official layout.
 - The generator went from rows, to a pinwheel spiral, to spiral plus compaction after Adrian showed by hand that sliding a group of cities one tile pushes the corner holes outward (closer cities, fewer banners).
 

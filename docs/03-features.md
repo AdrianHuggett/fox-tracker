@@ -145,6 +145,10 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 - Create plan builds a text plan per phase (FOX buildings, closed buildings, rally leaders with their target building and the players closest to them, loot gatherers, notes, team list) and one JPEG with the three phase maps; both download as files.
 - The page is English only: `i18n.js` does not reach inside the iframe.
 
+## Canyon planner (R4 and admin only)
+
+`canyon.html` is the Foundry planner adapted to Canyon Clash, loaded by `mountCanyon()` with the same `FORTRESS_ACCESS` gate. Board 1000 x 738 on the Lost Canyon map (embedded JPEG). 94 buildings: S1–S31 (Stormrage, left), F1–F31 (Flameguard, right), I1–I31 (Iceguard, bottom) and the Frozen Citadel; points per minute Bastion/Fortress/Citadel 1,800, Cluster of Ruins 600, Ruins 180, Stronghold/Airport 60. Phases 3–20, 20–40, 40–60 min; Fortresses open at 20:00, the Citadel at 40:00. "Our territory" sets where FOX starts and labels the other two Bastions ENEMY. Plans live in `localStorage` under `fox-canyon-war-room-v1-L1` / `-L2` (plus `-legion`).
+
 ## Layout planner (every member)
 
 `layout.html` is a self-contained page (own CSS and JS) loaded in an iframe by `mountLayout()` the first time Alliance → Layout planner opens. Every signed-in member sees it. Nothing is stored in Supabase: each member's layout lives in their own browser (`localStorage` keys `fox-layout-v1`, `fox-layout-locks`, `fox-layout-rot`, `fox-layout-gen`, each suffixed with `-<account id>`). `mountLayout()` passes the id in the URL hash (`#u=…`, never sent to the server), so two accounts on one browser keep separate layouts. Layouts move between members or devices with "Copy layout code" (`FOXLAYOUT:` + base64 JSON) and the import box, which also reads WOS Nerds layout-planner links.
