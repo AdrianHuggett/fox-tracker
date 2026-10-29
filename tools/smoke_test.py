@@ -14,8 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
-TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'layout', 'foxnews']
-CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance', 'layout':'alliance'}
+TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'canyon', 'layout', 'foxnews']
+CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance', 'canyon':'alliance', 'layout':'alliance'}
 CATEGORIES['foxnews'] = 'foxnews'
 
 def open_tab(pg, tab):
@@ -75,6 +75,16 @@ def run(p, width, name):
     keys = next(f for f in pg.frames if 'layout.html' in f.url).evaluate("Object.keys(localStorage).filter(k=>k.indexOf('fox-layout-v1')===0)")
     assert keys and all(k.startswith('fox-layout-v1-') for k in keys), keys
     print(f'[{name}] layout:', gen[:120], keys)
+    # Canyon planner (R4/admin): the map loads with all 94 buildings and a tap cycles the owner
+    if open_tab(pg, 'canyon'):
+        pg.wait_for_timeout(1000)
+        cf = pg.frame_locator('#p-canyon iframe')
+        n = cf.locator('#blds .bld').count()
+        assert n == 94, n
+        cfr = next(f for f in pg.frames if 'canyon.html' in f.url)
+        cfr.evaluate("""() => { const t = document.querySelector('#blds .bld[data-b="F10"] text'), r = t.getBoundingClientRect(), o = { bubbles: true, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, pointerId: 1 };
+            t.dispatchEvent(new PointerEvent('pointerdown', o)); t.dispatchEvent(new PointerEvent('pointerup', o)); }"""); pg.wait_for_timeout(300)
+        print(f'[{name}] canyon:', n, 'buildings |', cf.locator('#binfo .bname').text_content())
 
     b.close()
     return errs
