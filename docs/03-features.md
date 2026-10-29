@@ -147,7 +147,7 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 
 ## Canyon planner (R4 and admin only)
 
-`canyon.html` is the Foundry planner adapted to Canyon Clash, loaded by `mountCanyon()` with the same `FORTRESS_ACCESS` gate. Board 1000 x 738 on the Lost Canyon map (embedded JPEG). 94 buildings: S1–S31 (Stormrage, left), F1–F31 (Flameguard, right), I1–I31 (Iceguard, bottom) and the Frozen Citadel; points per minute Bastion/Fortress/Citadel 1,800, Cluster of Ruins 600, Ruins 180, Stronghold/Airport 60. Phases 3–20, 20–40, 40–60 min; Fortresses open at 20:00, the Citadel at 40:00. "Our territory" sets where FOX starts and labels the other two Bastions ENEMY. Plans live in `localStorage` under `fox-canyon-war-room-v1-L1` / `-L2` (plus `-legion`).
+`canyon.html` is the Foundry planner adapted to Canyon Clash, loaded by `mountCanyon()` with the same `FORTRESS_ACCESS` gate. Board 1000 x 738 on the Lost Canyon map (embedded JPEG). 94 buildings: S1–S31 (Stormrage, left), F1–F31 (Flameguard, right), I1–I31 (Iceguard, bottom) and the Frozen Citadel; points per minute Bastion/Fortress/Citadel 1,800, Cluster of Ruins 600, Ruins 180, Stronghold/Airport 60. Phases 3–20, 20–40, 40–60 min; Fortresses open at 20:00, the Citadel at 40:00. "Our territory" sets where FOX starts and labels the other two Bastions ENEMY. A "White mask" slider (0–90 %) fades the map image under the drawings; it is saved per viewer (`fox-canyon-war-room-v1-mask`). Plans live in `localStorage` under `fox-canyon-war-room-v1-L1` / `-L2` (plus `-legion`).
 
 ## Layout planner (every member)
 
