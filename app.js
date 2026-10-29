@@ -1705,7 +1705,7 @@ function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=
 function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="foundry.html?v=20261026-foundry" title="Foundry Battle planner"></iframe>';}
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261029-layout#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261029-nocities#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
 function goCategoryPage(page){if((page==='admin'&&!ADMIN)||((page==='fortress'||page==='foundry')&&!FORTRESS_ACCESS))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
 if($('category-sub'))$('category-sub').onclick=function(e){var b=e.target.closest('[data-page]');if(b)goCategoryPage(b.dataset.page);};

@@ -77,7 +77,7 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 <div class="app">
   <header class="top">
     <h1><span>FOX</span> Alliance Layout</h1>
-    <span class="sub" id="meta">Loaded from your WOS Nerds link · 113 cities</span>
+    <span class="sub" id="meta">Map from the WOS Nerds link · no cities yet</span>
   </header>
 
   <div class="mapwrap" id="mapwrap">
@@ -165,8 +165,9 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 <script>
 (function(){
 'use strict';
-/* Original layout, decoded from the WOS Nerds link Adrian shared (25 Oct 2026). [type, x, y, name] */
-var ORIGINAL=[["hq",-2,-2],["flag",2,9],["city",-5,5,"Emi"],["building",-3,5],["city",-6,3,"GIGZ"],["city",-4,3,"Lord Bobby"],["city",-2,3,"Tatzi"],["city",-2,1,"Hellena"],["city",-4,1,"Chopra"],["city",-4,-1,"Bello26"],["city",-4,-3,"Stoffe"],["city",-2,-4,"Alesha15"],["flag",-5,9],["city",-5,7,"Icardi"],["city",0,6,"Marc"],["city",0,8,"Zorgatron"],["city",0,4,"Naterade"],["city",2,6,"Phoenix"],["city",3,8,"jul"],["city",-2,-6,"erfanabdal"],["city",0,-6,"Chop"],["city",1,-4,"Indi"],["city",0,2,"YasserSK"],["city",2,3,"Chiefin"],["city",0,10,"Lord Shasha F"],["city",2,10,"Ice Cold"],["city",1,-1,"Emi"],["city",2,1,"GIGZ"],["city",3,-3,"Gonri"],["city",3,-1,"Tatzi"],["city",4,1,"Hellena"],["city",4,3,"Chopra"],["city",-5,-5,"Bello26"],["city",3,-5,"Stoffe"],["city",4,5,"Alesha15"],["city",5,-5,"Icardi"],["city",5,-3,"Marc"],["city",5,-1,"Zorgatron"],["city",-6,-3,"Naterade"],["city",-6,-1,"Phoenix"],["city",-6,1,"jul"],["city",6,1,"erfanabdal"],["city",6,3,"Chop"],["city",6,5,"Indi"],["city",-7,-7,"YasserSK"],["city",-7,-5,"Chiefin"],["city",-7,5,"Lord Shasha F"],["city",3,13,"Chief Lockon"],["city",-5,-7,"BO8 15"],["city",-2,8,"Archer"],["city",-2,10,"Kauket"],["city",-4,9,"Voland"],["city",-4,11,"DeTatanka"],["city",2,-7,"Sam22"],["city",4,-7,"Ziad"],["city",4,11,"Vivuss34"],["city",6,12,"Lord Yandoux"],["city",5,15,"Aurel"],["city",7,14,"Maypa"],["city",9,12,"Puffi"],["city",6,10,"Lord Bobby"],["city",11,9,"Kensuki"],["city",16,2,"Navy Gunner"],["city",6,-7,"Cem bekdas"],["city",9,3,"gola"],["city",-2,13,"Ziko"],["city",-10,3,"General max dec"],["city",-10,1,"Duncan"],["city",-12,-1,"Csk0009"],["city",-11,-3,"LadyDee"],["city",-9,-3,"Amanda"],["city",-8,0,"03Rb"],["city",7,-5,"Captain"],["city",7,-3,"Britney"],["city",7,-1,"Sharp"],["city",16,-1,"Rawanal"],["city",-8,2,"Efrain Shared"],["city",-3,-8,"Sleepy Joe"],["city",-1,-8,"Jagan"],["city",8,-8,"Momonga"],["city",8,1,"Garp"],["city",8,5,"Jim"],["city",-9,-9,"Warriorgirl"],["city",-9,-7,"Ladyicevane"],["city",6,-9,"Ricky"],["city",4,-9,"BeeXii"],["city",2,-11,"STEVEN"],["city",4,-11,"KEOD"],["city",0,-12,"y3llowk1ing"],["city",-9,-5,"Teguh19"],["city",-1,-10,"Val"],["city",-9,5,"Bellana"],["city",6,-11,"Doowoop"],["city",8,-10,"Levi Drago"],["city",7,-13,"Jorge ES"],["city",0,-14,"Kicks"],["city",-2,-14,"CHEEZ"],["city",-2,-12,"Ocean7x"],["city",-4,-12,"pawk"],["city",3,-14,"Kuchiki18"],["city",2,-16,"Capt Morgan"],["city",-9,7,"Lady Marin"],["city",-9,9,"Garafeld"],["city",-7,-9,"000"],["city",-11,-6,"GetPaid33"],["city",-7,9,"NenaSan"],["city",-12,-10,"YourTruQueen"],["city",-5,-9,"samir"],["city",-9,-13,"Amongus1315"],["city",-12,-14,"Fresh prince"],["city",-14,-16,"xhokla"],["city",-15,-8,"Rosa"],["city",21,17,"Jutrzenka"],["city",-20,22,"ATTiKuS180"],["city",-20,24,"Sunshine"],["city",-18,22,"Shan22"],["city",-18,24,"City 113"]];
+/* Starting map, decoded from the WOS Nerds link Adrian shared (25 Oct 2026), without its cities
+   (removed 29 Oct 2026 at Adrian's request) so every member starts with no cities. [type, x, y] */
+var ORIGINAL=[["hq",-2,-2],["flag",2,9],["building",-3,5],["flag",-5,9]];
 var ANCHOR_DEFAULT={x:411,y:530};
 var SIZE={city:2,flag:1,building:3,hq:3,node:2,obstacle:1};
 /* The account id arrives in the hash (never sent to the server) and keeps each member's saved layout apart. */
@@ -195,6 +196,8 @@ function pushHistory(){history.push(snapshot());if(history.length>60)history.shi
 function save(){try{localStorage.setItem(KEY,snapshot());}catch(e){}}
 function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.ents)){ents=s.ents;anchor=s.anchor||anchor;return true;}}catch(e){}return false;}
 if(!load())ents=fromRows(ORIGINAL);
+/* Layouts saved before 29 Oct 2026 still hold the starting map's cities: remove every city once, keep the rest. */
+try{if(!localStorage.getItem('fox-layout-nocities'+SFX)){if(ents.some(function(e){return e.type==='city';})){ents=ents.filter(function(e){return e.type!=='city';});save();}localStorage.setItem('fox-layout-nocities'+SFX,'1');}}catch(e){}
 
 /* ---------- game rules (as the WOS Nerds planner applies them) ---------- */
 function center(o){return {x:o.x+o.w/2-.5,y:o.y+o.w/2-.5};}
