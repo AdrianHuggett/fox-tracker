@@ -57,6 +57,9 @@ h1 span { color: var(--fox); }
 .tool[aria-pressed="true"] { background: var(--ice); color: #06121c; }
 .tool[aria-pressed="true"] kbd { color: #06121c; border-color: rgba(6,18,28,.3); }
 .tool svg { width: 16px; height: 16px; }
+.maskctl { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font: 600 12px var(--body); color: var(--muted); padding: 0 6px; }
+.maskctl input { width: 110px; accent-color: var(--ice); }
+.maskctl output { font: 500 11px var(--mono); min-width: 4ch; color: var(--fg); }
 svg#map { display: block; width: 100%; height: auto; max-height: calc(100vh - 150px); aspect-ratio: 1000 / 738; margin: 0 auto; touch-action: none; user-select: none; -webkit-user-select: none; }
 svg#map.t-select { cursor: default; }
 svg#map.t-attack, svg#map.t-route, svg#map.t-pen, svg#map.t-marker, svg#map.t-text { cursor: crosshair; }
@@ -168,6 +171,7 @@ svg#map.t-roster { cursor: crosshair; }
       <button type="button" class="tool" data-tool="eraser" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.5 2.5l4 4-7 7h-4l-1-1 8-10z"/><path d="M6 6l4 4"/></svg>Erase<kbd>E</kbd></button>
       <input type="text" id="label" class="textfield" placeholder="Type your text, then tap the map" maxlength="40" autocomplete="off" aria-label="Text to place" hidden>
+      <label class="maskctl" for="maskOp">White mask <input type="range" id="maskOp" min="0" max="90" step="5" value="30"><output id="maskVal" for="maskOp">30%</output></label>
     </div>
     <svg id="map" viewBox="0 0 1000 738" class="t-select" aria-label="Canyon Clash map">
       <defs id="defs"></defs>
@@ -446,10 +450,13 @@ svg#map.t-roster { cursor: crosshair; }
         <text y="12" text-anchor="middle" fill="#cfe0ef" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="600" font-size="10.5" letter-spacing="1.5">${name}</text>
       </g>`;
   }
+  let maskOp = 30;
+  try { const v = localStorage.getItem(KEY + '-mask'); if (v !== null && v !== '' && !isNaN(+v)) maskOp = Math.max(0, Math.min(90, +v)); } catch (e) { /* storage unavailable */ }
   function buildBg() {
     $('#bg').innerHTML = `
       <rect width="1000" height="738" fill="#0a131d"/>
       <image href="${MAP_IMG}" x="0" y="0" width="1000" height="738" preserveAspectRatio="none"/>
+      <rect id="mapMask" width="1000" height="738" fill="#ffffff" opacity="${maskOp / 100}" pointer-events="none"/>
       ${['S', 'F', 'I'].map(homeTag).join('')}`;
     const tb = $('#territory'); if (tb) tb.textContent = 'Our territory: ' + TER[state.territory];
   }
@@ -1158,6 +1165,13 @@ svg#map.t-roster { cursor: crosshair; }
   svg.addEventListener('pointerup', endDrag);
   svg.addEventListener('pointercancel', endDrag);
 
+  const mo = $('#maskOp');
+  mo.value = maskOp; $('#maskVal').textContent = maskOp + '%';
+  mo.addEventListener('input', () => {
+    maskOp = +mo.value; $('#maskVal').textContent = maskOp + '%';
+    const r = $('#mapMask'); if (r) r.setAttribute('opacity', maskOp / 100);
+    try { localStorage.setItem(KEY + '-mask', String(maskOp)); } catch (e) { /* storage unavailable */ }
+  });
   buildDefs(); buildBg(); render();
 })();
 </script>
