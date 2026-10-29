@@ -1710,7 +1710,7 @@ function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=
    Plans live in the viewer's own browser (localStorage), one per legion; nothing is stored in Supabase. */
 function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="foundry.html?v=20261026-foundry" title="Foundry Battle planner"></iframe>';}
 /* Canyon Clash planner: same idea as the Foundry planner, on the Lost Canyon map (canyon.html), R4s and admins only. */
-function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261030-canyon-note" title="Canyon Clash planner"></iframe>';}
+function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261030-canyon-note-export" title="Canyon Clash planner"></iframe>';}
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
 function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261029-joint-start#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}

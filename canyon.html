@@ -643,8 +643,10 @@ svg#map.t-roster { cursor: crosshair; }
   let noteEditing = false;
   const NOTE_FONT = '600 15px Barlow, sans-serif';
   // box grows with the text: title + 20px per line, from a short empty box up to the bottom of the map
-  function noteHeight(text) {
-    const n = text.trim() ? wrapText(text, NOTE.w - 24, NOTE_FONT).length : 1;
+  const EXPORT_NOTE_FONT = '600 15px Arial, Helvetica, sans-serif';
+  function noteLines(text, forExport) { return forExport ? wrapText(text, (NOTE.w - 24) * 0.94, EXPORT_NOTE_FONT) : wrapText(text, NOTE.w - 24, NOTE_FONT); }
+  function noteHeight(text, forExport) {
+    const n = text.trim() ? noteLines(text, forExport).length : 1;
     return Math.min((730 - Math.min(notePos()[1], 650)) / NS, Math.max(76, 44 + n * 20 + 12));
   }
   function placeNoteEditor() {
@@ -663,15 +665,15 @@ svg#map.t-roster { cursor: crosshair; }
     const note = interactive && noteEditing ? '' : ((state.notes || {})[ph] || '').trim();
     if (interactive && noteEditing) return `<g data-note="1" transform="translate(${notePos()[0]},${notePos()[1]}) scale(${NS})"><rect width="${NOTE.w}" height="${noteHeight($('#phaseNote').value)}" rx="6" fill="#0a131d" fill-opacity=".9" stroke="#7fd3f5" stroke-width="2"/><text x="12" y="24" fill="#ff8a8d" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="16" letter-spacing="1.5">PHASE ${ph} NOTES</text></g>`;
     if (!note && !interactive) return '';
-    const lines = note ? wrapText(note, NOTE.w - 24, NOTE_FONT) : ['Tap to write notes, drag to move this box'];
-    const H = noteHeight(note);
+    const lines = note ? noteLines(note, !interactive) : ['Tap to write notes, drag to move this box'];
+    const H = noteHeight(note, !interactive);
     const max = Math.floor((H - 46) / 20);
     const shown = lines.slice(0, max);
     if (lines.length > max) shown[max - 1] = shown[max - 1].replace(/.{0,2}$/, '') + '…';
     return `<g ${interactive ? 'data-note="1" style="cursor:move"' : ''} transform="translate(${notePos()[0]},${notePos()[1]}) scale(${NS})">
       <rect width="${NOTE.w}" height="${H}" rx="6" fill="#0a131d" fill-opacity=".82" stroke="#ff5a5f" stroke-width="2"/>
       <text x="12" y="24" fill="#ff8a8d" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="16" letter-spacing="1.5">PHASE ${ph} NOTES</text>
-      ${shown.map((l, i) => `<text x="12" y="${48 + i * 20}" fill="${note ? '#ffd9da' : '#8ba1b7'}" font-family="Barlow, sans-serif" font-weight="600" font-size="15"${note ? '' : ' font-style="italic"'}>${esc(l)}</text>`).join('')}
+      ${shown.map((l, i) => `<text x="12" y="${48 + i * 20}" fill="${note ? '#ffd9da' : '#8ba1b7'}" font-family="${interactive ? 'Barlow, sans-serif' : 'Arial, Helvetica, sans-serif'}" font-weight="600" font-size="15"${note ? '' : ' font-style="italic"'}>${esc(l)}</text>`).join('')}
     </g>`;
   }
   let rosterEdit = false; const drafts = {};
