@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 31 Oct 2026
 
+- Canyon planner: the Create plan text is editable. The JPEG is rebuilt from the edited text 700 ms after typing stops (and before Save as JPEG if it is out of date). Edits are kept while the generated text is unchanged; Rebuild from map drops them. The JPEG splits the text per phase on the PHASE 1/2/3 headings and tolerates a missing heading.
 - Canyon planner: mouse-wheel zoom towards the cursor (up to about 5.5×) by changing the SVG viewBox; pan with the right or middle mouse button; −, + and Fit buttons for touch screens. The view is per viewer, not part of the plan, and the Create plan JPEG always shows the whole board. The notes editor overlay follows the view.
 - Canyon planner: rally leader markers drawn at 70 % (other players stay at 50 %).
 
