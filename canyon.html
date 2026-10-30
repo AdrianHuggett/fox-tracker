@@ -258,14 +258,15 @@ svg#map.t-roster { cursor: crosshair; }
       <h2 id="planTitle">Battle plan</h2>
       <button type="button" class="btn" id="planClose">Close</button>
     </div>
-    <p class="hint">Built from what is on the map in each phase: who holds each building, where each player is placed, and your notes. Arrows stay on the map images.</p>
+    <p class="hint">Built from what is on the map in each phase: who holds each building, where each player is placed, and your notes. You can edit the text below before saving: the image updates as you type. Keep the PHASE 1, PHASE 2 and PHASE 3 headings so each phase's text stays next to its map.</p>
     <div class="btnrow">
       <button type="button" class="btn" id="planCopy">Copy text</button>
       <button type="button" class="btn" id="planTxt">Save as text file</button>
       <button type="button" class="btn" id="planJpg">Save as JPEG</button>
+      <button type="button" class="btn" id="planReset">Rebuild from map</button>
     </div>
     <p class="hint" id="planSaveHint" hidden>Saving files is not available here. Copy the text, and press and hold (or right-click) the image to save it.</p>
-    <textarea id="planText" readonly rows="14" aria-label="Plan text"></textarea>
+    <textarea id="planText" rows="16" aria-label="Plan text, editable" spellcheck="true"></textarea>
     <p class="hint" id="planImgHint">Building the image…</p>
     <img id="planImg" alt="Battle plan image with the map of each phase" hidden>
   </div>
@@ -1005,8 +1006,11 @@ svg#map.t-roster { cursor: crosshair; }
     const MAPW = 1600, MAPH = 1181, TXW = 900, PAD = 40, HEAD = 120, PH_HEAD = 70;
     const W = MAPW + TXW + PAD * 3;
     const phaseTexts = [1, 2, 3].map((ph) => {
-      const start = text.indexOf(PHASE_LABEL[ph]); const next = ph < 3 ? text.indexOf(PHASE_LABEL[ph + 1]) : text.indexOf('TEAMS');
-      return text.slice(start, next > -1 ? next : undefined).split('\n').slice(2).join('\n').trim();
+      const start = text.indexOf(PHASE_LABEL[ph]); if (start < 0) return '';
+      const ends = [ph < 3 ? PHASE_LABEL[ph + 1] : null, ph < 2 ? PHASE_LABEL[3] : null, 'TEAMS'].filter(Boolean).map((l) => text.indexOf(l, start + 1)).filter((i) => i > -1);
+      const body = text.slice(start, ends.length ? Math.min(...ends) : undefined).split('\n').slice(1);
+      if (body.length && /^-+$/.test(body[0].trim())) body.shift();
+      return body.join('\n').trim();
     });
     const H = HEAD + 3 * (PH_HEAD + MAPH + PAD) + PAD;
     const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -1050,19 +1054,35 @@ svg#map.t-roster { cursor: crosshair; }
       }
     };
   }
-  async function openPlan() {
-    const text = planText();
-    $('#planText').value = text;
-    $('#planOverlay').hidden = false; $('#planImg').hidden = true; $('#planImgHint').textContent = 'Building the image…'; $('#planImgHint').hidden = false;
-    const dl = await getDownloads();
-    $('#planTxt').hidden = !dl; $('#planJpg').hidden = !dl; $('#planSaveHint').hidden = !!dl;
+  // edits are kept while the map is unchanged; a changed map starts again from the new generated text
+  let planGen = '', planEdit = null, planBlobText = null, planBuild = 0, planTimer = null;
+  async function buildPlanImage() {
+    const text = $('#planText').value, my = ++planBuild;
+    $('#planImgHint').textContent = 'Building the image…'; $('#planImgHint').hidden = false;
     try {
-      planBlob = await planJpeg(text);
+      const blob = await planJpeg(text);
+      if (my !== planBuild) return;
+      planBlob = blob; planBlobText = text;
       if (planImgUrl) URL.revokeObjectURL(planImgUrl);
       planImgUrl = URL.createObjectURL(planBlob);
       $('#planImg').src = planImgUrl; $('#planImg').hidden = false; $('#planImgHint').hidden = true;
-    } catch (e) { $('#planImgHint').textContent = 'The image could not be built in this browser. The text plan above is complete.'; }
+    } catch (e) { if (my === planBuild) $('#planImgHint').textContent = 'The image could not be built in this browser. The text plan above is complete.'; }
   }
+  async function openPlan() {
+    const gen = planText();
+    if (gen !== planGen) { planGen = gen; planEdit = null; }
+    $('#planText').value = planEdit !== null ? planEdit : gen;
+    $('#planOverlay').hidden = false; $('#planImg').hidden = true;
+    const dl = await getDownloads();
+    $('#planTxt').hidden = !dl; $('#planJpg').hidden = !dl; $('#planSaveHint').hidden = !!dl;
+    await buildPlanImage();
+  }
+  $('#planText').addEventListener('input', () => {
+    planEdit = $('#planText').value;
+    clearTimeout(planTimer); planTimer = setTimeout(buildPlanImage, 700);
+    $('#planImgHint').textContent = 'The image will update when you stop typing…'; $('#planImgHint').hidden = false;
+  });
+  $('#planReset').onclick = () => { planEdit = null; $('#planText').value = planGen = planText(); clearTimeout(planTimer); buildPlanImage(); toast('Plan rebuilt from the map'); };
   async function saveFile(name, data) {
     const dl = await getDownloads();
     if (!dl) { $('#planSaveHint').hidden = false; return; }
@@ -1083,7 +1103,10 @@ svg#map.t-roster { cursor: crosshair; }
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(() => toast('Plan copied'), fallback); else fallback();
   };
   $('#planTxt').onclick = () => saveFile('FOX-canyon-legion' + legion + '-plan-' + stamp() + '.txt', $('#planText').value);
-  $('#planJpg').onclick = () => { if (planBlob) saveFile('FOX-canyon-legion' + legion + '-plan-' + stamp() + '.jpg', planBlob); else toast('The image is still being built'); };
+  $('#planJpg').onclick = async () => {
+    if ($('#planText').value !== planBlobText) { clearTimeout(planTimer); await buildPlanImage(); }
+    if (planBlob) saveFile('FOX-canyon-legion' + legion + '-plan-' + stamp() + '.jpg', planBlob); else toast('The image is still being built');
+  };
 
   // ---------- pointer ----------
   function pt(e) {
