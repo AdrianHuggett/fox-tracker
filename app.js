@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-10-31-canyon-zoom',date:'2026-10-31',title:'Canyon planner: zoom',points:['Scroll over the Canyon planner map to zoom in towards the cursor. Drag with the right or middle mouse button to move around, or use the −, + and Fit buttons.','Rally leader markers are 30% smaller so they cover less of the map.']},
   {id:'2026-10-30-canyon-note-move',date:'2026-10-30',title:'Canyon planner: movable notes',points:['The phase notes box in the Canyon planner can be dragged anywhere on the map. A tap still opens it for typing, and its place is saved with the plan.']},
   {id:'2026-10-30-canyon-paths',date:'2026-10-30',title:'Canyon planner: paths with bends',points:['New Path and Dotted tools in the Canyon planner: tap to add bends, tap the last point again or press Enter to finish, and the line ends with an arrowhead.','Select a path to drag any of its points. Colour, size and arrow text work as for straight arrows.','Arrows and paths now have a thin dark outline so they stand out on the map.']},
   {id:'2026-10-29-canyon-white-mask',date:'2026-10-29',title:'Canyon planner: white mask',points:['The Canyon planner has a White mask slider above the map: it fades the map so buildings, arrows and players stand out. Each person keeps their own setting.']},
@@ -1710,7 +1711,7 @@ function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=
    Plans live in the viewer's own browser (localStorage), one per legion; nothing is stored in Supabase. */
 function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="foundry.html?v=20261026-foundry" title="Foundry Battle planner"></iframe>';}
 /* Canyon Clash planner: same idea as the Foundry planner, on the Lost Canyon map (canyon.html), R4s and admins only. */
-function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261030-canyon-note-export" title="Canyon Clash planner"></iframe>';}
+function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261031-canyon-zoom" title="Canyon Clash planner"></iframe>';}
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
 function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261029-joint-start#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
