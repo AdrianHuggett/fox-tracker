@@ -1002,15 +1002,28 @@ svg#map.t-roster { cursor: crosshair; }
     words.forEach((w) => { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; });
     if (line) out.push(line); return out;
   }
+  function planSections(text) {
+    const out = { 1: [], 2: [], 3: [] }, pre = [];
+    let cur = 0, ended = false, afterHead = false;
+    for (const raw of text.split('\n')) {
+      const t = raw.trim();
+      const m = t.length <= 40 && /^phase\s*([123])\b/i.exec(t);
+      if (m && +m[1] > cur) { cur = +m[1]; ended = false; afterHead = true; continue; }
+      if (afterHead && /^-+$/.test(t)) { afterHead = false; continue; }
+      afterHead = false;
+      if (/^teams\s*:?$/i.test(t)) { ended = true; continue; }
+      if (ended) continue;
+      if (cur) out[cur].push(raw); else pre.push(raw);
+    }
+    // no PHASE 1 heading: whatever sits above PHASE 2 (minus the plan title lines) is phase 1
+    if (!out[1].length && cur) out[1] = pre.filter((l) => !/^FOX CANYON CLASH PLAN|^FOX territory:/i.test(l.trim()));
+    return { 1: out[1].join('\n').trim(), 2: out[2].join('\n').trim(), 3: out[3].join('\n').trim() };
+  }
   async function planJpeg(text) {
     const MAPW = 1600, MAPH = 1181, TXW = 900, PAD = 40, HEAD = 120, PH_HEAD = 70;
     const W = MAPW + TXW + PAD * 3;
     const phaseTexts = [1, 2, 3].map((ph) => {
-      const start = text.indexOf(PHASE_LABEL[ph]); if (start < 0) return '';
-      const ends = [ph < 3 ? PHASE_LABEL[ph + 1] : null, ph < 2 ? PHASE_LABEL[3] : null, 'TEAMS'].filter(Boolean).map((l) => text.indexOf(l, start + 1)).filter((i) => i > -1);
-      const body = text.slice(start, ends.length ? Math.min(...ends) : undefined).split('\n').slice(1);
-      if (body.length && /^-+$/.test(body[0].trim())) body.shift();
-      return body.join('\n').trim();
+      return planSections(text)[ph];
     });
     const H = HEAD + 3 * (PH_HEAD + MAPH + PAD) + PAD;
     const c = document.createElement('canvas'); c.width = W; c.height = H;
