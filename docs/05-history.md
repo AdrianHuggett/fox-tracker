@@ -2,6 +2,11 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 31 Oct 2026
+
+- Canyon planner: mouse-wheel zoom towards the cursor (up to about 5.5×) by changing the SVG viewBox; pan with the right or middle mouse button; −, + and Fit buttons for touch screens. The view is per viewer, not part of the plan, and the Create plan JPEG always shows the whole board. The notes editor overlay follows the view.
+- Canyon planner: rally leader markers drawn at 70 % (other players stay at 50 %).
+
 ## 30 Oct 2026
 
 - Canyon planner fix: in the Create plan JPEG the notes box text ran past the box, because an SVG drawn as an image cannot use the web font (Barlow) and fell back to a wider font. The exported note now wraps and draws with Arial/Helvetica at 94 % of the width.
