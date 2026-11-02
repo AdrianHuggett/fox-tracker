@@ -11,6 +11,7 @@
   .shell{max-width:1180px;margin:auto;padding:22px clamp(16px,3vw,34px) 56px}.eyebrow{color:var(--ice);text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:800}.mast{position:relative;overflow:hidden;border:1px solid #285477;border-radius:20px;padding:clamp(22px,5vw,48px);background:radial-gradient(circle at 85% 12%,#286685 0,transparent 34%),linear-gradient(120deg,#122c46,#091927 75%)}.mast:after{content:"✦";position:absolute;right:7%;top:8%;font-size:7rem;color:#ffffff0a;pointer-events:none}h1{font-size:clamp(32px,5vw,56px);line-height:1.05;letter-spacing:-.045em;margin:10px 0 14px;max-width:750px}h2{font-size:clamp(22px,3vw,30px);letter-spacing:-.03em;margin:0 0 8px}h3{font-size:17px;margin:0}.lead{max-width:780px;color:#c5dceb;font-size:clamp(15px,1.8vw,18px);line-height:1.55;margin:0}.mast-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.pill,.chip,.smalltag{border:1px solid #38617b;border-radius:999px;padding:6px 10px;color:#c7e4f5;background:#15354a;font-size:12px;font-weight:700}.pill.gold{border-color:#86633a;color:#ffe0ac;background:#43321f}.section{margin-top:42px}.section-intro{max-width:850px;color:var(--muted);line-height:1.5;margin:0 0 18px}.callout{padding:15px 18px;border-left:3px solid var(--ice);border-radius:0 10px 10px 0;background:#102e42;color:#d5ebf8;line-height:1.5}.callout strong{color:white}.category-grid,.timeline{display:grid;gap:12px}.category-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.category-card,.gen-card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:17px;min-width:0}.category-card h3{margin-bottom:7px}.category-card p,.gen-card p{margin:0;color:var(--muted);line-height:1.5;font-size:13px}.category-card .example{display:block;margin-top:10px;color:#d7effc;font-size:12px}.timeline{grid-template-columns:repeat(3,minmax(0,1fr))}.gen-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}.gen-head span{color:var(--gold);font-size:12px;font-weight:800;white-space:nowrap}.heroes{font-weight:700;color:#eaf4ff!important;margin-bottom:9px!important}.gen-card ul{margin:10px 0 0;padding-left:18px;color:#bdd5e3;font-size:13px;line-height:1.5}.gen-card li+li{margin-top:5px}.gen-card a{font-size:12px}.tools{position:sticky;top:0;z-index:5;background:#071724ee;backdrop-filter:blur(10px);padding:14px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(190px,1fr) auto auto;align-items:center;gap:10px}.tools input,.tools select{width:100%;min-height:40px;background:#0c2638;border:1px solid #3b6178;border-radius:8px;color:white;padding:9px 12px}.tools input::placeholder{color:#a5bdca}.filters{display:flex;flex-wrap:wrap;gap:6px}.filters button{border:1px solid #33576e;border-radius:8px;background:#102b3d;color:#d2e7f4;padding:9px 11px;min-height:40px;font-size:12px;font-weight:800}.filters button[aria-pressed=true]{background:var(--ice);color:#042130;border-color:var(--ice)}.count{color:var(--muted);font-size:12px;white-space:nowrap}.event-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.event{background:var(--panel);border:1px solid var(--line);border-radius:13px;min-width:0;overflow:hidden}.event:hover{border-color:#3d748e}.event summary{list-style:none;padding:17px;cursor:pointer}.event summary::-webkit-details-marker{display:none}.event summary:after{content:"+";float:right;color:var(--ice);font-size:20px;margin-top:-29px}.event[open] summary:after{content:"−"}.event-name{font-size:17px;font-weight:800;margin:0 25px 8px 0}.tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}.smalltag{font-size:10px;padding:3px 7px;background:#153449}.smalltag.special{background:#3a2854;border-color:#70528e;color:#dec9ff}.smalltag.seasonal{background:#1c4b52;border-color:#49898d;color:#c7fbef}.smalltag.deals{background:#493625;border-color:#8b6842;color:#ffe1b4}.summary{font-size:13px;color:#c1d8e7;line-height:1.48;margin:0}.event-more{border-top:1px solid var(--line);padding:14px 17px 17px;font-size:13px;line-height:1.5;color:#bdd5e3}.event-more p{margin:0 0 10px}.event-more strong{color:white}.event-more .stage{color:var(--gold)}.event-more a{font-weight:700}.empty{color:var(--muted);padding:22px;border:1px dashed var(--line);border-radius:12px}.sources{font-size:13px;color:var(--muted);line-height:1.55}.sources a{word-break:break-word}.footer{border-top:1px solid var(--line);padding-top:22px;margin-top:42px;color:var(--muted);font-size:12px;line-height:1.5}
   @media(max-width:900px){.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline{grid-template-columns:repeat(2,minmax(0,1fr))}.tools{grid-template-columns:1fr}.count{display:none}}
   @media(max-width:600px){.shell{padding-top:12px}.category-grid,.timeline,.event-grid{grid-template-columns:1fr}.mast{border-radius:14px}.tools{position:static}.filters button{flex:1}.section{margin-top:32px}}
+  .event-grid{grid-template-columns:minmax(0,1fr);max-width:950px}.event summary{padding:20px 22px}.event-more{padding:20px 22px 24px}.guide-intro{font-size:14px;color:#e5f4fd;line-height:1.55;margin:0 0 18px}.guide-section{padding-top:16px;border-top:1px solid var(--line);margin-top:16px}.guide-section h4{color:var(--ice);font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin:0 0 9px}.guide-section ul{padding-left:20px;margin:0;display:grid;gap:8px}.guide-section li{line-height:1.55}.squad-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}.squad{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:12px}.squad h5{font-size:13px;color:#fff;margin:0 0 5px}.squad .ratio{color:var(--gold);font-weight:800;font-size:13px;margin:0 0 7px}.squad p{margin:0;color:#c4dce9;line-height:1.5}.guide-sources{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px}.guide-sources a{font-weight:700}.event[open]{border-color:#4c839e}@media(max-width:760px){.squad-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -18,7 +19,7 @@
   <header class="mast">
     <div class="eyebrow">FOX field guide · Whiteout Survival</div>
     <h1>Events, from a new state through Gen 6</h1>
-    <p class="lead">Find the event, see what to prepare, and know whether it is recurring, seasonal, limited, or a deal. Hero generations are milestones, not a fixed event calendar.</p>
+    <p class="lead">Practical playbooks for every event in this guide: what to prepare, what to do, tactics to try, and mistakes to avoid. Hero generations are milestones, not a fixed event calendar.</p>
     <div class="mast-meta"><span class="pill" id="guide-total">Event guides</span><span class="pill">Gen 1–6</span><span class="pill gold">Updated November 2026</span></div>
   </header>
 
@@ -49,7 +50,7 @@
 
   <section class="section" aria-labelledby="catalog-title">
     <div class="eyebrow">03 · Event finder</div><h2 id="catalog-title">Find an event</h2>
-    <p class="section-intro">Search names or preparation tips. Open a card for its preparation note, availability caveat, and source.</p>
+    <p class="section-intro">Search by event or tactic. Open a card for a full playbook. Formation ratios are examples to test against your own heroes and battle reports.</p>
     <div class="tools" role="search">
       <input id="search" type="search" placeholder="Search events or preparation…" aria-label="Search events">
       <div class="filters" role="group" aria-label="Event category">
@@ -64,6 +65,7 @@
 
   <footer class="footer">This is a FOX planning guide, not the in-game calendar. Event rules, rewards, eligibility and start times change with state age and game updates. Read the current event screen before committing resources. Sources are linked on each card; most detailed guides are community-maintained.</footer>
 </main>
+<script src="event-details.js?v=20261103-playbooks"></script>
 <script>
 const wiki='https://www.whiteoutsurvival.wiki/events/';
 const events=[
@@ -114,7 +116,37 @@ events.sort((a,b)=>a.name.localeCompare(b.name,'en',{sensitivity:'base'}));
 document.getElementById('guide-total').textContent=events.length+' event guides';
 const list=document.getElementById('event-list'),search=document.getElementById('search'),focus=document.getElementById('focus'),count=document.getElementById('result-count'),empty=document.getElementById('empty');let category='all';
 function node(tag,cls,value){const n=document.createElement(tag);if(cls)n.className=cls;if(value)n.textContent=value;return n;}
-function draw(){const q=search.value.trim().toLocaleLowerCase();const shown=events.filter(e=>(category==='all'||e.cat.includes(category))&&(focus.value==='all'||e.focus===focus.value)&&(!q||[e.name,e.summary,e.prep,e.stage].join(' ').toLocaleLowerCase().includes(q)));list.replaceChildren();for(const e of shown){const card=node('details','event'),head=node('summary'),name=node('div','event-name',e.name),tags=node('div','tags');head.append(name);for(const c of e.cat){const t=node('span','smalltag '+c,c[0].toUpperCase()+c.slice(1));tags.append(t)}tags.append(node('span','smalltag',e.focus==='hero'?'Heroes & growth':e.focus==='alliance'?'Alliance':'Solo'));head.append(tags,node('p','summary',e.summary));const more=node('div','event-more'),prep=node('p'),stage=node('p','stage'),link=node('a',null,'Read source ↗');prep.append(node('strong',null,'Prepare: '),document.createTextNode(e.prep));stage.append(node('strong',null,'Availability: '),document.createTextNode(e.stage));link.href=e.source;link.target='_blank';link.rel='noopener noreferrer';more.append(prep,stage,link);card.append(head,more);list.append(card)}count.textContent=shown.length+' of '+events.length+' events';empty.hidden=shown.length!==0}
+function addList(parent,title,items){if(!items||!items.length)return;const section=node('section','guide-section'),heading=node('h4',null,title),ul=node('ul');for(const item of items){ul.append(node('li',null,item))}section.append(heading,ul);parent.append(section)}
+function draw(){
+  const q=search.value.trim().toLocaleLowerCase();
+  const shown=events.filter(e=>{
+    const guide=window.FOX_EVENT_DETAILS[e.name]||{};
+    const searchable=[e.name,e.summary,e.prep,e.stage,guide.goal,...(guide.before||[]),...(guide.play||[]),...(guide.plan||[]),...(guide.avoid||[])].join(' ').toLocaleLowerCase();
+    return (category==='all'||e.cat.includes(category))&&(focus.value==='all'||e.focus===focus.value)&&(!q||searchable.includes(q));
+  });
+  list.replaceChildren();
+  for(const e of shown){
+    const guide=window.FOX_EVENT_DETAILS[e.name]||{};
+    const card=node('details','event'),head=node('summary'),name=node('div','event-name',e.name),tags=node('div','tags');
+    head.append(name);
+    for(const c of e.cat)tags.append(node('span','smalltag '+c,c[0].toUpperCase()+c.slice(1)));
+    tags.append(node('span','smalltag',e.focus==='hero'?'Heroes & growth':e.focus==='alliance'?'Alliance':'Solo'));
+    head.append(tags,node('p','summary',e.summary));
+    const more=node('div','event-more');
+    if(guide.goal)more.append(node('p','guide-intro',guide.goal));
+    addList(more,'Before it starts',guide.before);
+    addList(more,'During the event',guide.play);
+    addList(more,'Practical plan',guide.plan);
+    if(guide.squads&&guide.squads.length){const section=node('section','guide-section'),heading=node('h4',null,'Three formations to test'),grid=node('div','squad-grid');section.append(heading);for(const squad of guide.squads){const box=node('div','squad');box.append(node('h5',null,squad.name),node('p','ratio',squad.ratio),node('p',null,squad.use));grid.append(box)}section.append(grid);more.append(section)}
+    addList(more,'Avoid',guide.avoid);
+    const stage=node('p','stage'),links=node('div','guide-sources'),source=node('a',null,'Event rules and rewards ↗');
+    stage.append(node('strong',null,'Availability: '),document.createTextNode(e.stage));
+    source.href=e.source;source.target='_blank';source.rel='noopener noreferrer';links.append(source);
+    if(guide.extra){const extra=node('a',null,'Formation analysis ↗');extra.href=guide.extra;extra.target='_blank';extra.rel='noopener noreferrer';links.append(extra)}
+    more.append(stage,links);card.append(head,more);list.append(card);
+  }
+  count.textContent=shown.length+' of '+events.length+' events';empty.hidden=shown.length!==0;
+}
 search.addEventListener('input',draw);focus.addEventListener('change',draw);document.querySelector('.filters').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(!b)return;category=b.dataset.category;for(const x of document.querySelectorAll('[data-category]'))x.setAttribute('aria-pressed',String(x===b));draw()});draw();
 </script>
 </body>
