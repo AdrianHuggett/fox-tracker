@@ -143,6 +143,7 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 - Legion 1 and Legion 2 each have a separate plan. Three phases (0–15, 15–30, 30–60 min) each have their own drawings, building ownership and note box.
 - Tools: Select (tap a building to cycle FOX → Enemy → Nobody; drag to box-select; Ctrl+C/V copy and paste across phases), Attack and Route arrows (colour, four sizes, text along the arrow, draggable end dots), Pen, Text, Erase. Players are placed from the team lists (⭐ rally leaders full size, others half size) and are always drawn above arrows.
 - Create plan builds a text plan per phase (FOX buildings, closed buildings, rally leaders with their target building and the players closest to them, loot gatherers, notes, team list) and one JPEG with the three phase maps; both download as files.
+- Since 2 Nov 2026 it has the same tools as the Canyon planner: Path (L) and Dotted (D) polylines ending with an arrowhead, a dark outline on arrows and paths, a "White mask" slider (per viewer, `fox-foundry-war-room-v4-mask`), a draggable notes box (position saved in the plan), mouse-wheel zoom with right/middle-button pan and −, + and Fit buttons, rally leader markers at 70 %, and an editable Create plan text (split per phase line by line; Rebuild from map discards edits).
 - The page is English only: `i18n.js` does not reach inside the iframe.
 
 ## Canyon planner (R4 and admin only)

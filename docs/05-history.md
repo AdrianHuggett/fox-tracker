@@ -2,6 +2,10 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 2 Nov 2026
+
+- Foundry planner: ported every Canyon planner change (Path/Dotted tools, arrow outline, white mask, movable notes box with the Arial export fix, wheel zoom and pan, 70 % rally leader markers, editable plan with the line-by-line phase split). Built by applying the same patch scripts to the Foundry page with the board height changed from 738 to 807. Default teams replaced with the 1 Nov Legion 1 split.
+
 ## 31 Oct 2026
 
 - Canyon planner fix: the plan JPEG split the edited text on the exact PHASE headings, so rewording a heading (or typing TEAMS in a note) left that phase blank next to its map. The text is now split line by line: any short line starting "Phase 1/2/3" starts that phase, a line reading only "TEAMS" ends the phase text, and text above PHASE 2 counts as phase 1 when the PHASE 1 heading is gone.
