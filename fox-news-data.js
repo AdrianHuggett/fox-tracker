@@ -1,5 +1,15 @@
 /* Curated game news. */
 window.FOX_NEWS_POSTS = [
+  {
+    "id": 8,
+    "title": "Halloween Party: rewards and closing dates",
+    "body": "The Halloween Party ends on November 2 at 23:59 UTC. Pumpkin Invasion continues until November 3 at 23:59 UTC.\nKing of Phantoms guarantees a permanent Name Card skin when you reach the required points by the event tally, including if you rank outside the top 25.\nUse Peculiar Flavored Candy to attack Pumpkin Fiends. The tenth hit defeats a Fiend, awards 2 Treasure Points, and may summon the Nightmare Pumpkin King.\nCheck your remaining Halloween Tune and Spooky Gathering rewards before their events close.",
+    "category": "game",
+    "pinned": false,
+    "source_url": "https://www.whiteoutsurvival.wiki/sneak-peek/102514638en/",
+    "created_at": "2026-10-27T00:00:00Z",
+    "banner": "news-packs.png"
+  },
 {
   "id": 7,
   "title": "October 20 update: alliance tools and upcoming events",

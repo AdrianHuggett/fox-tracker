@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-02-halloween-game-news',date:'2026-11-02',title:'Halloween Party news',points:['FOX News now shows the Halloween Party closing dates and the permanent Name Card reward, with a link to the official announcement.']},
   {id:'2026-10-31-canyon-plan-edit',date:'2026-10-31',title:'Canyon planner: edit the plan',points:['In the Canyon planner, the Create plan text can now be edited before saving. The JPEG updates as you type, and Rebuild from map starts again from the map.']},
   {id:'2026-10-31-canyon-zoom',date:'2026-10-31',title:'Canyon planner: zoom',points:['Scroll over the Canyon planner map to zoom in towards the cursor. Drag with the right or middle mouse button to move around, or use the −, + and Fit buttons.','Rally leader markers are 30% smaller so they cover less of the map.']},
   {id:'2026-10-30-canyon-note-move',date:'2026-10-30',title:'Canyon planner: movable notes',points:['The phase notes box in the Canyon planner can be dragged anywhere on the map. A tap still opens it for typing, and its place is saved with the plan.']},
