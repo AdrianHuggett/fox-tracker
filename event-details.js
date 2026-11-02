@@ -228,7 +228,7 @@ window.FOX_EVENT_DETAILS={
       {name:'Team C · infantry and lancer counter',ratio:'60 / 40 / 0',use:'Test against opponents whose marksmen are a key threat, using heroes with skills that support the two selected troop types. Without marksmen, watch whether you still deal enough damage. Equip remaining coherent gear.'}
     ],
     avoid:['Do not copy a fixed Gen 6 hero list without checking your stars, skills and gear.','Do not wait until the final minute to edit: lineups lock before battles.'],
-    extra:'Community formation analysis: https://wosguru.com/iwl'
+    extra:'https://wosguru.com/iwl'
   },
   'Snowbusters':{
     goal:'Clear snow, rescue survivors and finish areas while managing fuel and health.',

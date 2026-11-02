@@ -1721,7 +1721,7 @@ function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))retu
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
 function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261029-joint-start#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
-function mountEventGuide(){var p=$('p-events');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="events.html?v=20261103-playbooks" title="Whiteout Survival event guide"></iframe>';}
+function mountEventGuide(){var p=$('p-events');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="events.html?v=20261103-playbooks-links" title="Whiteout Survival event guide"></iframe>';}
 function goCategoryPage(page){if((page==='admin'&&!ADMIN)||((page==='fortress'||page==='foundry'||page==='canyon')&&!FORTRESS_ACCESS))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
 if($('category-sub'))$('category-sub').onclick=function(e){var b=e.target.closest('[data-page]');if(b)goCategoryPage(b.dataset.page);};
