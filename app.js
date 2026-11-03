@@ -623,6 +623,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+ {id:'2026-11-04-layout-other-flags-jpeg',date:'2026-11-04',title:'Layout planner: other flags and JPEG',points:['Place gray flags for other alliances and keep them in your layout code. Export the full map as a JPEG image.']},
  {id:'2026-11-03-event-playbooks',date:'2026-11-03',title:'Practical event playbooks',points:['Every Event guide entry now has steps for preparation, play, strategy and mistakes to avoid. Icefire Warhymn League includes three formation examples to test against your battle reports.']},
  {id:'2026-11-03-event-guide',date:'2026-11-03',title:'Whiteout Survival event guide',points:['A new Event guide under Resources covers recurring, seasonal and special events through hero Gen 6, with preparation tips and source links.']},
   {id:'2026-11-02-foundry-tools',date:'2026-11-02',title:'Foundry planner: Canyon tools',points:['The Foundry planner now has everything the Canyon planner got: Path and Dotted tools with bends, a dark outline on arrows, a white mask slider, a movable notes box, mouse-wheel zoom, smaller rally leader markers and an editable plan before saving.','The default Foundry teams are updated to the latest Legion 1 sign-ups.']},
@@ -1720,7 +1721,7 @@ function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))re
 function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261031-canyon-plan-fix" title="Canyon Clash planner"></iframe>';}
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261029-joint-start#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261104-other-flags-jpeg#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
 function mountEventGuide(){var p=$('p-events');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="events.html?v=20261103-playbooks-links" title="Whiteout Survival event guide"></iframe>';}
 function goCategoryPage(page){if((page==='admin'&&!ADMIN)||((page==='fortress'||page==='foundry'||page==='canyon')&&!FORTRESS_ACCESS))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};

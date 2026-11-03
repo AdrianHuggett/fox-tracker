@@ -51,10 +51,14 @@ aside{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;overf
 input[type=text],input[type=search],input[type=number],textarea,select{width:100%;font:13px var(--body);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 textarea{min-height:64px;font:12px var(--num);resize:vertical}
 .row{display:flex;gap:8px;align-items:center}
+.share-actions{flex-wrap:wrap}
+.share-actions .btn{flex:1 1 130px}
 .btn{font:600 12px var(--head);letter-spacing:.04em;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;white-space:nowrap}
 .btn.main{background:var(--ice);color:#03121D;border-color:var(--ice)}
 .btn[data-al="fox"][aria-pressed="true"]{background:var(--ice);color:#03121D;border-color:var(--ice)}
 .btn[data-al="ngt"][aria-pressed="true"]{background:var(--ngt);color:#140726;border-color:var(--ngt)}
+.btn[data-al="other"][aria-pressed="true"]{background:#8D99A6;color:#03121D;border-color:#8D99A6}
+.tools button[data-tool="flag-other"][aria-pressed="true"]{background:#8D99A6;border-color:#8D99A6;color:#03121D}
 .tools button[data-tool="flag-ngt"][aria-pressed="true"],.tools button[data-tool="hq-ngt"][aria-pressed="true"]{background:var(--ngt);border-color:var(--ngt);color:#140726}
 .list{max-height:330px;overflow:auto;margin-top:8px;border-top:1px solid var(--line)}
 .li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:7px 2px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}
@@ -88,6 +92,7 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
       <div class="tcol"><button type="button" data-tool="city" aria-pressed="false">+ City</button><button type="button" class="lock" data-lock="city" aria-pressed="false" aria-label="Lock cities" title="Lock cities"></button></div>
       <div class="tcol"><button type="button" data-tool="flag-fox" aria-pressed="false">+ FOX flag</button><button type="button" class="lock" data-lock="flag-fox" aria-pressed="false" aria-label="Lock FOX flags" title="Lock FOX flags"></button></div>
       <div class="tcol"><button type="button" data-tool="flag-ngt" aria-pressed="false">+ NGT flag</button><button type="button" class="lock" data-lock="flag-ngt" aria-pressed="false" aria-label="Lock NGT flags" title="Lock NGT flags"></button></div>
+      <div class="tcol"><button type="button" data-tool="flag-other" aria-pressed="false">+ Other flag</button><button type="button" class="lock" data-lock="flag-other" aria-pressed="false" aria-label="Lock other alliance flags" title="Lock other alliance flags"></button></div>
       <div class="tcol"><button type="button" data-tool="building" aria-pressed="false">+ Bear Trap</button><button type="button" class="lock" data-lock="building" aria-pressed="false" aria-label="Lock Bear Traps" title="Lock Bear Traps"></button></div>
       <div class="tcol"><button type="button" data-tool="hq-fox" aria-pressed="false">+ FOX HQ</button><button type="button" class="lock" data-lock="hq-fox" aria-pressed="false" aria-label="Lock the FOX HQ" title="Lock the FOX HQ"></button></div>
       <div class="tcol"><button type="button" data-tool="hq-ngt" aria-pressed="false">+ NGT HQ</button><button type="button" class="lock" data-lock="hq-ngt" aria-pressed="false" aria-label="Lock the NGT HQ" title="Lock the NGT HQ"></button></div>
@@ -111,7 +116,7 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
       <div class="stats">
         <div class="stat"><b id="sCities">0</b><span>Cities</span></div>
         <div class="stat"><b id="sTraps">0</b><span>Bear Traps</span></div>
-        <div class="stat"><b id="sFlags">0</b><span>Flags FOX / NGT</span></div>
+        <div class="stat"><b id="sFlags">0</b><span>Flags FOX / NGT / Other</span></div>
         <div class="stat"><b id="sFast">–</b><span>Fastest march</span></div>
         <div class="stat"><b id="sSlow">–</b><span>Slowest march</span></div>
         <div class="stat"><b id="sAvg">–</b><span>Average</span></div>
@@ -134,7 +139,7 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 
     <section class="card sel" id="selCard" hidden>
       <h2 id="selTitle">Selected</h2>
-      <div id="selAlRow" hidden><label>Alliance</label><div class="row"><button type="button" class="btn" data-al="fox" aria-pressed="false">FOX</button><button type="button" class="btn" data-al="ngt" aria-pressed="false">NGT</button></div></div>
+      <div id="selAlRow" hidden><label>Alliance</label><div class="row"><button type="button" class="btn" data-al="fox" aria-pressed="false">FOX</button><button type="button" class="btn" data-al="ngt" aria-pressed="false">NGT</button><button type="button" class="btn" data-al="other" aria-pressed="false">Other</button></div></div>
       <div id="selNameRow"><label for="selName">Name</label>
       <div class="row"><input type="text" id="selName" maxlength="40"><button type="button" class="btn" id="selSave">Rename</button></div></div>
       <label for="selX">In-game coordinates</label>
@@ -151,7 +156,7 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 
     <section class="card">
       <h2>Share and import</h2>
-      <div class="row"><button type="button" class="btn main" id="copyLink">Copy WOS Nerds link</button><button type="button" class="btn" id="copyCode">Copy layout code</button></div>
+      <div class="row share-actions"><button type="button" class="btn main" id="copyLink">Copy WOS Nerds link</button><button type="button" class="btn" id="copyCode">Copy layout code</button><button type="button" class="btn" id="exportJpeg">Export JPEG</button></div>
       <div class="row" style="margin-top:6px"><button type="button" class="btn" id="reset">Reload starting map</button></div>
       <p class="msg" id="shareMsg">The link opens this layout on wosnerds.com, where it can be edited again.</p>
       <label for="importBox" class="sub">Paste a WOS Nerds link or a layout code to load it here</label>
@@ -180,18 +185,18 @@ var multi=[];
 var ents=[], anchor={x:ANCHOR_DEFAULT.x,y:ANCHOR_DEFAULT.y}, history=[], selected=null, tool='select', query='', showCoords=false, clearArmed=null;
 var LABEL={city:'City',flag:'Flag',building:'Bear Trap',hq:'HQ',node:'Node',obstacle:'Obstacle'};
 var ORDER={hq:0,building:1,flag:2,node:3,obstacle:4,city:5};
-/* Flags belong to FOX or NGT. In WOS Nerds links FOX is the "main" alliance and NGT the "farm" one. */
+/* WOS Nerds links support FOX (main) and NGT (farm); other alliance flags stay in local/layout-code maps. */
 function toolType(t){return t.indexOf('flag')===0?'flag':t.indexOf('hq')===0?'hq':t;}
-function toolAl(t){return /-ngt$/.test(t)?'ngt':'fox';}
+function toolAl(t){return /-other$/.test(t)?'other':/-ngt$/.test(t)?'ngt':'fox';}
 function hasAl(t){return t==='flag'||t==='hq';}
-function nameOf(e){return e.type==='flag'?(alOf(e)==='ngt'?'NGT flag':'FOX flag'):e.type==='hq'?(alOf(e)==='ngt'?'NGT HQ':'FOX HQ'):(LABEL[e.type]||e.type);}
-function alOf(e){return e.al==='ngt'?'ngt':'fox';}
+function nameOf(e){return e.type==='flag'?(alOf(e)==='other'?'Other alliance flag':alOf(e)==='ngt'?'NGT flag':'FOX flag'):e.type==='hq'?(alOf(e)==='ngt'?'NGT HQ':'FOX HQ'):(LABEL[e.type]||e.type);}
+function alOf(e){return e.al==='other'?'other':e.al==='ngt'?'ngt':'fox';}
 /* Pinned kinds: their elements cannot be dragged, moved by X:Y, deleted or cleared until unlocked. */
 var LOCKKEY='fox-layout-locks'+SFX,locks={};
 try{locks=JSON.parse(localStorage.getItem(LOCKKEY)||'{}')||{};}catch(e){locks={};}
 function kindOf(e){return (e.type==='flag'||e.type==='hq')?e.type+'-'+alOf(e):e.type;}
 function isLocked(e){return !!locks[kindOf(e)];}
-var LOCKNAME={'flag-fox':'FOX flags','flag-ngt':'NGT flags',node:'Nodes',obstacle:'Obstacles',city:'Cities',building:'Bear Traps','hq-fox':'FOX HQs','hq-ngt':'NGT HQs'};
+var LOCKNAME={'flag-fox':'FOX flags','flag-ngt':'NGT flags','flag-other':'Other alliance flags',node:'Nodes',obstacle:'Obstacles',city:'Cities',building:'Bear Traps','hq-fox':'FOX HQs','hq-ngt':'NGT HQs'};
 function snapshot(){return JSON.stringify({ents:ents,anchor:anchor});}
 function pushHistory(){history.push(snapshot());if(history.length>60)history.shift();}
 function save(){try{localStorage.setItem(KEY,snapshot());}catch(e){}}
@@ -223,7 +228,7 @@ function overlaps(o,skip){for(var i=0;i<ents.length;i++){var e=ents[i];if(e===sk
 function bitsOf(n,len){return n.toString(2).padStart(len,'0');}
 var TYPECODE={flag:'000',city:'001',building:'010',node:'011',hq:'101',obstacle:'100'};
 /* WOS Nerds stores each position in 10 bits shifted by 30, so only -30..993 tiles from its anchor fit in a link. */
-function encode(){var b='';encode.skipped=0;encode.alli=[];ents.forEach(function(e){if(!TYPECODE[e.type])return;if(e.x+GRID<0||e.y+GRID<0||e.x+GRID>1023||e.y+GRID>1023){encode.skipped++;return;}encode.alli.push(alOf(e)==='ngt'?'farm':'main');b+=TYPECODE[e.type]+bitsOf(e.x+GRID,10)+bitsOf(e.y+GRID,10);
+function encode(){var b='';encode.skipped=0;encode.otherSkipped=0;encode.alli=[];ents.forEach(function(e){if(!TYPECODE[e.type])return;if(e.type==='flag'&&alOf(e)==='other'){encode.otherSkipped++;return;}if(e.x+GRID<0||e.y+GRID<0||e.x+GRID>1023||e.y+GRID>1023){encode.skipped++;return;}encode.alli.push(alOf(e)==='ngt'?'farm':'main');b+=TYPECODE[e.type]+bitsOf(e.x+GRID,10)+bitsOf(e.y+GRID,10);
   if(e.type==='city'){var name=e.name||'City';var utf=name.length>254||[].some.call(name,function(ch){return ch.codePointAt(0)>255;});
     if(utf){var bytes=new TextEncoder().encode(name);b+='11111111'+bitsOf(bytes.length,16);bytes.forEach(function(x){b+=bitsOf(x,8);});}
     else{var len=Math.min(name.length,254);b+=bitsOf(len,8);for(var i=0;i<len;i++)b+=bitsOf(name.charCodeAt(i)&255,8);}}});
@@ -238,7 +243,7 @@ function decode(b64){var raw=atob(b64),b='';for(var i=0;i<raw.length;i++)b+=bits
 function shareLink(){var data=encodeURIComponent(encode());return 'https://wosnerds.com/layout-planner/?mapData='+data+'%7C%7Ca%3D'+anchor.x+'%3A'+anchor.y+'%7C%7Cw%3D0%7C%7Cm%3Dcoords%7C%7Cmode%3Db%7C%7Calli%3D'+encodeURIComponent(encodeURIComponent(JSON.stringify({active:'main',list:encode.alli})));}
 
 /* ---------- map drawing: the grid is turned 45° like the in-game map ---------- */
-var cv=document.getElementById('map'),ctx=cv.getContext('2d'),wrap=document.getElementById('mapwrap');
+var cv=document.getElementById('map'),ctx=cv.getContext('2d'),wrap=document.getElementById('mapwrap'),exporting=false;
 var view={s:16,ox:0,oy:0},dpr=1;
 /* View angle in degrees: 45 is the in-game diamond. The rotate buttons change it in 45° steps. */
 var ROT=45;try{var r0=parseInt(localStorage.getItem('fox-layout-rot'+SFX),10);if(!isNaN(r0))ROT=r0;}catch(e){}
@@ -272,21 +277,21 @@ function overlapCells(){var n=new Map();ents.forEach(function(e){if(e.type!=='fl
   for(var x=cx-r;x<=cx+r;x++)for(var y=cy-r;y<=cy+r;y++)one.add(x+','+y);one.forEach(function(k){n.set(k,(n.get(k)||0)+1);});});
   var s=new Set();n.forEach(function(v,k){if(v>1)s.add(k);});return s;}
 var analysis={};
-function analyse(){var terr=territory(),count={};ents.forEach(function(e){if(e.type==='city'){var k=(e.name||'').trim().toLowerCase();count[k]=(count[k]||0)+1;}});
+function analyse(){var terr=new Set([...territory('fox'),...territory('ngt')]),count={};ents.forEach(function(e){if(e.type==='city'){var k=(e.name||'').trim().toLowerCase();count[k]=(count[k]||0)+1;}});
   analysis={terr:terr,tf:territory('fox'),tn:territory('ngt'),overlap:overlapCells(),dup:function(e){return count[(e.name||'').trim().toLowerCase()]>1;},out:function(e){return insideCount(e,terr)<e.w*e.w;},placeholder:function(e){return /^city\s*\d*$/i.test((e.name||'').trim())||!(e.name||'').trim();}};}
 function draw(){analyse();var W=cv.width/dpr,H=cv.height/dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
   drawGrid(W,H);
-  [['fox','rgba(53,200,245,.10)'],['ngt','rgba(181,123,255,.13)']].forEach(function(t){ctx.fillStyle=t[1];territory(t[0]).forEach(function(k){var p=k.split(',');poly(+p[0],+p[1],1);ctx.fill();});});
+  [['other','rgba(141,153,166,.16)'],['fox','rgba(53,200,245,.10)'],['ngt','rgba(181,123,255,.13)']].forEach(function(t){ctx.fillStyle=t[1];territory(t[0]).forEach(function(k){var p=k.split(',');poly(+p[0],+p[1],1);ctx.fill();});});
   /* Tiles covered by two or more flags/HQs get a faint hatch, so overlapping coverage is visible without shouting. */
   ctx.save();ctx.fillStyle=hatch();analysis.overlap.forEach(function(k){var p=k.split(',');poly(+p[0],+p[1],1);ctx.fill();});ctx.restore();
   var showLabels=view.s>=13;
   ents.forEach(function(e){poly(e.x,e.y,e.w);
     var fill={hq:'#D9A441',flag:'#8FA6BC',building:'#1B1F2A',node:'#2E6B3F',obstacle:'#7A2230'}[e.type]||'#16486B';
-    if(e.type==='flag')fill=alOf(e)==='ngt'?'#B57BFF':'#35C8F5';
+    if(e.type==='flag')fill=alOf(e)==='other'?'#8D99A6':alOf(e)==='ngt'?'#B57BFF':'#35C8F5';
     if(e.type==='hq')fill=alOf(e)==='ngt'?'#7B4FC9':'#D9A441';
     if(e.type==='city'){fill=analysis.out(e)?'#5A1E26':analysis.dup(e)?'#5C4318':(cityAl(e)==='ngt'?'#4A2E7A':'#14507A');}
     ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=e===selected?3:1.2;
-    ctx.strokeStyle=e===selected?'#FFFFFF':isLocked(e)?'#D9A441':e.type==='building'?'#FF7A3D':e.type==='hq'?(alOf(e)==='ngt'?'#E2CCFF':'#FFE3A0'):'rgba(140,200,240,.55)';ctx.stroke();
+    ctx.strokeStyle=e===selected?'#FFFFFF':isLocked(e)?'#D9A441':e.type==='building'?'#FF7A3D':e.type==='hq'?(alOf(e)==='ngt'?'#E2CCFF':'#FFE3A0'):alOf(e)==='other'?'#D4DAE0':'rgba(140,200,240,.55)';ctx.stroke();
     var c=toScreen(e.x+e.w/2,e.y+e.w/2);ctx.textAlign='center';ctx.textBaseline='middle';
     var g=gameCoord(e),xy=g.x+':'+g.y,fs=Math.max(8,Math.min(13,view.s*.42));
     if(e.type==='building'||e.type==='hq'){var hqn=alOf(e)==='ngt';ctx.fillStyle=e.type==='hq'?(hqn?'#F5F7FF':'#03121D'):'#FF7A3D';ctx.font='700 '+Math.max(9,view.s*(e.type==='hq'?.5:.7))+'px Chakra Petch, sans-serif';ctx.fillText(e.type==='hq'?(hqn?'NGT HQ':'FOX HQ'):'TRAP',c.x,showCoords&&showLabels?c.y-fs*.6:c.y);
@@ -297,8 +302,8 @@ function draw(){analyse();var W=cv.width/dpr,H=cv.height/dpr;ctx.setTransform(dp
     else if(e.type==='node'){ctx.fillStyle='#BFF5CF';ctx.font='700 '+Math.max(8,view.s*.5)+'px Chakra Petch, sans-serif';ctx.fillText('NODE',c.x,showCoords&&showLabels?c.y-fs*.55:c.y);
       if(showCoords&&showLabels){ctx.font='500 '+(fs*.85)+'px IBM Plex Mono, monospace';ctx.fillText(xy,c.x,c.y+fs*.6);}}
     else if(showCoords&&showLabels){ctx.font='500 '+(fs*.8)+'px IBM Plex Mono, monospace';ctx.fillStyle='#F5F7FF';ctx.fillText(xy,c.x,c.y-view.s*.75);}
-    else if(e.type==='flag'&&view.s>=18){ctx.font='700 '+Math.round(view.s*.42)+'px Chakra Petch, sans-serif';ctx.fillStyle='#03121D';ctx.fillText(alOf(e)==='ngt'?'NGT':'FOX',c.x,c.y);}});
-  drawGhost();}
+    else if(e.type==='flag'&&view.s>=18){ctx.font='700 '+Math.round(view.s*.42)+'px Chakra Petch, sans-serif';ctx.fillStyle='#03121D';ctx.fillText(alOf(e)==='other'?'OTH':alOf(e)==='ngt'?'NGT':'FOX',c.x,c.y);}});
+  if(!exporting)drawGhost();}
 /* Outline of the element about to be placed, under the mouse. Green fits, red is blocked. */
 var ghost=null;
 function placeable(o){return inMap(o)&&!overlaps(o);}
@@ -308,7 +313,7 @@ function drawSelection(){multi=multi.filter(function(e){return ents.indexOf(e)>=
     var x=Math.min(drag.x0,drag.x1),y=Math.min(drag.y0,drag.y1),w=Math.abs(drag.x1-drag.x0),h=Math.abs(drag.y1-drag.y0);ctx.fillRect(x,y,w,h);ctx.strokeRect(x,y,w,h);ctx.restore();}}
 function drawGhost(){drawSelection();drawPaste();if(!ghost||tool==='select'||tool==='delete'||tool==='area')return;var ok=placeable(ghost),col=ok?'#35DEA0':'#FF5946';
   ctx.save();if(ghost.type==='flag'||ghost.type==='hq'){var r=ghost.type==='flag'?3:6+Math.floor(ghost.w/2),cx=ghost.w===1?ghost.x:ghost.x+Math.floor(ghost.w/2),cy=ghost.w===1?ghost.y:ghost.y+Math.floor(ghost.w/2),ng=alOf(ghost)==='ngt';
-    poly(cx-r,cy-r,2*r+1);ctx.fillStyle=ng?'rgba(181,123,255,.10)':'rgba(53,200,245,.08)';ctx.fill();ctx.setLineDash([3,4]);ctx.lineWidth=1;ctx.strokeStyle=ng?'rgba(181,123,255,.7)':'rgba(53,200,245,.6)';ctx.stroke();}
+    poly(cx-r,cy-r,2*r+1);ctx.fillStyle=alOf(ghost)==='other'?'rgba(141,153,166,.12)':ng?'rgba(181,123,255,.10)':'rgba(53,200,245,.08)';ctx.fill();ctx.setLineDash([3,4]);ctx.lineWidth=1;ctx.strokeStyle=alOf(ghost)==='other'?'rgba(141,153,166,.7)':ng?'rgba(181,123,255,.7)':'rgba(53,200,245,.6)';ctx.stroke();}
   poly(ghost.x,ghost.y,ghost.w);ctx.fillStyle=ok?'rgba(53,222,160,.18)':'rgba(255,89,70,.18)';ctx.fill();ctx.setLineDash([5,3]);ctx.lineWidth=2;ctx.strokeStyle=col;ctx.stroke();
   var g=gameCoord(ghost),c=toScreen(ghost.x+ghost.w/2,ghost.y+ghost.w/2);ctx.setLineDash([]);ctx.font='600 11px IBM Plex Mono, monospace';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillStyle=col;ctx.fillText(g.x+':'+g.y,c.x,toScreen(ghost.x,ghost.y).y-4);ctx.restore();}
 function ghostAt(p){if(tool==='select'||tool==='delete'||tool==='area'){ghost=null;return;}var g=toGrid(p.x,p.y),tt=toolType(tool),w=SIZE[tt];ghost={type:tt,w:w,x:Math.floor(g.x)-Math.floor((w-1)/2),y:Math.floor(g.y)-Math.floor((w-1)/2)};if(hasAl(tt))ghost.al=toolAl(tool);}
@@ -318,7 +323,7 @@ function $(id){return document.getElementById(id);}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function panel(){analyse();var cities=ents.filter(function(e){return e.type==='city';});
   var times=cities.map(bestTime).filter(function(t){return t!==null;});
-  $('sCities').textContent=cities.length;$('sTraps').textContent=ents.filter(function(e){return e.type==='building';}).length;$('sFlags').textContent=ents.filter(function(e){return e.type==='flag'&&alOf(e)==='fox';}).length+' / '+ents.filter(function(e){return e.type==='flag'&&alOf(e)==='ngt';}).length;
+  $('sCities').textContent=cities.length;$('sTraps').textContent=ents.filter(function(e){return e.type==='building';}).length;$('sFlags').textContent=['fox','ngt','other'].map(function(al){return ents.filter(function(e){return e.type==='flag'&&alOf(e)===al;}).length;}).join(' / ');
   $('sFast').textContent=times.length?Math.min.apply(null,times)+'s':'–';$('sSlow').textContent=times.length?Math.max.apply(null,times)+'s':'–';$('sAvg').textContent=times.length?Math.round(times.reduce(function(a,b){return a+b;},0)/times.length)+'s':'–';
   var dupNames={};cities.filter(analysis.dup).forEach(function(c){dupNames[c.name]=1;});var dn=Object.keys(dupNames);
   var outs=cities.filter(analysis.out),ph=cities.filter(analysis.placeholder);
@@ -341,7 +346,7 @@ function panel(){analyse();var cities=ents.filter(function(e){return e.type==='c
       title='<b>'+esc(kk)+(ents.filter(function(x){return x.type!=='city'&&nameOf(x)===kk;}).length>1?' '+kindCount[kk]:'')+'</b>';}
     return '<div class="li" data-i="'+i+'" role="button" tabindex="0"><span>'+title+'<br><small>X:'+g.x+' Y:'+g.y+'</small></span><span class="t">'+(e.type==='city'?(r.t===null?'–':r.t+'s'):'')+'</span></div>';}).join('')||'<p class="msg">Nothing matches.</p>';
   if(selected&&ents.indexOf(selected)>=0){var isCity=selected.type==='city',g=gameCoord(selected);$('selCard').hidden=false;$('selTitle').textContent='Selected '+nameOf(selected);$('selNameRow').hidden=!isCity;
-    $('selAlRow').hidden=!hasAl(selected.type);[].forEach.call(document.querySelectorAll('[data-al]'),function(b){b.setAttribute('aria-pressed',String(b.dataset.al===alOf(selected)));});
+    $('selAlRow').hidden=!hasAl(selected.type);[].forEach.call(document.querySelectorAll('[data-al]'),function(b){b.hidden=b.dataset.al==='other'&&selected.type!=='flag';b.setAttribute('aria-pressed',String(b.dataset.al===alOf(selected)));});
     if(isCity&&document.activeElement!==$('selName'))$('selName').value=selected.name||'';
     if(document.activeElement!==$('selX')&&document.activeElement!==$('selY')){$('selX').value=g.x;$('selY').value=g.y;}
     var t=isCity?marchTimes(selected):[];$('selInfo').textContent='In-game X:'+g.x+' Y:'+g.y+(isCity?' · march to Bear Trap '+(t.length?t.map(function(x){return x+'s';}).join(' / '):'–'):'');}
@@ -451,9 +456,24 @@ function moveTo(){if(!selected)return;var X=Number($('selX').value),Y=Number($('
   if(overlaps(cand,selected)){info.textContent='Something already stands at X:'+X+' Y:'+Y+'. Move it first.';return;}
   pushHistory();selected.x=nx;selected.y=ny;var r=wrap.getBoundingClientRect(),c=toScreen(nx+w/2,ny+w/2);view.ox+=r.width/2-c.x;view.oy+=r.height/2-c.y;refresh();}
 [].forEach.call(document.querySelectorAll('[data-al]'),function(b){b.onclick=function(){if(!selected||!hasAl(selected.type)||alOf(selected)===b.dataset.al)return;pushHistory();selected.al=b.dataset.al;refresh();};});
+$('exportJpeg').onclick=function(){var btn=this,W=2400,H=1600,off=document.createElement('canvas'),image=document.createElement('canvas');off.width=image.width=W;off.height=image.height=H;
+  var oldCv=cv,oldCtx=ctx,oldView=view,oldDpr=dpr,oldHatch=hatchPat,t=rc(),xs=[],ys=[];btn.disabled=true;
+  ents.forEach(function(e){[[e.x,e.y],[e.x+e.w,e.y],[e.x,e.y+e.w],[e.x+e.w,e.y+e.w]].forEach(function(p){xs.push(p[0]*t.c-p[1]*t.s);ys.push(p[0]*t.s+p[1]*t.c);});});
+  if(!xs.length){xs=[-10,10];ys=[-10,10];}
+  try{var minX=Math.min.apply(null,xs),maxX=Math.max.apply(null,xs),minY=Math.min.apply(null,ys),maxY=Math.max.apply(null,ys);
+    cv=off;ctx=off.getContext('2d');dpr=1;hatchPat=null;exporting=true;
+    view={s:Math.max(.35,Math.min(56,(W-160)/Math.max(1,maxX-minX),(H-160)/Math.max(1,maxY-minY))),ox:0,oy:0};
+    view.ox=W/2-(minX+maxX)/2*view.s;view.oy=H/2-(minY+maxY)/2*view.s;
+    draw();var out=image.getContext('2d');out.fillStyle='#06182A';out.fillRect(0,0,W,H);out.drawImage(off,0,0);
+  }catch(e){$('shareMsg').textContent='JPEG export failed: '+e.message;btn.disabled=false;return;}
+  finally{cv=oldCv;ctx=oldCtx;view=oldView;dpr=oldDpr;hatchPat=oldHatch;exporting=false;}
+  image.toBlob(function(blob){btn.disabled=false;if(!blob){$('shareMsg').textContent='JPEG export failed.';return;}
+    var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='fox-layout-'+new Date().toISOString().slice(0,10)+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},60000);
+    $('shareMsg').textContent='Full map exported as JPEG.';},'image/jpeg',.92);
+};
 $('selMove').onclick=moveTo;$('selX').onkeydown=$('selY').onkeydown=function(ev){if(ev.key==='Enter')moveTo();};
 $('selSave').onclick=rename;$('selName').onkeydown=function(ev){if(ev.key==='Enter')rename();};
-$('copyLink').onclick=function(){var link=shareLink(),skip=encode.skipped?' '+encode.skipped+' element'+(encode.skipped>1?'s are':' is')+' too far from the HQ for a WOS Nerds link and were left out.':'';var done=function(ok){$('shareMsg').textContent=(ok?'Link copied. Paste it in your alliance chat or open it on wosnerds.com.':'Copying was blocked. Select the link below and copy it.')+skip;if(!ok){$('importBox').value=link;$('importBox').select();}};
+$('copyLink').onclick=function(){var link=shareLink(),skip=encode.skipped?' '+encode.skipped+' element'+(encode.skipped>1?'s are':' is')+' too far from the HQ for a WOS Nerds link and were left out.':'';if(encode.otherSkipped)skip+=' '+encode.otherSkipped+' other alliance flag'+(encode.otherSkipped>1?'s were':' was')+' left out because WOS Nerds links support only two alliances. Copy layout code to keep every flag.';var done=function(ok){$('shareMsg').textContent=(ok?'Link copied. Paste it in your alliance chat or open it on wosnerds.com.':'Copying was blocked. Select the link below and copy it.')+skip;if(!ok){$('importBox').value=link;$('importBox').select();}};
   try{navigator.clipboard.writeText(link).then(function(){done(true);},function(){done(false);});}catch(e){done(false);}};
 $('reset').onclick=function(){pushHistory();ents=startMap();anchor={x:ANCHOR_DEFAULT.x,y:ANCHOR_DEFAULT.y};selected=null;refresh();fit();$('shareMsg').textContent='Starting map reloaded (joint FOX + NGT map, no cities). Undo brings your changes back.';};
 /* ---------- layout generator ----------
@@ -477,10 +497,10 @@ function renderGen(){var box=$('genTraps');if(!box)return;var traps=ents.filter(
     return '<div class="genrow"><label for="gen'+i+'"><b style="color:'+(r.al==='ngt'?'var(--ngt)':'var(--ice)')+'">'+esc(r.label)+'</b></label><div class="row"><input type="range" id="gen'+i+'" data-k="'+r.k+'" min="0" max="100" step="1" value="'+v+'"><b class="genv">'+v+'</b></div></div>';}).join('');}
 function generateLayout(rebuild){
   var K=function(x,y){return x+','+y;},R=45;
-  var keep=ents.filter(function(e){if(e.type==='city')return isLocked(e);if(e.type==='flag'&&rebuild)return isLocked(e);return true;});
+  var keep=ents.filter(function(e){if(e.type==='city')return isLocked(e);if(e.type==='flag'&&rebuild)return alOf(e)==='other'||isLocked(e);return true;});
   var occ=new Set();keep.forEach(function(e){for(var dx=0;dx<e.w;dx++)for(var dy=0;dy<e.w;dy++)occ.add(K(e.x+dx,e.y+dy));});
   function cover(e){var cx=e.w===1?e.x:e.x+Math.floor(e.w/2),cy=e.w===1?e.y:e.y+Math.floor(e.w/2),r=e.type==='flag'?3:6+Math.floor(e.w/2),out=[];for(var x=cx-r;x<=cx+r;x++)for(var y=cy-r;y<=cy+r;y++)out.push(K(x,y));return out;}
-  var terr={fox:new Set(),ngt:new Set()};keep.forEach(function(e){if(e.type==='flag'||e.type==='hq')cover(e).forEach(function(k){terr[alOf(e)].add(k);});});
+  var terr={fox:new Set(),ngt:new Set(),other:new Set()};function foreignTerr(al){return new Set([...terr[al==='fox'?'ngt':'fox'],...terr.other]);}keep.forEach(function(e){if(e.type==='flag'||e.type==='hq')cover(e).forEach(function(k){terr[alOf(e)].add(k);});});
   var traps=keep.filter(function(e){return e.type==='building';}).map(function(t){return {e:t,al:trapAlliance(t),need:Math.max(0,trapCount(t)),want:trapCount(t),cx:t.x+1,cy:t.y+1,times:[]};});
   keep.filter(function(e){return e.type==='city';}).forEach(function(c){var al=cityAl(c),b=null,bd=1e9;traps.forEach(function(t){if(t.al!==al)return;var d=Math.hypot(t.cx-(c.x+.5),t.cy-(c.y+.5));if(d<bd){bd=d;b=t;}});if(b)b.need=Math.max(0,b.need-1);});
   function cellsOf(x,y){return [K(x,y),K(x+1,y),K(x,y+1),K(x+1,y+1)];}
@@ -499,11 +519,11 @@ function generateLayout(rebuild){
   var newFlags=[],cities=[];
   /* A new banner covers the spot it is needed for, joins its own territory, never touches the other
      alliance's, prefers a spiral corner tile and never takes a tile a city of the spiral needs. */
-  function bestFlag(c,t){var oth=t.al==='fox'?'ngt':'fox',own=terr[t.al],best=null;
+  function bestFlag(c,t){var oth=foreignTerr(t.al),own=terr[t.al],best=null;
     for(var fx=c.x-2;fx<=c.x+3;fx++)for(var fy=c.y-2;fy<=c.y+3;fy++){var fk=K(fx,fy);if(occ.has(fk))continue;if(!inMap({x:fx-3,y:fy-3,w:7}))continue;
       var ok=true,touch=own.size===0,fresh=0,over=0,gain=0;
       for(var x=fx-4;x<=fx+4&&ok;x++)for(var y=fy-4;y<=fy+4;y++){var k=K(x,y);
-        if(Math.abs(x-fx)<=3&&Math.abs(y-fy)<=3){if(terr[oth].has(k)){ok=false;break;}if(own.has(k))over++;else if(!occ.has(k)){fresh++;gain+=Math.max(0,R-Math.hypot(t.cx-(x+.5),t.cy-(y+.5)));}}
+        if(Math.abs(x-fx)<=3&&Math.abs(y-fy)<=3){if(oth.has(k)){ok=false;break;}if(own.has(k))over++;else if(!occ.has(k)){fresh++;gain+=Math.max(0,R-Math.hypot(t.cx-(x+.5),t.cy-(y+.5)));}}
         else if(own.has(k))touch=true;}
       if(over)touch=true;if(!ok||!touch||!fresh)continue;
       var s=gain-over*25+(leftover.has(fk)?2000:0)-(planned.has(fk)?200000:0);if(!best||s>best.s)best={x:fx,y:fy,s:s};}
@@ -511,7 +531,7 @@ function generateLayout(rebuild){
   function addFlag(f,al){var fl={type:'flag',x:f.x,y:f.y,w:1,al:al};newFlags.push(fl);occ.add(K(f.x,f.y));cover(fl).forEach(function(k){terr[al].add(k);});}
   function tryPlace(c){var t=traps[c.ti];if(t.need<=0)return;var ks=cellsOf(c.x,c.y);
     if(ks.some(function(k){return occ.has(k);})||!inMap({x:c.x,y:c.y,w:2}))return;
-    if(!ks.every(function(k){return terr[t.al].has(k);})){var oth=terr[t.al==='fox'?'ngt':'fox'];if(ks.some(function(k){return oth.has(k);}))return;
+    if(!ks.every(function(k){return terr[t.al].has(k);})){var oth=foreignTerr(t.al);if(ks.some(function(k){return oth.has(k);}))return;
       var f=bestFlag(c,t);if(!f)return;addFlag(f,t.al);
       if(ks.some(function(k){return occ.has(k);})||!ks.every(function(k){return terr[t.al].has(k);}))return;}
     ks.forEach(function(k){occ.add(k);});var city={type:'city',x:c.x,y:c.y,w:2,al:t.al,name:''};cities.push(city);
@@ -528,7 +548,7 @@ function generateLayout(rebuild){
      them again (most uncovered ground first, then farthest from the trap): a closer city is worth it, and
      the clean-up below drops whatever turns out redundant. Returns the new territory, or null. */
   function patch(al,T,ks,fl,t){var lost=new Set();keep.concat(cities).forEach(function(c){if(c.type==='city'&&cityAl(c)===al)cellsOf(c.x,c.y).forEach(function(k){if(!T.has(k))lost.add(k);});});
-    var oth=terr[al==='fox'?'ngt':'fox'],add=[];
+    var oth=foreignTerr(al),add=[];
     while(lost.size&&add.length<2){var best=null,seen={};
       lost.forEach(function(lk){var p=lk.split(',').map(Number);for(var x=p[0]-3;x<=p[0]+3;x++)for(var y=p[1]-3;y<=p[1]+3;y++){var k=K(x,y);if(seen[k])continue;seen[k]=1;
         if(occ.has(k)||ks.indexOf(k)>=0||k===K(fl.x,fl.y)||add.some(function(a){return K(a.x,a.y)===k;})||!inMap({x:x-3,y:y-3,w:7}))continue;
@@ -538,7 +558,7 @@ function generateLayout(rebuild){
     if(lost.size)return null;
     add.forEach(function(f){newFlags.push(f);occ.add(K(f.x,f.y));flagAt[K(f.x,f.y)]=f;});return terrOf(al);}
   function compact(){for(var pass=0,moved=true;moved&&pass<100;pass++){moved=false;seats.sort(function(a,b){return b.d-a.d;});
-    seats.forEach(function(s){var c=s.c,t=s.t,al=t.al,oth=terr[al==='fox'?'ngt':'fox'],cur=cellsOf(c.x,c.y),r=Math.ceil(s.d)+1,cand=[];
+    seats.forEach(function(s){var c=s.c,t=s.t,al=t.al,oth=foreignTerr(al),cur=cellsOf(c.x,c.y),r=Math.ceil(s.d)+1,cand=[];
       cur.forEach(function(k){occ.delete(k);});
       for(var x=t.cx-r;x<=t.cx+r;x++)for(var y=t.cy-r;y<=t.cy+r;y++){var d=Math.hypot(t.cx-(x+.5),t.cy-(y+.5));if(d<s.d-1e-9)cand.push({x:x,y:y,d:d});}
       cand.sort(function(a,b){return a.d-b.d;});

@@ -152,6 +152,8 @@ Next SvS date and MUR rate (read-only for members; an admin also sees a date pic
 
 ## Layout planner (every member)
 
+Other alliance flags can be placed and locked independently. They and their territory appear gray, block generated FOX/NGT territory, and survive local saves and `FOXLAYOUT:` codes. WOS Nerds links omit them because that format represents only two alliances; the copy action explains the omission. Export JPEG renders the complete layout into a 2400×1600 image fitted to all elements at the current map rotation, regardless of the current viewport. Selection and placement previews are excluded.
+
 `layout.html` is a self-contained page (own CSS and JS) loaded in an iframe by `mountLayout()` the first time Alliance → Layout planner opens. Every signed-in member sees it. Nothing is stored in Supabase: each member's layout lives in their own browser (`localStorage` keys `fox-layout-v1`, `fox-layout-locks`, `fox-layout-rot`, `fox-layout-gen`, each suffixed with `-<account id>`). `mountLayout()` passes the id in the URL hash (`#u=…`, never sent to the server), so two accounts on one browser keep separate layouts. Layouts move between members or devices with "Copy layout code" (`FOXLAYOUT:` + base64 JSON) and the import box, which also reads WOS Nerds layout-planner links.
 
 - Map items: cities (2×2), FOX and NGT flags (1×1, territory 7×7), Bear Traps (3×3), FOX and NGT HQs (3×3, territory 15×15), nodes (2×2) and obstacles. Each kind can be locked; locked items cannot be moved, deleted or cleared. Select area, Ctrl-click, copy and paste, undo, rotate the view in 45° steps, and X:Y entry in game coordinates (anchor X:411 Y:530 by default).
