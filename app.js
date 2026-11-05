@@ -37,6 +37,7 @@ function initials(email,name){
   return (loc.slice(0,2)||'??').toUpperCase();
 }
 function identifyUser(u){
+  if(U&&U.id!==u.id) resetPrivatePreview();
   U=u; $('who').textContent=u.email;
   var av=$('avatar'); if(av) av.textContent=initials(u.email,u.user_metadata&&u.user_metadata.name);
 }
@@ -1187,6 +1188,26 @@ function checkAdmin(profile){
   var pa=$('p-admin'); if(ADMIN&&pa&&pa.classList.contains('on')) loadMembers();
 }
 
+/* Private feature access is confirmed by an owner-scoped server row. An admin
+   flag only decides whether to ask; it never grants access to the document. */
+var privatePreview=null, PRIVATE_PREVIEW_ACCESS=false;
+function resetPrivatePreview(){
+  if(privatePreview)privatePreview.dispose();privatePreview=null;PRIVATE_PREVIEW_ACCESS=false;
+  var tab=$('tab-private-profile');if(tab)tab.hidden=true;
+  var panel=$('p-private-profile');if(panel){panel.replaceChildren();panel.classList.remove('on');}
+}
+async function checkPrivatePreview(){
+  resetPrivatePreview();if(!ADMIN||!U||!window.FOXPrivatePreview)return;
+  var owner=U.id;
+  var controller=window.FOXPrivatePreview.create({sb:SB,userId:owner,onDenied:function(){
+    if(privatePreview!==controller)return;resetPrivatePreview();syncCategories();goCategoryPage('dash');
+  }});
+  privatePreview=controller;
+  var access=await controller.check();
+  if(!U||U.id!==owner||privatePreview!==controller)return;
+  PRIVATE_PREVIEW_ACCESS=access;$('tab-private-profile').hidden=!access;syncCategories();
+}
+
 function renderTop(){
   var withT=0,met=0,sum=0,behind=0;
   D.items.forEach(function(it){ var c=calcItem(it);
@@ -1350,6 +1371,7 @@ document.addEventListener('input',function(e){
 document.addEventListener('click',function(e){
   var t=e.target;
   if(t.matches('nav.tabs button[data-p]')){
+    if(t.dataset.p==='private-profile'&&!PRIVATE_PREVIEW_ACCESS) return;
     if((t.dataset.p==='fortress'||t.dataset.p==='foundry'||t.dataset.p==='canyon')&&!FORTRESS_ACCESS) return;
     [].forEach.call(document.querySelectorAll('nav.tabs button[data-p]'),function(b){
       b.setAttribute('aria-selected',String(b===t)); });
@@ -1366,6 +1388,7 @@ document.addEventListener('click',function(e){
     if(t.dataset.p==='canyon') mountCanyon();
     if(t.dataset.p==='layout') mountLayout();
     if(t.dataset.p==='events') mountEventGuide();
+    if(t.dataset.p==='private-profile'&&privatePreview)privatePreview.mount($('p-private-profile'));
     headroomShow();
     return; }
   var pt=t.closest&&t.closest('#packs .gtog');
@@ -1411,6 +1434,7 @@ document.addEventListener('click',function(e){
 /* ---------- auth ---------- */
 function authMsg(t,ok){ var e=$('authmsg'); e.textContent=t||''; e.className='authmsg'+(ok?' ok':''); }
 function showAuth(){ if($('fatal')) $('fatal').hidden=true;
+  resetPrivatePreview();
   $('auth').style.display=''; $('app').style.display='none'; $('userbar').style.display='none';
   var nv=$('navtabs'); if(nv) nv.style.display='none'; }
 function showApp(){ if($('fatal')) $('fatal').hidden=true;
@@ -1469,6 +1493,7 @@ async function loadAll(){
   await loadHistory();
   await loadExch();
   touchProfile(); checkAdmin(prof);
+  await checkPrivatePreview();
   if($('dispname')) $('dispname').value=String((U.user_metadata&&U.user_metadata.name)||'').trim();
   showApp(); render(); say('saved');
   restoreTab();
@@ -1489,6 +1514,7 @@ function restoreTab(){
   try{
     if(!isReload()){ sessionStorage.setItem('fox-tab','foxnews'); var landing=document.querySelector('#navtabs button[data-p="foxnews"]'); if(landing) landing.click(); return; }
     var tb=sessionStorage.getItem('fox-tab')||'foxnews';
+    if(tb==='private-profile'&&!PRIVATE_PREVIEW_ACCESS)tb='dash';
     if((tb==='fortress'||tb==='foundry'||tb==='canyon')&&!FORTRESS_ACCESS) tb='r4';
     if(!tb||tb==='dash') return;
     var b=document.querySelector('nav.tabs button[data-p="'+tb+'"]');
@@ -1577,6 +1603,11 @@ async function boot(){
       '<p class="hint">Add your Supabase project URL and anon key at the top of index.html.</p></div>';
     return; }
   SB=window.supabase.createClient(CONFIG.url,CONFIG.key);
+  SB.auth.onAuthStateChange(function(event,session){
+    if(event==='SIGNED_OUT'||(U&&session&&session.user.id!==U.id)){
+      resetPrivatePreview();syncCategories();
+    }
+  });
   /* Listeners go on before the first network call. If that call fails the sign-in
      form still has to work, rather than sitting there inert behind a blank page. */
   wireUp();
@@ -1634,6 +1665,7 @@ function wireUp(){
   if($('svs-save')) $('svs-save').addEventListener('click',saveSvsDate);
   if($('newpw')) $('newpw').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); changePassword(); } });
   $('signout').addEventListener('click',async function(){
+    resetPrivatePreview();
     await SB.auth.signOut(); location.reload();
   });
   if($('cur-select')){
@@ -1712,8 +1744,8 @@ function mountBuildings(){
   if(window.ResizeObserver)new ResizeObserver(syncHeaderHeight).observe(header);
   else window.addEventListener('resize',syncHeaderHeight);
 })();
-var categoryLast={prep:'dash',alliance:'r4',resources:'events'},categoryPages={foxnews:[['foxnews','FOX News']],prep:[['dash','Dashboard'],['stock','Backpack'],['packs','Things to buy']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles'],['fortress','Fortress rewards'],['foundry','Foundry planner'],['canyon','Canyon planner'],['layout','Layout planner']],resources:[['events','Event guide'],['matrix','Pack contents'],['ref','Reference']]};
-function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var heroTitle=document.querySelector('.hero h1');if(heroTitle)heroTitle.innerHTML='<span class="fox">FOX</span> '+(page==='foxnews'?'News':page==='events'?'Event Guide':'Prep Tracker');var heroSub=document.querySelector('.hero .sub');if(heroSub){if(!heroSub.dataset.prepText)heroSub.dataset.prepText=heroSub.textContent;heroSub.textContent=page==='foxnews'?'Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.':page==='events'?'Prepare for Whiteout Survival events, from a new state through hero Gen 6.':heroSub.dataset.prepText;}var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'prep';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return (p[0]!=='admin'||ADMIN)&&((p[0]!=='fortress'&&p[0]!=='foundry'&&p[0]!=='canyon')||FORTRESS_ACCESS);}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='planner'||page==='foxnews';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=['foxnews','planner','alliance','resources'].indexOf(group)>=0;}
+var categoryLast={prep:'dash',alliance:'r4',resources:'events'},categoryPages={foxnews:[['foxnews','FOX News']],prep:[['dash','Dashboard'],['stock','Backpack'],['packs','Things to buy'],['private-profile','My profile']],planner:[['planner','All planners'],['buildings','Buildings'],['gear','Chief Gear'],['war','War Academy'],['pets','Pets'],['experts','Experts'],['hero','Hero Gear'],['widgets','Widgets'],['charms','Chief Charms']],alliance:[['admin','Members'],['r4','R4 roles'],['fortress','Fortress rewards'],['foundry','Foundry planner'],['canyon','Canyon planner'],['layout','Layout planner']],resources:[['events','Event guide'],['matrix','Pack contents'],['ref','Reference']]};
+function syncCategories(page){if(!categoryPages||!$('category-nav'))return;page=page||(document.querySelector('.panel.on')||{}).id;page=String(page||'dash').replace(/^p-/,'');var heroTitle=document.querySelector('.hero h1');if(heroTitle)heroTitle.innerHTML='<span class="fox">FOX</span> '+(page==='foxnews'?'News':page==='events'?'Event Guide':'Prep Tracker');var heroSub=document.querySelector('.hero .sub');if(heroSub){if(!heroSub.dataset.prepText)heroSub.dataset.prepText=heroSub.textContent;heroSub.textContent=page==='foxnews'?'Stay up to date with Whiteout Survival: game updates, developer announcements and key takeaways, all in one place.':page==='events'?'Prepare for Whiteout Survival events, from a new state through hero Gen 6.':heroSub.dataset.prepText;}var group=Object.keys(categoryPages).find(function(k){return categoryPages[k].some(function(p){return p[0]===page;});})||'prep';categoryLast[group]=page;[].forEach.call($('category-nav').querySelectorAll('button'),function(b){b.setAttribute('aria-selected',String(b.dataset.category===group));});var sub=$('category-sub');sub.innerHTML=categoryPages[group].filter(function(p){return (p[0]!=='private-profile'||PRIVATE_PREVIEW_ACCESS)&&(p[0]!=='admin'||ADMIN)&&((p[0]!=='fortress'&&p[0]!=='foundry'&&p[0]!=='canyon')||FORTRESS_ACCESS);}).map(function(p){return '<button role="tab" data-page="'+p[0]+'" aria-selected="'+(p[0]===page)+'">'+p[1]+'</button>';}).join('');$('category-subwrap').hidden=!U||page==='planner'||page==='foxnews';var stats=document.querySelector('.statspanel');if(stats)stats.hidden=page==='private-profile'||['foxnews','planner','alliance','resources'].indexOf(group)>=0;}
 /* Foundry Battle planner: a self-contained page (foundry.html) shown in an iframe, loaded the first time the tab opens.
    Plans live in the viewer's own browser (localStorage), one per legion; nothing is stored in Supabase. */
 function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="foundry.html?v=20261102-foundry-tools" title="Foundry Battle planner"></iframe>';}
@@ -1723,7 +1755,7 @@ function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))retu
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
 function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261104-other-flags-jpeg#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
 function mountEventGuide(){var p=$('p-events');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="events.html?v=20261103-playbooks-links" title="Whiteout Survival event guide"></iframe>';}
-function goCategoryPage(page){if((page==='admin'&&!ADMIN)||((page==='fortress'||page==='foundry'||page==='canyon')&&!FORTRESS_ACCESS))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
+function goCategoryPage(page){if(page==='private-profile'&&!PRIVATE_PREVIEW_ACCESS)page='dash';if((page==='admin'&&!ADMIN)||((page==='fortress'||page==='foundry'||page==='canyon')&&!FORTRESS_ACCESS))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
 if($('category-sub'))$('category-sub').onclick=function(e){var b=e.target.closest('[data-page]');if(b)goCategoryPage(b.dataset.page);};
 if($('p-planner'))$('p-planner').onclick=function(e){var b=e.target.closest('[data-go]');if(b)goCategoryPage(b.dataset.go);};
