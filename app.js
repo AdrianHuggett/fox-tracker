@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-07-expert-sigil-icons',date:'2026-11-07',title:'Justus in Expert Materials',points:['Track Justus Sigils in your Backpack. Justus and Gareth now have their own artwork.']},
  {id:'2026-11-04-layout-other-flags-jpeg',date:'2026-11-04',title:'Layout planner: other flags and JPEG',points:['Place gray flags for other alliances and keep them in your layout code. Export the full map as a JPEG image.']},
  {id:'2026-11-03-event-playbooks',date:'2026-11-03',title:'Practical event playbooks',points:['Every Event guide entry now has steps for preparation, play, strategy and mistakes to avoid. Icefire Warhymn League includes three formation examples to test against your battle reports.']},
  {id:'2026-11-03-event-guide',date:'2026-11-03',title:'Whiteout Survival event guide',points:['A new Event guide under Resources covers recurring, seasonal and special events through hero Gen 6, with preparation tips and source links.']},
@@ -863,6 +864,8 @@ var ITEM_ART = {
   "Valeria Sigils": "item-valeria-sigils.png",
   "Ronne Sigils": "item-ronne-sigils.png",
   "Kathy Sigils": "item-kathy-sigils.png",
+  "Gareth Sigils": "item-gareth-sigils.png",
+  "Justus Sigils": "item-justus-sigils.png",
   "Books of Knowledge": "item-books-of-knowledge.png",
   "Advanced Wild Marks": "item-advanced-wild-marks.png",
   "Common Wild Marks": "item-common-wild-marks.png",
@@ -1484,7 +1487,16 @@ async function loadAll(){
   if(fireCrystalItem && steelItem && fireCrystalItem.grp!==steelItem.grp){
     groupOrder[steelItem.grp]=groupOrder[fireCrystalItem.grp]+0.5;
   }
-  D.items.sort(function(a,b){ return groupOrder[a.grp]-groupOrder[b.grp] || a.sort-b.sort; });
+  D.items.sort(function(a,b){
+    var groupDiff=groupOrder[a.grp]-groupOrder[b.grp];
+    if(groupDiff) return groupDiff;
+    // Keep the shared books after individual sigils without renumbering saved rows.
+    if(/Expert Materials$/.test(a.grp)){
+      var booksDiff=Number(a.name==='Books of Knowledge')-Number(b.name==='Books of Knowledge');
+      if(booksDiff) return booksDiff;
+    }
+    return a.sort-b.sort;
+  });
   uPacks={}; r[5].data.forEach(function(p){ uPacks[p.pack_id]=Number(p.freq); });
   var prof=r[6]&&r[6].data;
   if(prof){ CUR.code=prof.currency_code||'GBP'; CUR.symbol=prof.currency_symbol||'£'; CUR.rate=Number(prof.currency_rate)||1; }

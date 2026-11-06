@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+  ["Justus in Expert Materials","Justus en materiales de expertos","Uzman Malzemelerinde Justus","Justus i ekspertmaterialer"],
+  ["Track Justus Sigils in your Backpack. Justus and Gareth now have their own artwork.","Registra Justus Sigils en tu mochila. Justus y Gareth ahora tienen sus propias imágenes.","Çantanda Justus Sigils miktarını takip et. Justus ve Gareth artık kendi görsellerine sahip.","Spor Justus Sigils i ryggsekken din. Justus og Gareth har nå sine egne bilder."],
 ["Layout planner: other flags and JPEG","Planificador de distribución: otras banderas y JPEG","Yerleşim planlayıcı: diğer bayraklar ve JPEG","Layoutplanlegger: andre flagg og JPEG"],
 ["Place gray flags for other alliances and keep them in your layout code. Export the full map as a JPEG image.","Coloca banderas grises de otras alianzas y consérvalas en el código del plano. Exporta el mapa completo como imagen JPEG.","Diğer ittifaklar için gri bayraklar yerleştir ve bunları yerleşim kodunda sakla. Haritanın tamamını JPEG olarak dışa aktar.","Plasser grå flagg for andre allianser og behold dem i layoutkoden. Eksporter hele kartet som et JPEG-bilde."],
 ["Practical event playbooks","Guías prácticas de eventos","Pratik etkinlik rehberleri","Praktiske arrangementsguider"],

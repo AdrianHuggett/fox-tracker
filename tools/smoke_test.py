@@ -56,6 +56,14 @@ def run(p, width, name):
 
     # Feature checks: keep these in sync with docs/03-features.md
     open_tab(pg, 'stock'); pg.wait_for_timeout(300)
+    expert_rows = pg.locator('#stock tr[data-gn$="Expert Materials"]:not(.xch)')
+    assert expert_rows.locator('td.nm').all_text_contents() == [
+        'Kathy Sigils', 'Gareth Sigils', 'Justus Sigils', 'Books of Knowledge'
+    ], 'Keep Justus with sigils and Books of Knowledge last'
+    for expert in ['Gareth', 'Justus']:
+        art = pg.locator(f'#stock tr[data-q="{expert.lower()} sigils"] img.item-art')
+        assert art.get_attribute('src') == f'item-{expert.lower()}-sigils.png'
+        assert art.evaluate('(img) => img.complete && img.naturalWidth > 0'), f'{expert} artwork did not load'
     free = pg.locator('#stock tr[data-q="design plans"] td').nth(6)
     assert free.text_content().strip() == '3.33', 'Bought reset must not inflate free income'
     detail = free.locator('span').get_attribute('title')

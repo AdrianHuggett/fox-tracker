@@ -19,7 +19,11 @@ var DB = window.__DB = {
     {sort:3, grp:'Gear',   icon:'', name:'Design Plans',       have:100,  target:200,  free:2},
     {sort:4, grp:'Gear',   icon:'', name:'Lunar Amber',        have:0,    target:10,   free:0},
     {sort:5, grp:'Gear',   icon:'', name:'Polishing Solution', have:50,   target:100,  free:0},
-    {sort:6, grp:'Gear',   icon:'', name:'Hardened Alloy',     have:1000, target:5000, free:0}],
+    {sort:6, grp:'Gear',   icon:'', name:'Hardened Alloy',     have:1000, target:5000, free:0},
+    {sort:7, grp:'📚 Expert Materials', icon:'', name:'Kathy Sigils', have:12, target:20, free:0},
+    {sort:8, grp:'📚 Expert Materials', icon:'⚜', name:'Gareth Sigils', have:34, target:60, free:0},
+    {sort:9, grp:'📚 Expert Materials', icon:'', name:'Books of Knowledge', have:100, target:500, free:0},
+    {sort:50, grp:'📚 Expert Materials', icon:'📜', name:'Justus Sigils', have:0, target:0, free:0}],
   user_packs: [{user_id:'u1', pack_id:1, freq:0}],
   user_exchanges: [{xid:'charm-g2d', qty:20}],
   stock_history: [

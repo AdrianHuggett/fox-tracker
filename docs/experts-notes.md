@@ -36,4 +36,5 @@
 
 - Ronne and Kathy are flagged `estimated` in the source.
 - Fabian · Crisis Rescue lists 551 minutes for level 1 → 2, where the series suggests 895. Kept as in the source.
-- Gareth Sigils has no artwork and may be missing from older Backpacks.
+- `tools/add-justus-sigils.sql` adds Justus to the item template and existing Backpacks without changing existing rows or access policies. It is transactional, preserves existing Justus quantities and can be rerun. Requires explicit owner approval before execution.
+- Artwork added 7 November 2026 from the public game-asset catalogue at `https://github.com/chiefpansancolt/whiteout-survival-data`: `images/items/gareth-sigil.png` and `images/experts/Justus/Justus.png`. Justus uses his game portrait because that catalogue does not include a Justus sigil image. Both local assets use the existing 24px item icon presentation. The Experts upgrade planner remains on its separately documented catalogue.
