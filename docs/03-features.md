@@ -109,7 +109,7 @@ Upgrade planner → Pets covers the 14 WoSTools pets across five rarity tiers. C
 
 ## Experts planner
 
-Upgrade planner → Experts. Relationship and skill levels for the 10 Dawn Academy Experts, totals for Books of Knowledge, sigils, Affinity, learning time and SvS points (sigils and books only). Push to Backpack sets Books, each Expert's own sigils and the General Expert Sigils still uncovered. Full rules and reference checks: `docs/experts-notes.md`.
+Upgrade planner → Experts. Relationship and skill levels for the 11 Dawn Academy Experts, including Justus in Gen 3, totals for Books of Knowledge, sigils, Affinity, learning time and SvS points (sigils and books only). Push to Backpack sets Books, each Expert's own sigils and the General Expert Sigils still uncovered. Full rules and reference checks: `docs/experts-notes.md`.
 
 ## Languages (English, Spanish, Turkish, Norwegian)
 

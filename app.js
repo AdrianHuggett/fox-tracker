@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-07-justus-planner',date:'2026-11-07',title:'Justus in the Experts planner',points:['Plan Justus relationship and skill upgrades under Gen 3, including skill prerequisites, Books of Knowledge and sigil costs. His blue sigil now appears in the Backpack and planner totals.']},
   {id:'2026-11-07-expert-sigil-icons',date:'2026-11-07',title:'Justus in Expert Materials',points:['Track Justus Sigils in your Backpack. Justus and Gareth now have their own artwork.']},
  {id:'2026-11-04-layout-other-flags-jpeg',date:'2026-11-04',title:'Layout planner: other flags and JPEG',points:['Place gray flags for other alliances and keep them in your layout code. Export the full map as a JPEG image.']},
  {id:'2026-11-03-event-playbooks',date:'2026-11-03',title:'Practical event playbooks',points:['Every Event guide entry now has steps for preparation, play, strategy and mistakes to avoid. Icefire Warhymn League includes three formation examples to test against your battle reports.']},
@@ -865,7 +866,7 @@ var ITEM_ART = {
   "Ronne Sigils": "item-ronne-sigils.png",
   "Kathy Sigils": "item-kathy-sigils.png",
   "Gareth Sigils": "item-gareth-sigils.png",
-  "Justus Sigils": "item-justus-sigils.png",
+  "Justus Sigils": "item-justus-sigils-v2.png",
   "Books of Knowledge": "item-books-of-knowledge.png",
   "Advanced Wild Marks": "item-advanced-wild-marks.png",
   "Common Wild Marks": "item-common-wild-marks.png",

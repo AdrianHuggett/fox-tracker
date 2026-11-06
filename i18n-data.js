@@ -4,6 +4,10 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+  ["Justus in the Experts planner","Justus en el planificador de expertos","Uzman planlayıcısında Justus","Justus i ekspertplanleggeren"],
+  ["Plan Justus relationship and skill upgrades under Gen 3, including skill prerequisites, Books of Knowledge and sigil costs. His blue sigil now appears in the Backpack and planner totals.","Planifica las mejoras de relación y habilidades de Justus en Gen 3, incluidos los requisitos, Books of Knowledge y sigils. Su sigil azul aparece en la mochila y en los totales.","Gen 3 altında Justus ilişki ve beceri yükseltmelerini; ön koşullar, Books of Knowledge ve sigil maliyetleriyle planla. Mavi sigili artık Çantada ve planlayıcı toplamlarında görünür.","Planlegg Justus-relasjon og ferdigheter under Gen 3, med ferdighetskrav, Books of Knowledge og sigilkostnader. Det blå sigilet hans vises nå i ryggsekken og planleggerens summer."],
+  ["Requires combined skill level {n}","Requiere un nivel combinado de habilidades de {n}","Toplam beceri seviyesi {n} gerektirir","Krever samlet ferdighetsnivå {n}"],
+  ["Justus data","Datos de Justus","Justus verileri","Justus-data"],
   ["Justus in Expert Materials","Justus en materiales de expertos","Uzman Malzemelerinde Justus","Justus i ekspertmaterialer"],
   ["Track Justus Sigils in your Backpack. Justus and Gareth now have their own artwork.","Registra Justus Sigils en tu mochila. Justus y Gareth ahora tienen sus propias imágenes.","Çantanda Justus Sigils miktarını takip et. Justus ve Gareth artık kendi görsellerine sahip.","Spor Justus Sigils i ryggsekken din. Justus og Gareth har nå sine egne bilder."],
 ["Layout planner: other flags and JPEG","Planificador de distribución: otras banderas y JPEG","Yerleşim planlayıcı: diğer bayraklar ve JPEG","Layoutplanlegger: andre flagg og JPEG"],

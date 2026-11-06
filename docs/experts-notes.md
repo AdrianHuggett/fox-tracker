@@ -37,4 +37,13 @@
 - Ronne and Kathy are flagged `estimated` in the source.
 - Fabian · Crisis Rescue lists 551 minutes for level 1 → 2, where the series suggests 895. Kept as in the source.
 - `tools/add-justus-sigils.sql` adds Justus to the item template and existing Backpacks without changing existing rows or access policies. It is transactional, preserves existing Justus quantities and can be rerun. Requires explicit owner approval before execution.
-- Artwork added 7 November 2026 from the public game-asset catalogue at `https://github.com/chiefpansancolt/whiteout-survival-data`: `images/items/gareth-sigil.png` and `images/experts/Justus/Justus.png`. Justus uses his game portrait because that catalogue does not include a Justus sigil image. Both local assets use the existing 24px item icon presentation. The Experts upgrade planner remains on its separately documented catalogue.
+- Gareth artwork: `images/items/gareth-sigil.png` from `https://github.com/chiefpansancolt/whiteout-survival-data`. Justus now uses the blue sigil image, `icons/justus-sigil.png` from `https://github.com/BuildwithRaed/WOS-RST/tree/959fd658fcc27896ab18f2d63e445207023f77c4`, stored as `item-justus-sigils-v2.png` so previously cached portraits are not reused. Both the Backpack and planner use it.
+
+## Justus addition - 7 November 2026
+
+- Added only Justus to the catalogue; previous experts and their saved IDs are unchanged. Gen 3, Expert Growth; four learnable skills and the automatic Former Glory talent.
+- Source: the WoSTools calculator's `5867-142542f5a6f4283a.js` catalogue, checked 2026-11-07. Books, relationship gates and combined-skill gates were cross-checked against the Justus record in `data/chief/experts.json` from the public game-data repository above. Exact published learning minutes are retained rather than estimated from Books.
+- Full relationship: 513,070 Affinity and 440 own sigils. All active skills: 73,500 Books and 163,630 base learning minutes (113d 15h 10m). Talent costs no Books.
+- Glorious Gains unlocks at relationship 10; levels 3/5 require relationship 30/50. Treasure Seeker unlocks at 20; levels 3/5 require 40/60. Master Diplomat unlocks at 30; levels 3/5 require combined learned-skill levels 8/12. Fortune Wayfarer unlocks at 40; levels 5/8/10 require combined levels 15/20/24.
+- Combined requirements are checked before learning the gated level: other target skill levels plus this skill's preceding level. Reducing another target clamps dependent targets to achievable levels; recorded current levels are preserved. Existing experts retain their original rules.
+- `python tools/test_experts.py` verifies costs, prerequisites, saved-plan preservation, own/general sigil allocation and confirmed Backpack targets on desktop and phone.

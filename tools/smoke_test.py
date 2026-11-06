@@ -14,9 +14,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
-TABS = ['dash', 'stock', 'packs', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'canyon', 'layout', 'foxnews']
+TABS = ['dash', 'stock', 'packs', 'experts', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'canyon', 'layout', 'foxnews']
 CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance', 'canyon':'alliance', 'layout':'alliance'}
 CATEGORIES['foxnews'] = 'foxnews'
+CATEGORIES['experts'] = 'planner'
 
 def open_tab(pg, tab):
     pg.click(f'#category-nav button[data-category="{CATEGORIES[tab]}"]')
@@ -24,6 +25,9 @@ def open_tab(pg, tab):
         button = pg.locator(f'#category-sub button[data-page="{tab}"]')
         if button.count() == 0:
             return False
+        if not button.is_visible() and CATEGORIES[tab] == 'planner':
+            pg.locator(f'#p-planner button[data-go="{tab}"]').click()
+            return True
         button.click()
     return True
 
@@ -62,7 +66,7 @@ def run(p, width, name):
     ], 'Keep Justus with sigils and Books of Knowledge last'
     for expert in ['Gareth', 'Justus']:
         art = pg.locator(f'#stock tr[data-q="{expert.lower()} sigils"] img.item-art')
-        assert art.get_attribute('src') == f'item-{expert.lower()}-sigils.png'
+        assert art.get_attribute('src') == ('item-justus-sigils-v2.png' if expert == 'Justus' else 'item-gareth-sigils.png')
         assert art.evaluate('(img) => img.complete && img.naturalWidth > 0'), f'{expert} artwork did not load'
     free = pg.locator('#stock tr[data-q="design plans"] td').nth(6)
     assert free.text_content().strip() == '3.33', 'Bought reset must not inflate free income'
