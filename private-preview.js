@@ -30,7 +30,8 @@
           revision=r.data.revision;
           var saved=r.data.profile||{};frame=document.createElement('iframe');
           // Reference links may open a separate tab; the preview keeps an opaque origin.
-          frame.title='My profile — private test';frame.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox');frame.referrerPolicy='no-referrer';
+          frame.title='My profile — private test';frame.dataset.privatePreviewVersion=String(r.data.version||'');
+          frame.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox');frame.referrerPolicy='no-referrer';
           frame.style.cssText='display:block;width:100%;height:800px;border:0;border-radius:12px;';
           frame.addEventListener('load',function(){send({type:'init',profile:saved});});
           frame.srcdoc=r.data.document;host.replaceChildren(frame);

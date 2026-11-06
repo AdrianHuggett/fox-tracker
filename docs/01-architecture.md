@@ -107,3 +107,8 @@ A tab click toggles `.panel.on` and stores the tab in `sessionStorage['fox-tab']
 
 - Item names are the join key everywhere (`user_items.name`, `pack_contents.item`, `baselines.item`, `ITEM_ART`, `EXCH`). **Renaming an item breaks those links.**
 - `profiles.id` = `auth.users.id`. R4 members (`r4_members.id`, bigint) are **not** user accounts; they are just names.
+
+
+## Private profile delivery
+
+`private-preview.js` is the public delivery bridge only. The optimizer document, recommendation rules and saved account profile remain outside this public repository and are delivered by owner-scoped Supabase policies. The iframe keeps an opaque origin and source-checked save messages. Its `data-private-preview-version` attribute records the version returned by the authenticated database query so a deployment can be verified without copying private document content into public assets. A document-only release preserves the saved profile, revision and access policies; changes visible only to the private test owner do not create a What's new announcement.
