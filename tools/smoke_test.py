@@ -14,10 +14,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MOCK = (ROOT / 'tools' / 'mock-supabase.js').read_text(encoding='utf-8')
 OUT = ROOT / 'tools' / 'out'
 OUT.mkdir(exist_ok=True)
-TABS = ['dash', 'stock', 'packs', 'experts', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'canyon', 'layout', 'foxnews']
+TABS = ['dash', 'stock', 'packs', 'experts', 'gear', 'matrix', 'ref', 'r4', 'admin', 'foundry', 'canyon', 'layout', 'foxnews']
 CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources', 'ref':'resources', 'r4':'alliance', 'admin':'alliance', 'foundry':'alliance', 'canyon':'alliance', 'layout':'alliance'}
 CATEGORIES['foxnews'] = 'foxnews'
 CATEGORIES['experts'] = 'planner'
+CATEGORIES['gear'] = 'planner'
 
 def open_tab(pg, tab):
     pg.click(f'#category-nav button[data-category="{CATEGORIES[tab]}"]')

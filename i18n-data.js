@@ -4,6 +4,10 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+  ["Not equipped","Sin equipar","Kuşanılmamış","Ikke utstyrt"],
+  ["Unknown","Desconocido","Bilinmiyor","Ukjent"],
+  ["Chief Gear icons show their rank","Los iconos de Chief Gear muestran su rango","Chief Gear simgeleri rütbelerini gösteriyor","Chief Gear-ikoner viser rangeringen"],
+  ["Chief Gear artwork now shows its colour, stars and T tier. The planner displays both current and target icons, including partial upgrade progress.","Las imágenes de Chief Gear muestran su color, estrellas y nivel T. El planificador muestra los iconos actuales y objetivo, incluido el progreso parcial.","Chief Gear görselleri artık renklerini, yıldızlarını ve T kademelerini gösteriyor. Planlayıcı, kısmi yükseltme ilerlemesiyle mevcut ve hedef simgelerini gösterir.","Chief Gear-bildene viser nå farge, stjerner og T-nivå. Planleggeren viser både nåværende ikon og målikon, inkludert delvis oppgraderingsfremdrift."],
   ["Justus in the Experts planner","Justus en el planificador de expertos","Uzman planlayıcısında Justus","Justus i ekspertplanleggeren"],
   ["Plan Justus relationship and skill upgrades under Gen 3, including skill prerequisites, Books of Knowledge and sigil costs. His blue sigil now appears in the Backpack and planner totals.","Planifica las mejoras de relación y habilidades de Justus en Gen 3, incluidos los requisitos, Books of Knowledge y sigils. Su sigil azul aparece en la mochila y en los totales.","Gen 3 altında Justus ilişki ve beceri yükseltmelerini; ön koşullar, Books of Knowledge ve sigil maliyetleriyle planla. Mavi sigili artık Çantada ve planlayıcı toplamlarında görünür.","Planlegg Justus-relasjon og ferdigheter under Gen 3, med ferdighetskrav, Books of Knowledge og sigilkostnader. Det blå sigilet hans vises nå i ryggsekken og planleggerens summer."],
   ["Requires combined skill level {n}","Requiere un nivel combinado de habilidades de {n}","Toplam beceri seviyesi {n} gerektirir","Krever samlet ferdighetsnivå {n}"],
