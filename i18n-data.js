@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+  ["Choose Foundry player roles","Elige los roles de los jugadores en Foundry","Foundry oyuncu rollerini seç","Velg spillerroller i Foundry"],
+  ["Tap a player to choose Player, Rally leader or Loot gatherer. Changing their role also updates their placed markers and battle plan.","Toca un jugador para elegir Jugador, Líder de rally o Recolector de botín. Al cambiar su rol, también se actualizan sus marcadores y el plan de batalla.","Bir oyuncuya dokunarak Oyuncu, Ralli lideri veya Ganimet toplayıcı rolünü seç. Rol değiştiğinde haritadaki işaretleri ve savaş planı da güncellenir.","Trykk på en spiller for å velge Spiller, Rallyleder eller Byttesamler. Når du endrer rollen, oppdateres også spillerens markører og kampplanen."],
   ["Team D in the Foundry planner","Equipo D en el planificador de Foundry","Foundry planlayıcısında D Takımı","Lag D i Foundry-planleggeren"],
   ["Add Team D players, use pink markers and routes, and include their assignments in both legions’ plans.","Añade jugadores al Equipo D, usa marcadores y rutas rosas e incluye sus asignaciones en los planes de ambas legiones.","D Takımı oyuncularını ekle, pembe işaretler ve rotalar kullan ve görevlerini her iki lejyonun planına dahil et.","Legg til spillere på lag D, bruk rosa markører og ruter, og ta med oppgavene deres i planene for begge legioner."],
   ["Not equipped","Sin equipar","Kuşanılmamış","Ikke utstyrt"],
