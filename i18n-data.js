@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+  ["Team D in the Foundry planner","Equipo D en el planificador de Foundry","Foundry planlayıcısında D Takımı","Lag D i Foundry-planleggeren"],
+  ["Add Team D players, use pink markers and routes, and include their assignments in both legions’ plans.","Añade jugadores al Equipo D, usa marcadores y rutas rosas e incluye sus asignaciones en los planes de ambas legiones.","D Takımı oyuncularını ekle, pembe işaretler ve rotalar kullan ve görevlerini her iki lejyonun planına dahil et.","Legg til spillere på lag D, bruk rosa markører og ruter, og ta med oppgavene deres i planene for begge legioner."],
   ["Not equipped","Sin equipar","Kuşanılmamış","Ikke utstyrt"],
   ["Unknown","Desconocido","Bilinmiyor","Ukjent"],
   ["Chief Gear icons show their rank","Los iconos de Chief Gear muestran su rango","Chief Gear simgeleri rütbelerini gösteriyor","Chief Gear-ikoner viser rangeringen"],

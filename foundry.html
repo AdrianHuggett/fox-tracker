@@ -274,10 +274,11 @@ svg#map.t-roster { cursor: crosshair; }
 
 <script>
 (function () {
-  const COLORS = { A: '#5ab4ff', B: '#c792ff', C: '#3ddc97', E: '#ff5a5f', O: '#f08a3c', Y: '#ffd23f', W: '#e8eef5' };
+  const TEAM_IDS = ['A', 'B', 'C', 'D'];
+  const COLORS = { A: '#5ab4ff', B: '#c792ff', C: '#3ddc97', D: '#ff85c0', E: '#ff5a5f', O: '#f08a3c', Y: '#ffd23f', W: '#e8eef5' };
   const SIZES = { S: 0.55, M: 1, L: 1.6, XL: 2.3 };
   const SIZE_NAMES = { S: 'Thin', M: 'Normal', L: 'Thick', XL: 'Huge' };
-  const COLOR_NAMES = { A: 'Team A', B: 'Team B', C: 'Team C', E: 'Enemy', O: 'Orange', Y: 'Yellow', W: 'White' };
+  const COLOR_NAMES = { A: 'Team A', B: 'Team B', C: 'Team C', D: 'Team D', E: 'Enemy', O: 'Orange', Y: 'Yellow', W: 'White' };
   const FOX = '#f08a3c', ENEMY = '#ff5a5f';
   const KINDS = [
     { k: 'team', label: 'Team', glyph: '●' },
@@ -315,15 +316,17 @@ svg#map.t-roster { cursor: crosshair; }
   function parseRoster(text) {
     const teams = [];
     String(text || '').split(/\n+/).forEach((line) => {
-      const m = line.match(/^\s*Team\s*([ABC])\s*[:\-]\s*(.*)$/i);
+      const m = line.match(/^\s*Team\s*([A-Z])\s*[:-]\s*(.*)$/i);
       if (!m) return;
+      const team = m[1].toUpperCase();
+      if (!TEAM_IDS.includes(team)) return;
       const players = m[2].split(',').map((x) => x.trim()).filter(Boolean).map((raw) => {
         let role = 'member', name = raw;
         if (name.startsWith('⭐')) { role = 'rally'; name = name.slice(1).trim(); }
         else if (name.startsWith('💰')) { role = 'loot'; name = name.slice(2).trim(); }
         return { name: name.replace(/^[\uFE0F\s]+/, ''), role };
       }).map((p) => p).filter((p) => p.name);
-      teams.push({ team: m[1].toUpperCase(), players });
+      teams.push({ team, players });
     });
     return teams;
   }
@@ -359,7 +362,7 @@ svg#map.t-roster { cursor: crosshair; }
   // each legion has its own plan, kept under its own key
   let legion = 1;
   try { legion = localStorage.getItem(KEY + '-legion') === '2' ? 2 : 1; } catch (e) { /* storage unavailable */ }
-  function emptyPlan() { return { nextId: 1, side: 'left', positions: {}, owners: {}, items: [], notes: {}, roster: 'Team A:\nTeam B:\nTeam C:' }; }
+  function emptyPlan() { return { nextId: 1, side: 'left', positions: {}, owners: {}, items: [], notes: {}, roster: TEAM_IDS.map((team) => `Team ${team}:`).join('\n') }; }
   function freshPlan() { return legion === 1 ? examplePlan() : emptyPlan(); }
   function normalize(st) { st.owners = st.owners || {}; st.positions = st.positions || {}; st.items = st.items || []; if (!st.roster) st.roster = legion === 1 ? DEFAULT_ROSTER : emptyPlan().roster; return st; }
   let state = normalize(load() || freshPlan());
@@ -564,7 +567,7 @@ svg#map.t-roster { cursor: crosshair; }
     }
     if (it.type === 'marker') {
       const k = KINDS.find((x) => x.k === it.kind) || KINDS[0];
-      const glyph = it.kind === 'team' ? (['A', 'B', 'C'].includes(it.color) ? it.color : it.color === 'E' ? '!' : '•') : k.glyph;
+      const glyph = it.kind === 'team' ? (TEAM_IDS.includes(it.color) ? it.color : it.color === 'E' ? '!' : '•') : k.glyph;
       const fs = it.kind === 'team' ? 22 : 20;
       const fill = it.kind === 'team' ? '#06121c' : '#ffffff';
       const sc = it.kind === 'rally' ? 0.7 : 0.5; // rally leaders at 70%, other players at half size
@@ -706,7 +709,7 @@ svg#map.t-roster { cursor: crosshair; }
   let rosterEdit = false; const drafts = {};
   function teamsFull() {
     const parsed = parseRoster(state.roster);
-    return ['A', 'B', 'C'].map((t) => parsed.find((x) => x.team === t) || { team: t, players: [] });
+    return TEAM_IDS.map((t) => parsed.find((x) => x.team === t) || { team: t, players: [] });
   }
   function saveTeams(teams) {
     state.roster = teams.map((t) => 'Team ' + t.team + ': ' + t.players.map((pl) => (pl.role === 'rally' ? '⭐' : pl.role === 'loot' ? '💰' : '') + pl.name).join(', ') + ',').join('\n');
@@ -952,7 +955,7 @@ svg#map.t-roster { cursor: crosshair; }
       const items = state.items.filter((i) => i.phase === ph);
       const markers = items.filter((i) => i.type === 'marker');
       const pos = [];
-      ['A', 'B', 'C'].forEach((team) => {
+      TEAM_IDS.forEach((team) => {
         const ms = markers.filter((m) => m.color === team && m.kind !== 'foe');
         if (!ms.length) return;
         const rallies = ms.filter((m) => m.kind === 'rally');
