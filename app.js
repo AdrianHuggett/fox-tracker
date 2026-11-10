@@ -1790,7 +1790,7 @@ window.FOXLayoutStore={
 window.FOXGameData={
   players:function(){if(!SB||!U)return Promise.resolve(undefined);
     return SB.from('wos_players').select('chief_id,nick_name,alliance,alliance_rank,power,furnace_level,x,y,pos_at,roster_at').then(function(r){if(r.error)throw r.error;return r.data||[];});}};
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261111-gamenames#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261111-gamefold#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
   /* On phones the frame grows to the whole planner page, so only the site page scrolls (no scroll inside a scroll). */
   var f=p.querySelector('iframe');f.onload=function(){var d=f.contentDocument,app=d&&d.querySelector('.app');if(!app)return;
     var size=function(){f.style.height=window.matchMedia('(max-width:820px)').matches?(app.scrollHeight+48)+'px':'';};
