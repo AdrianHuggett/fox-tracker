@@ -624,6 +624,8 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-11-fortress-game',date:'2026-11-11',title:'Fortress rewards: members from the game',points:['Update from game adds missing FOX members and updates their rank (R1–R5) and power from whiteoutstats.com. Max members stay Max, and nobody is removed.']},
+  {id:'2026-11-11-layout-gamepos',date:'2026-11-11',title:'Layout planner: cities from the game',points:['Place FOX + NGT cities from game puts every FOX and NGT member\'s city where it stands in game, read from whiteoutstats.com every few hours. Undo brings your layout back.']},
   {id:'2026-11-11-fortress-sort',date:'2026-11-11',title:'Fortress rewards: R4/R5 back, and sorting',points:['R4 and R5 are roles again, rated by contribution like R1–R3; only Max gets the per-player maximum. Members and Distribution can be sorted by role or by name.']},
   {id:'2026-11-11-fortress-max',date:'2026-11-11',title:'Fortress rewards: Max role',points:['R4 and R5 no longer get the maximum automatically. Give the Max role to anyone who should receive the per-player maximum; former R4/R5 members start as Max and can be changed.']},
   {id:'2026-11-10-layout-globe',date:'2026-11-10',title:'Layout planner: globe buff',points:['Select a city and tick Globe buff: a dashed yellow square shows the 8 city spots around it that get the damage boost, and each boosted city gets a yellow dot.']},
@@ -1783,7 +1785,12 @@ window.FOXLayoutStore={
     return SB.from('user_layouts').select('data').eq('user_id',U.id).maybeSingle().then(function(r){if(r.error)throw r.error;return r.data?r.data.data:null;});},
   save:function(data){if(!SB||!U)return Promise.reject(new Error('signed out'));
     return SB.from('user_layouts').upsert({user_id:U.id,data:data,updated_at:new Date().toISOString()},{onConflict:'user_id'}).then(function(r){if(r.error)throw r.error;});}};
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261110-globe#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
+/* In-game data copied from whiteoutstats.com by the wos-sync Edge Function (table wos_players, read-only for
+   members): FOX and NGT rosters with each member's map position. players() resolves undefined when signed out. */
+window.FOXGameData={
+  players:function(){if(!SB||!U)return Promise.resolve(undefined);
+    return SB.from('wos_players').select('chief_id,nick_name,alliance,alliance_rank,power,furnace_level,x,y,pos_at,roster_at').then(function(r){if(r.error)throw r.error;return r.data||[];});}};
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261111-gamepos#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
   /* On phones the frame grows to the whole planner page, so only the site page scrolls (no scroll inside a scroll). */
   var f=p.querySelector('iframe');f.onload=function(){var d=f.contentDocument,app=d&&d.querySelector('.app');if(!app)return;
     var size=function(){f.style.height=window.matchMedia('(max-width:820px)').matches?(app.scrollHeight+48)+'px':'';};

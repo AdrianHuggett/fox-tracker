@@ -51,6 +51,15 @@ RLS is enabled on every table. `anon` has no grants anywhere, and TRUNCATE is re
   ```
 - `user_layouts(user_id uuid PK default auth.uid() → auth.users on delete cascade, data jsonb not null, updated_at timestamptz default now())`: one Layout planner layout per member, `data = {v:1, ents, anchor, locks, gen}`. Created 10 Nov 2026 (approved by Adrian, run from his dashboard session) with RLS enabled, `revoke all … from anon, public`, `grant select, insert, update, delete … to authenticated`, and own-row policies `user_layouts_own_read/insert/update/delete` written exactly like the `user_exchanges` ones above. Checked after creation: RLS on, 4 policies, no anon access.
 
+### In-game data from whiteoutstats.com (read by signed-in users; written only by the `wos-sync` Edge Function)
+
+SQL in `supabase/wos-sync.sql`, function source in `supabase/functions/wos-sync/index.ts` (deployed from the dashboard editor, JWT verification on). The whiteoutstats.com API key is the function secret `WOS_API_KEY`, typed by Adrian in Edge Functions → Secrets; it never reaches the browser.
+
+- `wos_players(chief_id bigint PK, uid, nick_name, alliance text ('FOX'/'NGT', null after leaving), alliance_rank smallint 1–5, power, furnace_level, x int, y int, roster_at, pos_at)`: the FOX and NGT rosters (state 3685) with each member's city position as shown in game. RLS on; `revoke all from anon, public`; `grant select to authenticated`; policy `wos_players_read` (select, `true`).
+- `wos_sync_state(id int PK = 1, last_run, roster_at, last_error)`: the function's bookkeeping; same read access.
+- pg_cron job `wos-sync` (every 5 minutes) calls the function through pg_net with the public anon key. A run does nothing within 4 minutes of the previous one, refreshes both rosters once an hour (2 requests) and looks up at most 40 players whose position is missing or older than 6 hours (about 1,100 API requests a day; the free key allows 60 a minute and 5,000 a day).
+- The site reads it through `window.FOXGameData.players()` (`app.js`): Layout planner "Place FOX + NGT cities from game" and Fortress rewards "Update from game".
+
 ### R4 roles (readable by every signed-in user; direct writes admin only)
 
 - `r4_members(id bigint, sort, name)`.

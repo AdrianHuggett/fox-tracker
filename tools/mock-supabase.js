@@ -33,6 +33,10 @@ var DB = window.__DB = {
   profiles: [
     {id:'u1', name:'Adrian', is_admin:true,  r4_editor:false, currency_code:'GBP', currency_symbol:'£', currency_rate:1, created_at:'2026-09-01', last_seen:'2026-10-02'},
     {id:'u2', name:'Emi',    is_admin:false, r4_editor:true,  created_at:'2026-09-05', last_seen:'2026-09-25'}],
+  wos_players: [
+    {chief_id:101, nick_name:'ADRIAN', alliance:'FOX', alliance_rank:4, power:339970287, furnace_level:30, x:404, y:519, pos_at:'2026-11-11T08:00:00Z', roster_at:'2026-11-11T08:00:00Z'},
+    {chief_id:102, nick_name:'Emi', alliance:'NGT', alliance_rank:3, power:250000000, furnace_level:30, x:420, y:519, pos_at:'2026-11-11T07:00:00Z', roster_at:'2026-11-11T08:00:00Z'},
+    {chief_id:103, nick_name:'Pending', alliance:'FOX', alliance_rank:1, power:1000, furnace_level:10, x:null, y:null, pos_at:null, roster_at:'2026-11-11T08:00:00Z'}],
   r4_members: [{id:1, sort:10, name:'Emi'}, {id:2, sort:20, name:'Solo'}],
   r4_tasks: [
     {id:11, sort:1, section:'Core Administrative Tasks', name:'Canyon Clash', freq:'Weekly', remarks:'', time_utc:'12:00', roles:{'1':'main','2':'assist'}},

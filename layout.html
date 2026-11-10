@@ -154,6 +154,13 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
     </section>
 
     <section class="card">
+      <h2>In-game positions</h2>
+      <p class="sub" style="margin:0 0 8px">Puts each FOX and NGT member's city where it stands in game, from whiteoutstats.com (refreshed every few hours). The city with the member's name moves there; a member not on the map yet is added. Locked cities and other alliances stay as they are. Undo brings everything back.</p>
+      <div class="row"><button type="button" class="btn main" id="gameBtn" disabled>Place FOX + NGT cities from game</button></div>
+      <p class="msg" id="gameMsg"></p>
+    </section>
+
+    <section class="card">
       <h2>Generate layout</h2>
       <p class="sub" style="margin:0 0 8px">Seats each Bear Trap's players as close to it as possible, only on ground covered by their alliance's banners: a spiral first, then every city slides into the closest free spot. Banners are added or moved as needed and never touch another alliance's ground. Locked elements never move; locked cities are kept and count. Other cities of the planned alliances are replaced; an alliance whose traps are all at 0 is left untouched. Undo brings everything back.</p>
       <p class="sub" style="margin:0 0 6px">Players near each Bear Trap</p>
@@ -802,6 +809,49 @@ if(cloud.store){cloud.msg='loading from your account…';panel();
       $('genTraps').dataset.sig='';selected=null;multi=[];history=[];cloud.msg='saved to your account';paintLocks();ensureNums();refresh();fit();cloud.ready=true;}
     else{cloud.ready=true;cloudSave();}},
     function(e){cloud.msg='account copy unavailable, using this browser\'s copy';panel();});}
+
+/* ---------- in-game positions ----------
+   window.FOXGameData (app.js) reads public.wos_players, which the wos-sync Edge Function fills from
+   whiteoutstats.com: FOX and NGT members with their city's X:Y. "Place FOX + NGT cities from game" puts each
+   member's city there: the city with that player id (e.cid) or, failing that, that name moves; a missing one
+   is added. Locked cities, other alliances and every other element stay as they are. */
+var game={store:null,rows:null};
+try{game.store=window.parent!==window&&window.parent.FOXGameData||null;}catch(e){game.store=null;}
+function ago(t){var m=Math.round((Date.now()-Date.parse(t))/60000);return !(m>=0)?'recently':m<1?'just now':m<60?m+' min ago':m<2880?Math.round(m/60)+' h ago':Math.round(m/1440)+' days ago';}
+/* The layout's alliance with that tag; FOX and NGT fall back to their historic ids, added if missing. */
+function gameAl(tag){var t=String(tag).toUpperCase(),a=ALS.filter(function(x){return x.tag.toUpperCase()===t;})[0];
+  if(!a){var id=t==='FOX'?'fox':t==='NGT'?'ngt':'a'+t.toLowerCase();a=ALS.filter(function(x){return x.id===id;})[0];if(!a){a=mkAl(id);a.tag=t;ALS.push(a);}}
+  return a.id;}
+function gameStatus(){var msg=$('gameMsg'),btn=$('gameBtn');
+  if(!game.store){msg.textContent='Open the planner on the FOX site, signed in, to use in-game positions.';return;}
+  msg.textContent='Reading in-game positions…';
+  game.store.players().then(function(rows){
+    if(rows===undefined){msg.textContent='Sign in on the site to use in-game positions.';return;}
+    game.rows=(rows||[]).filter(function(r){return r.alliance==='FOX'||r.alliance==='NGT';});
+    var pos=game.rows.filter(function(r){return r.x!=null&&r.y!=null;}),times=pos.map(function(r){return r.pos_at;}).filter(Boolean).sort();
+    btn.disabled=!pos.length;
+    msg.textContent=pos.length?pos.length+' of '+game.rows.length+' FOX and NGT members have a position (read '+(times.length?ago(times[times.length-1])+(times.length>1&&ago(times[0])!==ago(times[times.length-1])?', oldest '+ago(times[0]):''):'recently')+').'
+      :game.rows.length?game.rows.length+' members found, their positions are being read: try again in a few minutes.'
+      :'No in-game data yet: it appears once the whiteoutstats.com sync is running.';},
+    function(e){msg.textContent='In-game positions unavailable: '+(e&&e.message||'error');});}
+function placeFromGame(){var rows=(game.rows||[]).filter(function(r){return r.x!=null&&r.y!=null;});if(!rows.length)return;
+  pushHistory();var used=new Set(),n={moved:0,added:0,same:0,locked:0,out:0},per={},placed=[],cities=ents.filter(function(e){return e.type==='city';});
+  rows.forEach(function(r){var nm=(r.nick_name||'').trim(),gx=anchor.y-r.y-1,gy=anchor.x-r.x-1;
+    var c=cities.filter(function(e){return !used.has(e)&&e.cid===r.chief_id;})[0]
+      ||cities.filter(function(e){return !used.has(e)&&!e.cid&&nm&&(e.name||'').trim().toLowerCase()===nm.toLowerCase();})[0];
+    if(c)used.add(c);
+    if(c&&isLocked(c)){n.locked++;return;}
+    if(!inMap({x:gx,y:gy,w:2})){n.out++;return;}
+    if(c){if(c.x===gx&&c.y===gy)n.same++;else n.moved++;c.x=gx;c.y=gy;}
+    else{c={type:'city',x:gx,y:gy,w:2};ents.push(c);used.add(c);n.added++;}
+    c.al=gameAl(r.alliance);c.cid=r.chief_id;if(nm)c.name=nm;placed.push(c);per[r.alliance]=(per[r.alliance]||0)+1;});
+  var clash=placed.filter(function(c){return overlaps(c,c);}).length;
+  selected=null;multi=[];refresh();fit();
+  $('gameMsg').textContent=(placed.length?Object.keys(per).map(function(k){return per[k]+' '+k;}).join(' and ')+' cities placed: '+n.moved+' moved, '+n.added+' added, '+n.same+' already there.':'No city placed.')
+    +(n.locked?' '+n.locked+' locked cit'+(n.locked>1?'ies were':'y was')+' left where '+(n.locked>1?'they are':'it is')+'.':'')+(n.out?' '+n.out+' outside the map were skipped.':'')
+    +(clash?' '+clash+' stand on another element (a planned flag, trap or city): check them.':'')+' Undo brings the previous layout back.';}
+$('gameBtn').onclick=placeFromGame;
+gameStatus();
 })();
 </script>
 </body>

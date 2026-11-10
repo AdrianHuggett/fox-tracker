@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var root, state, storageKey, shownCount = '';
+  var root, state, storageKey, shownCount = '', gameMsg = '';
   var nextId = 1;
   function id() { return String(Date.now()) + '-' + String(nextId++); }
   var SITES = [
@@ -279,6 +279,8 @@
       '<section class="fr-card"><div class="fr-card-head"><h3>Current sites</h3><span>' + state.sites.length + ' selected</span></div><p>Select only the fortresses and strongholds your alliance currently controls. Their chests and special rewards are added below.</p><div class="fr-sites">' + siteCards + '</div><p class="fr-note">Special reward names can be edited in the reward pools.</p></section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>1. Members</h3><span>' + state.members.length + '</span></div><p>Members with the Max role receive the per-player maximum. Excluded members, including Ricky Lahey, are ignored. Paste one additional name per line.</p>' +
       '<div class="fr-add"><textarea id="fr-names" rows="3" placeholder="One member per line" aria-label="Member names"></textarea><button type="button" class="fr-primary" data-action="add-members">Add members</button></div>' +
+      '<div class="fr-game"><button type="button" class="fr-secondary" data-action="game-sync">Update from game</button><span>Names, ranks (R1–R5) and power of FOX members, from whiteoutstats.com. Max members stay Max.</span></div>' +
+      (gameMsg ? '<p class="fr-game-msg" role="status">' + escapeHTML(gameMsg) + '</p>' : '') +
       (state.members.length ? '<div class="fr-list-tools"><input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member">' + sortButtons('members', memberSort, 'Sort members') + '</div><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
       '<p class="fr-note">Contribution rates each member’s engagement from 1 to 4. Max members do not need a rating.</p></section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before giving Max members their full share.</p>' +
@@ -325,6 +327,42 @@
     });
     return rows;
   }
+  function ago(t) {
+    var m = Math.round((Date.now() - Date.parse(t)) / 60000);
+    return !(m >= 0) ? 'recently' : m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago';
+  }
+  /* "Update from game": the FOX roster that the wos-sync Edge Function copies from whiteoutstats.com
+     (window.FOXGameData in app.js). Members are matched by player id (cid), then by name; missing ones are
+     added; the in-game rank sets R1–R5 unless the member is Max; power follows the game. Nobody is removed:
+     members no longer in FOX are listed so the user can exclude or remove them. */
+  function syncFromGame() {
+    var store = window.FOXGameData;
+    if (!store) { gameMsg = 'In-game data is not available here.'; render(); return; }
+    gameMsg = 'Reading the FOX roster from the game…'; render();
+    store.players().then(function (rows) {
+      if (rows === undefined) { gameMsg = 'Sign in to read the FOX roster from the game.'; render(); return; }
+      var fox = (rows || []).filter(function (r) { return r.alliance === 'FOX' && String(r.nick_name || '').trim(); });
+      if (!fox.length) { gameMsg = 'No FOX roster yet: it appears once the whiteoutstats.com sync is running.'; render(); return; }
+      var added = 0, roles = 0, seen = {};
+      fox.forEach(function (r) {
+        var name = String(r.nick_name).trim().slice(0, 60);
+        var member = state.members.find(function (m) { return m.cid === r.chief_id; }) ||
+          state.members.find(function (m) { return !m.cid && m.name.toLowerCase() === name.toLowerCase(); });
+        var role = r.alliance_rank >= 1 && r.alliance_rank <= 5 ? 'r' + r.alliance_rank : null;
+        if (!member) { member = { id: id(), name: name, role: role || 'r1', power: 0, contribution: 1, excluded: false }; state.members.push(member); added++; }
+        else if (role && !isMax(member) && member.role !== role) { member.role = role; roles++; }
+        member.cid = r.chief_id;
+        member.name = name;
+        if (r.power != null) member.power = powerNumber(r.power);
+        seen[member.id] = true;
+      });
+      var gone = state.members.filter(function (m) { return !m.excluded && !seen[m.id]; });
+      var latest = fox.map(function (r) { return r.roster_at; }).filter(Boolean).sort().pop();
+      gameMsg = 'FOX roster from the game' + (latest ? ' (read ' + ago(latest) + ')' : '') + ': ' + fox.length + ' members, ' + added + ' added, ' + roles + ' role' + (roles === 1 ? '' : 's') + ' updated.' +
+        (gone.length ? ' Not in FOX in game: ' + gone.map(function (m) { return m.name; }).join(', ') + '. Exclude or remove them if they left.' : '');
+      save(); render();
+    }, function (e) { gameMsg = 'In-game data unavailable: ' + (e && e.message || 'error'); render(); });
+  }
   function message(value) { var el = root.querySelector('#fr-message'); if (el) el.textContent = value; }
   function onInput(event) {
     if (event.target.id !== 'fr-member-search') return;
@@ -355,6 +393,9 @@
       var name = root.querySelector('#fr-reward-name').value.trim().slice(0, 80);
       if (!name) { root.querySelector('#fr-reward-name').focus(); return; }
       state.rewards.push({ id: id(), name: name, quantity: Math.max(1, integer(root.querySelector('#fr-reward-quantity').value)), cap: integer(root.querySelector('#fr-reward-cap').value) });
+    } else if (button.dataset.action === 'game-sync') {
+      syncFromGame();
+      return;
     } else if (button.dataset.action === 'propose') {
       propose();
       return;
