@@ -73,7 +73,17 @@ textarea{min-height:64px;font:12px var(--num);resize:vertical}
 input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 .genv{font:600 13px var(--num);min-width:28px;text-align:right}
 .msg{font-size:12px;color:var(--muted);min-height:16px;margin-top:6px}
-@media (max-width:900px){.app{grid-template-columns:1fr;height:auto}.mapwrap{height:68vh}aside{overflow:visible}}
+/* Legend of the map colours (swatches are diamonds, like the map tiles) */
+.legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;font-size:12px;color:var(--muted)}
+.legend li{display:flex;align-items:center;gap:8px;min-width:0}
+.legend i{flex:none;width:11px;height:11px;transform:rotate(45deg);border:1px solid rgba(140,200,240,.55)}
+.legend i.lk{background:transparent;border:2px solid var(--gold)}
+.legend i.hx{background:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 1px,transparent 1px 4px),#0D2B40}
+/* Phones: the toolbar is one row that scrolls sideways, so it never hides the map; the map keeps its own
+   proportions (no vh, so the site can size the iframe to the page without a feedback loop). */
+@media (max-width:900px){.app{grid-template-columns:1fr;height:auto}.mapwrap{height:auto;aspect-ratio:4/5;max-height:680px}aside{overflow:visible}
+  .tools{flex-wrap:nowrap;overflow-x:auto;right:10px;max-width:none;padding-bottom:4px;scrollbar-width:thin}.tcol,.tools>button{flex:none}
+  .hint{right:10px;bottom:52px;max-width:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -124,8 +134,23 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
     </section>
 
     <section class="card">
+      <h2>Legend</h2>
+      <ul class="legend">
+        <li><i style="background:#14507A"></i>FOX city</li>
+        <li><i style="background:#4A2E7A"></i>NGT city</li>
+        <li><i style="background:#35C8F5"></i>FOX banner</li>
+        <li><i style="background:#B57BFF"></i>NGT banner</li>
+        <li><i style="background:#8D99A6"></i>Other alliance banner</li>
+        <li><i style="background:#5A1E26"></i>City outside its banners</li>
+        <li><i style="background:#5C4318"></i>Same name as another city</li>
+        <li><i class="lk"></i>Locked</li>
+        <li><i class="hx"></i>Ground covered twice</li>
+      </ul>
+    </section>
+
+    <section class="card">
       <h2>Generate layout</h2>
-      <p class="sub" style="margin:0 0 8px">Places each alliance's players around its Bear Traps in a pinwheel spiral, closest first, only on ground covered by that alliance's banners. New banners go in the spiral's corner tiles where possible. Locked elements never move; locked cities are kept and count. Other cities are replaced; Undo brings them back.</p>
+      <p class="sub" style="margin:0 0 8px">Seats each Bear Trap's players as close to it as possible, only on ground covered by their alliance's banners: a spiral first, then every city slides into the closest free spot. Banners are added or moved as needed and never touch another alliance's ground. Locked elements never move; locked cities are kept and count. Other cities are replaced; Undo brings them back.</p>
       <p class="sub" style="margin:0 0 6px">Players near each Bear Trap</p>
       <div id="genTraps"></div>
       <label class="sub" style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="genRebuild" checked> Remove unlocked banners first, so only the needed ones are placed</label>
@@ -588,7 +613,7 @@ function generateLayout(rebuild){
   /* Pruning shrinks the other alliance's ground, which can free a move that was blocked, so go twice. */
   compact();prune();compact();prune();
   seats.forEach(function(s){s.t.times.push(Math.ceil(5+(s.d*(1300/(1300+s.d))*20)/11));});
-  var removed=rebuild?ents.filter(function(e){return e.type==='flag'&&!isLocked(e);}).length:0;
+  var removed=rebuild?ents.filter(function(e){return e.type==='flag'&&alOf(e)!=='other'&&!isLocked(e);}).length:0;
   return {ents:keep.concat(newFlags,cities),traps:traps,added:newFlags.length,removed:removed};}
 $('genTraps').addEventListener('input',function(ev){var s=ev.target;if(!s.dataset||!s.dataset.k)return;genCounts[s.dataset.k]=+s.value;s.parentNode.querySelector('.genv').textContent=s.value;
   try{localStorage.setItem('fox-layout-gen'+SFX,JSON.stringify(genCounts));}catch(e){}});

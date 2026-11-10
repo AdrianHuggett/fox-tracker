@@ -2,6 +2,10 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 10 Nov 2026
+
+- Layout planner review: added a colour legend; phones get a one-row swipeable toolbar, a map sized by aspect ratio instead of `vh`, and an iframe that `mountLayout()` sizes to the planner page on screens ≤ 820px (one scroll instead of a scroll inside a scroll); the Generate text now describes spiral plus compaction; the "unlocked removed first" count no longer includes other-alliance flags, which Generate keeps.
+
 ## 2 Nov 2026
 
 - Foundry planner: ported every Canyon planner change (Path/Dotted tools, arrow outline, white mask, movable notes box with the Arial export fix, wheel zoom and pan, 70 % rally leader markers, editable plan with the line-by-line phase split). Built by applying the same patch scripts to the Foundry page with the board height changed from 738 to 807. Default teams replaced with the 1 Nov Legion 1 split.

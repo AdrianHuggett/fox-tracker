@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-10-layout-legend-phone',date:'2026-11-10',title:'Layout planner: legend and phone view',points:['A legend explains the map colours. On phones the tool buttons sit in one row you can swipe, so they no longer hide the map.']},
   {id:'2026-11-09-foundry-player-roles',date:'2026-11-09',title:'Choose Foundry player roles',points:['Tap a player to choose Player, Rally leader or Loot gatherer. Changing their role also updates their placed markers and battle plan.']},
   {id:'2026-11-09-foundry-team-d',date:'2026-11-09',title:'Team D in the Foundry planner',points:['Add Team D players, use pink markers and routes, and include their assignments in both legions’ plans.']},
   {id:'2026-11-07-chief-gear-badges',date:'2026-11-07',title:'Chief Gear icons show their rank',points:['Chief Gear artwork now shows its colour, stars and T tier. The planner displays both current and target icons, including partial upgrade progress.']},
@@ -1769,7 +1770,11 @@ function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))re
 function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261031-canyon-plan-fix" title="Canyon Clash planner"></iframe>';}
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
    layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261104-other-flags-jpeg#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';}
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261110-legend-phone#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
+  /* On phones the frame grows to the whole planner page, so only the site page scrolls (no scroll inside a scroll). */
+  var f=p.querySelector('iframe');f.onload=function(){var d=f.contentDocument,app=d&&d.querySelector('.app');if(!app)return;
+    var size=function(){f.style.height=window.matchMedia('(max-width:820px)').matches?(app.scrollHeight+48)+'px':'';};
+    size();if(window.ResizeObserver)new ResizeObserver(size).observe(app);window.addEventListener('resize',size);};}
 function mountEventGuide(){var p=$('p-events');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="events.html?v=20261103-playbooks-links" title="Whiteout Survival event guide"></iframe>';}
 function goCategoryPage(page){if(page==='private-profile'&&!PRIVATE_PREVIEW_ACCESS)page='dash';if((page==='admin'&&!ADMIN)||((page==='fortress'||page==='foundry'||page==='canyon')&&!FORTRESS_ACCESS))page='r4';var b=document.querySelector('#navtabs button[data-p="'+page+'"]');if(b)b.click();}
 if($('category-nav'))$('category-nav').onclick=function(e){var b=e.target.closest('[data-category]');if(!b)return;var g=b.dataset.category;goCategoryPage(g==='dash'?'dash':g==='planner'?'planner':categoryLast[g]||(g==='alliance'&&ADMIN?'admin':categoryPages[g][0][0]));};
