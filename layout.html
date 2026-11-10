@@ -73,6 +73,8 @@ textarea{min-height:64px;font:12px var(--num);resize:vertical}
 .li .t{font:600 13px var(--num);text-align:right}
 .tag{font:600 10px var(--head);letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:5px;margin-left:6px}
 .tag.dup{background:rgba(255,179,71,.18);color:var(--warn)}
+.tag.globe{background:rgba(255,224,102,.16);color:#FFE066}
+.sel label.chk{display:flex;gap:8px;align-items:flex-start;color:var(--ink);font-size:12.5px;margin:10px 0 2px;cursor:pointer}.sel label.chk input{margin-top:2px;accent-color:#FFE066}
 .tag.out{background:rgba(255,89,70,.18);color:var(--bad)}
 .sel label{display:block;color:var(--muted);font-size:11px;margin:8px 0 4px}
 .genrow{margin-bottom:8px}.genrow label{display:block;font-size:12px;margin-bottom:2px}
@@ -84,6 +86,8 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 .legend li{display:flex;align-items:center;gap:8px;min-width:0}
 .legend i{flex:none;width:11px;height:11px;transform:rotate(45deg);border:1px solid rgba(140,200,240,.55)}
 .legend i.lk{background:transparent;border:2px solid var(--gold)}
+.legend i.gz{background:rgba(255,224,102,.14);border:2px dashed #FFE066}
+.legend i.gb{width:8px;height:8px;border:0;border-radius:50%;background:#FFE066;transform:none;margin:0 1px 0 2px}
 .legend i.hx{background:repeating-linear-gradient(45deg,rgba(255,255,255,.4) 0 1px,transparent 1px 4px),#0D2B40}
 /* Phones: the toolbar is one row that scrolls sideways, so it never hides the map; the map keeps its own
    proportions (no vh, so the site can size the iframe to the page without a feedback loop). */
@@ -167,7 +171,8 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
       <h2 id="selTitle">Selected</h2>
       <div id="selAlRow" hidden><label for="selAl">Alliance</label><select id="selAl"></select></div>
       <div id="selNameRow"><label for="selName">Name</label>
-      <div class="row"><input type="text" id="selName" maxlength="40"><button type="button" class="btn" id="selSave">Rename</button></div></div>
+      <div class="row"><input type="text" id="selName" maxlength="40"><button type="button" class="btn" id="selSave">Rename</button></div>
+      <label class="chk"><input type="checkbox" id="selGlobe"><span><b>Globe buff</b>: the 8 city spots around this city get a damage boost (dashed yellow square on the map)</span></label></div>
       <label for="selX">In-game coordinates</label>
       <div class="row"><input type="number" id="selX" inputmode="numeric" min="0" max="1200" aria-label="X coordinate" placeholder="X"><input type="number" id="selY" inputmode="numeric" min="0" max="1200" aria-label="Y coordinate" placeholder="Y"><button type="button" class="btn" id="selMove">Move here</button></div>
       <p class="msg" id="selInfo"></p>
@@ -280,6 +285,14 @@ function bestTime(c){var t=marchTimes(c);return t.length?Math.min.apply(null,t):
 function territory(al){var s=new Set();ents.forEach(function(e){if(e.type!=='flag'&&e.type!=='hq')return;if(al&&alOf(e)!==al)return;var cx=e.w===1?e.x:e.x+Math.floor(e.w/2),cy=e.w===1?e.y:e.y+Math.floor(e.w/2),r=e.type==='flag'?3:6+Math.floor(e.w/2);for(var x=cx-r;x<=cx+r;x++)for(var y=cy-r;y<=cy+r;y++)s.add(x+','+y);});return s;}
 function insideCount(o,terr){var n=0;for(var dx=0;dx<o.w;dx++)for(var dy=0;dy<o.w;dy++)if(terr.has((o.x+dx)+','+(o.y+dy)))n++;return n;}
 function gameCoord(o){var tx=o.x+o.w-1,ty=o.y+o.w-1,cl=function(v){return Math.max(0,Math.min(1200,v));};return {x:cl(anchor.x-ty),y:cl(anchor.y-tx)};}
+/* Globe buff: a city marked as globe (e.globe) boosts the 8 city spots around it, the 6x6 square made of
+   3x3 city spots with the globe in the middle. A city counts when it stands fully inside that square. */
+var GLOBE='#FFE066';
+function globeZone(g){return {x:g.x-2,y:g.y-2,w:g.w+4};}
+function inZone(c,z){return c.x>=z.x&&c.x+c.w<=z.x+z.w&&c.y>=z.y&&c.y+c.w<=z.y+z.w;}
+function globes(){return ents.filter(function(e){return e.type==='city'&&e.globe;});}
+function boostedBy(g){var z=globeZone(g);return ents.filter(function(c){return c.type==='city'&&c!==g&&inZone(c,z);});}
+function globesOver(c){return globes().filter(function(g){return g!==c&&inZone(c,globeZone(g));});}
 function overlaps(o,skip){for(var i=0;i<ents.length;i++){var e=ents[i];if(e===skip)continue;if(o.x<e.x+e.w&&e.x<o.x+o.w&&o.y<e.y+e.w&&e.y<o.y+o.w)return true;}return false;}
 
 /* ---------- WOS Nerds link format (23-bit records, same as their compressMap) ---------- */
@@ -345,7 +358,8 @@ function draw(){analyse();var W=cv.width/dpr,H=cv.height/dpr;ctx.setTransform(dp
   ALS.forEach(function(a){ctx.fillStyle=rgba(a.color,.12);analysis.terrs[a.id].forEach(function(k){var p=k.split(',');poly(+p[0],+p[1],1);ctx.fill();});});
   /* Tiles covered by two or more flags/HQs get a faint hatch, so overlapping coverage is visible without shouting. */
   ctx.save();ctx.fillStyle=hatch();analysis.overlap.forEach(function(k){var p=k.split(',');poly(+p[0],+p[1],1);ctx.fill();});ctx.restore();
-  var showLabels=view.s>=13;
+  var showLabels=view.s>=13,gl=globes();
+  gl.forEach(function(g){var z=globeZone(g);poly(z.x,z.y,z.w);ctx.fillStyle='rgba(255,224,102,.08)';ctx.fill();});
   ents.forEach(function(e){poly(e.x,e.y,e.w);
     var fill={hq:'#D9A441',flag:'#8FA6BC',building:'#1B1F2A',node:'#2E6B3F',obstacle:'#7A2230'}[e.type]||'#16486B';
     if(e.type==='flag')fill=alColor(alOf(e));
@@ -364,7 +378,18 @@ function draw(){analyse();var W=cv.width/dpr,H=cv.height/dpr;ctx.setTransform(dp
       if(showCoords&&showLabels){ctx.font='500 '+(fs*.85)+'px IBM Plex Mono, monospace';ctx.fillText(xy,c.x,c.y+fs*.6);}}
     else if(showCoords&&showLabels){ctx.font='500 '+(fs*.8)+'px IBM Plex Mono, monospace';ctx.fillStyle='#F5F7FF';ctx.fillText(xy,c.x,c.y-view.s*.75);}
     else if(e.type==='flag'&&view.s>=18){var tg=alTag(alOf(e));ctx.font='700 '+Math.round(view.s*(tg.length>3?.34:.42))+'px Chakra Petch, sans-serif';ctx.fillStyle=isLight(fill)?'#03121D':'#F5F7FF';ctx.fillText(tg,c.x,c.y);}});
+  drawGlobes(gl);
   if(!exporting)drawGhost();}
+/* Globe buff on the map: dashed yellow square around each globe, a globe sign on the globe city and a
+   yellow dot on every city it boosts. */
+function drawGlobes(gl){if(!gl.length)return;ctx.save();var done=new Set();
+  gl.forEach(function(g){var z=globeZone(g);poly(z.x,z.y,z.w);ctx.setLineDash([Math.max(4,view.s*.35),Math.max(3,view.s*.22)]);ctx.lineWidth=2;ctx.strokeStyle=GLOBE;ctx.stroke();ctx.setLineDash([]);
+    poly(g.x,g.y,g.w);ctx.lineWidth=2;ctx.stroke();
+    var c=toScreen(g.x+g.w/2,g.y+g.w/2),r=Math.max(3.5,view.s*.24),y=view.s>=13?c.y-view.s*.82:c.y;
+    ctx.beginPath();ctx.arc(c.x,y,r,0,Math.PI*2);ctx.fillStyle='#03121D';ctx.fill();ctx.lineWidth=Math.max(1,r*.22);ctx.strokeStyle=GLOBE;ctx.stroke();
+    ctx.beginPath();ctx.ellipse(c.x,y,r*.45,r,0,0,Math.PI*2);ctx.moveTo(c.x-r,y);ctx.lineTo(c.x+r,y);ctx.stroke();
+    boostedBy(g).forEach(function(b){if(b.globe||done.has(b))return;done.add(b);var p=toScreen(b.x+b.w/2,b.y+b.w/2);ctx.beginPath();ctx.arc(p.x,view.s>=13?p.y-view.s*.82:p.y,Math.max(2,view.s*.11),0,Math.PI*2);ctx.fillStyle=GLOBE;ctx.fill();});});
+  ctx.restore();}
 /* Outline of the element about to be placed, under the mouse. Green fits, red is blocked. */
 var ghost=null;
 function placeable(o){return inMap(o)&&!overlaps(o);}
@@ -397,20 +422,23 @@ function panel(){analyse();var cities=ents.filter(function(e){return e.type==='c
   if(!dn.length&&!outs.length&&!ph.length&&ents.some(function(e){return e.type==='building';}))h+='<p class="ok">Nothing to fix. Every member has one spot inside the territory.</p>';
   $('issues').innerHTML=h;
   var q=query.trim().toLowerCase();
-  var rows=ents.filter(function(e){var label=(e.type==='city'?(e.name||'')+' #'+(e.num||''):LABEL[e.type]||e.type).toLowerCase(),g=gameCoord(e);return !q||label.indexOf(q)>=0||(g.x+':'+g.y).indexOf(q)>=0;})
+  var rows=ents.filter(function(e){var label=(e.type==='city'?(e.name||'')+' #'+(e.num||'')+(e.globe?' globe':''):LABEL[e.type]||e.type).toLowerCase(),g=gameCoord(e);return !q||label.indexOf(q)>=0||(g.x+':'+g.y).indexOf(q)>=0;})
     .map(function(e){return {c:e,t:e.type==='city'?bestTime(e):null};})
     .sort(function(a,b){return (ORDER[a.c.type]-ORDER[b.c.type])||((a.t===null?1e9:a.t)-(b.t===null?1e9:b.t))||(a.c.name||'').localeCompare(b.c.name||'');});
   var kindCount={};
   $('list').innerHTML=rows.map(function(r){var e=r.c,i=ents.indexOf(e),g=gameCoord(e),title;
-    if(e.type==='city')title=esc(e.name||'(no name)')+(analysis.dup(e)?'<span class="tag dup">twice</span>':'')+(analysis.out(e)?'<span class="tag out">outside</span>':'');
+    if(e.type==='city')title=esc(e.name||'(no name)')+(e.globe?'<span class="tag globe">globe</span>':'')+(analysis.dup(e)?'<span class="tag dup">twice</span>':'')+(analysis.out(e)?'<span class="tag out">outside</span>':'');
     else{var kk=nameOf(e);kindCount[kk]=(kindCount[kk]||0)+1;
       title='<b>'+esc(kk)+(ents.filter(function(x){return x.type!=='city'&&nameOf(x)===kk;}).length>1?' '+kindCount[kk]:'')+'</b>';}
     return '<div class="li" data-i="'+i+'" role="button" tabindex="0"><span>'+title+'<br><small>X:'+g.x+' Y:'+g.y+'</small></span><span class="t">'+(e.type==='city'?(r.t===null?'–':r.t+'s'):'')+'</span></div>';}).join('')||'<p class="msg">Nothing matches.</p>';
   if(selected&&ents.indexOf(selected)>=0){var isCity=selected.type==='city',g=gameCoord(selected);$('selCard').hidden=false;$('selTitle').textContent='Selected '+nameOf(selected);$('selNameRow').hidden=!isCity;
     $('selAlRow').hidden=!hasAl(selected.type);if(hasAl(selected.type))$('selAl').value=alOf(selected);
-    if(isCity&&document.activeElement!==$('selName'))$('selName').value=selected.name||'';
+    if(isCity&&document.activeElement!==$('selName'))$('selName').value=selected.name||'';if(isCity)$('selGlobe').checked=!!selected.globe;
     if(document.activeElement!==$('selX')&&document.activeElement!==$('selY')){$('selX').value=g.x;$('selY').value=g.y;}
-    var t=isCity?marchTimes(selected):[];$('selInfo').textContent='In-game X:'+g.x+' Y:'+g.y+(isCity?' · march to Bear Trap '+(t.length?t.map(function(x){return x+'s';}).join(' / '):'–'):'');}
+    var t=isCity?marchTimes(selected):[],gi='';
+    if(isCity&&selected.globe){var bs=boostedBy(selected);gi=' · globe boosts '+bs.length+' of 8 cities'+(bs.length?': '+bs.map(function(b){return b.name||'(no name)';}).join(', '):'');}
+    else if(isCity){var over=globesOver(selected);if(over.length)gi=' · boosted by the globe of '+over.map(function(o){return o.name||'(no name)';}).join(', ');}
+    $('selInfo').textContent='In-game X:'+g.x+' Y:'+g.y+(isCity?' · march to Bear Trap '+(t.length?t.map(function(x){return x+'s';}).join(' / '):'–'):'')+gi;}
   else $('selCard').hidden=true;
   $('meta').textContent=cities.length+' cities · anchor X:'+anchor.x+' Y:'+anchor.y+(cloud&&cloud.msg?' · '+cloud.msg:'');renderAlliances();renderGen();}
 /* Alliances card, toolbar picker, selection picker and legend. Rebuilt only when the alliances or their
@@ -425,7 +453,7 @@ function renderAlliances(){var cnt={};ALS.forEach(function(a){cnt[a.id]={flag:0,
       +'<div class="alcnt">'+c.flag+' flag'+(c.flag===1?'':'s')+(c.hq?' · '+c.hq+' HQ':'')+' · '+c.city+' cit'+(c.city===1?'y':'ies')+'</div></div>';}).join('');
   $('alPick').innerHTML=alOptions();$('alPick').value=curAl;$('alPick').style.borderLeftColor=alColor(curAl);$('selAl').innerHTML=alOptions();if(selected&&hasAl(selected.type))$('selAl').value=alOf(selected);
   $('legend').innerHTML=ALS.map(function(a){return '<li><i style="background:'+esc(a.color)+'"></i>'+esc(a.tag)+' banner</li><li><i style="background:'+shade(a.color,.4)+'"></i>'+esc(a.tag)+' city</li>';}).join('')
-    +'<li><i style="background:#5A1E26"></i>City outside its banners</li><li><i style="background:#5C4318"></i>Same name as another city</li><li><i class="lk"></i>Locked</li><li><i class="hx"></i>Ground covered twice</li>';
+    +'<li><i style="background:#5A1E26"></i>City outside its banners</li><li><i style="background:#5C4318"></i>Same name as another city</li><li><i class="lk"></i>Locked</li><li><i class="hx"></i>Ground covered twice</li><li><i class="gz"></i>Globe buff (8 cities around)</li><li><i class="gb"></i>City boosted by a globe</li>';
   paintLocks();}
 /* Every city carries a unique number (num). New, pasted or imported cities get the next free one;
    "Renumber cities" redoes them in order: FOX then NGT, each from the closest to its own trap. */
@@ -567,6 +595,8 @@ $('exportJpeg').onclick=function(){var btn=this,W=2400,H=1600,off=document.creat
     $('shareMsg').textContent='Full map exported as JPEG.';},'image/jpeg',.92);
 };
 $('selMove').onclick=moveTo;$('selX').onkeydown=$('selY').onkeydown=function(ev){if(ev.key==='Enter')moveTo();};
+$('selGlobe').onchange=function(){if(!selected||selected.type!=='city')return;pushHistory();if(this.checked)selected.globe=true;else delete selected.globe;refresh();
+  $('hint').textContent=this.checked?(selected.name||'This city')+' is a globe: the dashed yellow square shows the 8 city spots it boosts.':'Globe removed from '+(selected.name||'this city')+'.';};
 $('selSave').onclick=rename;$('selName').onkeydown=function(ev){if(ev.key==='Enter')rename();};
 $('copyLink').onclick=function(){var link=shareLink(),skip=encode.skipped?' '+encode.skipped+' element'+(encode.skipped>1?'s are':' is')+' too far from the HQ for a WOS Nerds link and were left out.':'';if(encode.otherSkipped)skip+=' '+encode.otherSkipped+' flag'+(encode.otherSkipped>1?'s and HQs':' or HQ')+' of a third alliance '+(encode.otherSkipped>1?'were':'was')+' left out because WOS Nerds links support only two alliances. Copy layout code to keep every flag.';var done=function(ok){$('shareMsg').textContent=(ok?'Link copied. Paste it in your alliance chat or open it on wosnerds.com.':'Copying was blocked. Select the link below and copy it.')+skip;if(!ok){$('importBox').value=link;$('importBox').select();}};
   try{navigator.clipboard.writeText(link).then(function(){done(true);},function(){done(false);});}catch(e){done(false);}};
@@ -702,10 +732,10 @@ $('genBtn').onclick=function(){var btn=this;btn.disabled=true;$('genMsg').textCo
 $('jointBtn').onclick=function(){pushHistory();ents=JOINT.map(function(r){var e={type:r[0],x:r[1],y:r[2],w:SIZE[r[0]]||1};if(r[0]==='city')e.name=r[3];if(r[4])e.al=r[4];return e;});anchor={x:411,y:530};selected=null;refresh();fit();
   $('genMsg').textContent='Joint plan loaded: 2 flags and 60 cities per alliance, 4 Bear Traps on the border, flags edge to edge. Undo brings back your previous map.';};
 /* Layout code: the whole map (every element, anchor, locks and alliances), with no distance limit. */
-function layoutCode(){var o={v:1,a:[anchor.x,anchor.y],l:locks,al:ALS,e:ents.map(function(e){var r=[e.type,e.x,e.y];if(e.type==='city'){r.push(e.name||'',e.al||'');if(e.num)r.push(e.num);}else if(hasAl(e.type))r.push('',alOf(e));return r;})};
+function layoutCode(){var o={v:1,a:[anchor.x,anchor.y],l:locks,al:ALS,e:ents.map(function(e){var r=[e.type,e.x,e.y];if(e.type==='city'){r.push(e.name||'',e.al||'');if(e.num||e.globe)r.push(e.num||0);if(e.globe)r.push(1);}else if(hasAl(e.type))r.push('',alOf(e));return r;})};
   var bytes=new TextEncoder().encode(JSON.stringify(o)),s='';bytes.forEach(function(b){s+=String.fromCharCode(b);});return 'FOXLAYOUT:'+btoa(s);}
 function readCode(v){var raw=atob(v.replace(/^FOXLAYOUT:/,'').trim()),b=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)b[i]=raw.charCodeAt(i);
-  var o=JSON.parse(new TextDecoder().decode(b));return {anchor:{x:o.a[0],y:o.a[1]},locks:o.l||{},alliances:Array.isArray(o.al)?o.al:null,ents:o.e.map(function(r){var e={type:r[0],x:r[1],y:r[2],w:SIZE[r[0]]||1};if(r[0]==='city'){e.name=r[3]||'';if(r[5])e.num=r[5];}if(r[4])e.al=r[4];return e;})};}
+  var o=JSON.parse(new TextDecoder().decode(b));return {anchor:{x:o.a[0],y:o.a[1]},locks:o.l||{},alliances:Array.isArray(o.al)?o.al:null,ents:o.e.map(function(r){var e={type:r[0],x:r[1],y:r[2],w:SIZE[r[0]]||1};if(r[0]==='city'){e.name=r[3]||'';if(r[5])e.num=r[5];if(r[6])e.globe=true;}if(r[4])e.al=r[4];return e;})};}
 $('copyCode').onclick=function(){var code=layoutCode();var done=function(ok){$('shareMsg').textContent=ok?'Layout code copied ('+ents.length+' elements). Send it to another member, or paste it into the box below on another device.':'Copying was blocked. Select the code below and copy it.';if(!ok){$('importBox').value=code;$('importBox').select();}};
   try{navigator.clipboard.writeText(code).then(function(){done(true);},function(){done(false);});}catch(e){done(false);}};
 $('importBtn').onclick=function(){var v=$('importBox').value.trim();if(!v){$('importMsg').textContent='Paste a link first.';return;}
@@ -722,7 +752,7 @@ $('importBtn').onclick=function(){var v=$('importBox').value.trim();if(!v){$('im
 var clip=[];
 function copySel(){var src=multi.length?multi:(selected?[selected]:[]);if(!src.length){$('hint').textContent='Select something first, then copy it.';return;}
   var mx=Math.min.apply(null,src.map(function(e){return e.x;})),my=Math.min.apply(null,src.map(function(e){return e.y;}));
-  clip=src.map(function(e){return {type:e.type,dx:e.x-mx,dy:e.y-my,w:e.w,al:e.al,name:e.name};});clip.origin={x:mx,y:my};
+  clip=src.map(function(e){return {type:e.type,dx:e.x-mx,dy:e.y-my,w:e.w,al:e.al,name:e.name,globe:e.globe};});clip.origin={x:mx,y:my};
   $('hint').textContent=clip.length+' element'+(clip.length>1?'s':'')+' copied. Point at the map and press Ctrl+V (or Paste).';}
 /* Paste mode: the copy follows the mouse (green when it fits, red when blocked) and lands on the next click. */
 var pasting=false;
@@ -736,7 +766,7 @@ function pasteSel(){if(!clip.length){$('hint').textContent='Nothing copied yet.'
 function placePaste(base,search){var spot=clipFits(base.x,base.y)?base:null;
   if(!spot&&search){for(var r=1;r<=25&&!spot;r++)for(var dx=-r;dx<=r&&!spot;dx++)for(var dy=-r;dy<=r&&!spot;dy++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(clipFits(base.x+dx,base.y+dy))spot={x:base.x+dx,y:base.y+dy};}}
   if(!spot){$('hint').textContent='The copy does not fit there (red). Move it to free ground and click again, or press Esc.';return;}
-  pasting=false;pushHistory();var n=ents.filter(function(e){return e.type==='city';}).length,added=clip.map(function(c){var e={type:c.type,x:spot.x+c.dx,y:spot.y+c.dy,w:c.w};if(c.al)e.al=c.al;if(c.type==='city')e.name='City '+(++n);return e;});
+  pasting=false;pushHistory();var n=ents.filter(function(e){return e.type==='city';}).length,added=clip.map(function(c){var e={type:c.type,x:spot.x+c.dx,y:spot.y+c.dy,w:c.w};if(c.al)e.al=c.al;if(c.type==='city'){e.name='City '+(++n);if(c.globe)e.globe=true;}return e;});
   ents=ents.concat(added);multi=added;selected=added.length===1?added[0]:null;refresh();
   $('hint').textContent=added.length+' element'+(added.length>1?'s':'')+' pasted and selected. Drag one to move the group.';}
 $('renumBtn').onclick=function(){pushHistory();renumber();refresh();$('hint').textContent='Cities renumbered 1 to '+ents.filter(function(e){return e.type==='city';}).length+'. Undo restores the previous numbers.';};

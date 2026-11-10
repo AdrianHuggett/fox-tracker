@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 10 Nov 2026
 
+- Layout planner: globe buff, at Adrian's request (a globe city boosts the damage of the 8 cities around it; he wanted the buff's outline on the map). The zone is taken as the 3×3 city spots around the globe (6×6 tiles), since cities are 2×2.
 - Layout planner: alliances are now a list per layout instead of fixed FOX / NGT / Other (Adrian wanted any alliance of the state, named by him, with flags that follow). Old layouts keep working: missing ids are added to the list on load.
 - Layout planner layouts moved to the member's account (table `user_layouts`, SQL approved by Adrian and run from his dashboard session), at his request: he wants his layout on any device. The browser copy is uploaded the first time, so no existing layout is lost.
 - Layout planner review: added a colour legend; phones get a one-row swipeable toolbar, a map sized by aspect ratio instead of `vh`, and an iframe that `mountLayout()` sizes to the planner page on screens ≤ 820px (one scroll instead of a scroll inside a scroll); the Generate text now describes spiral plus compaction; the "unlocked removed first" count no longer includes other-alliance flags, which Generate keeps.

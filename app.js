@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-10-layout-globe',date:'2026-11-10',title:'Layout planner: globe buff',points:['Select a city and tick Globe buff: a dashed yellow square shows the 8 city spots around it that get the damage boost, and each boosted city gets a yellow dot.']},
   {id:'2026-11-10-layout-neighbours',date:'2026-11-10',title:'Layout planner: neighbours stay put',points:['Generate only plans alliances with players on a Bear Trap slider. Set a neighbour\'s traps to 0 and its cities and banners stay exactly where they are.']},
   {id:'2026-11-10-layout-alliances',date:'2026-11-10',title:'Layout planner: any alliance',points:['Add any alliance of the state with its tag, name and colour in the Alliances card, pick it in the toolbar, and its flags and HQ show its tag and colour automatically.']},
   {id:'2026-11-10-layout-account',date:'2026-11-10',title:'Your layout on every device',points:['The Layout planner now saves your layout on your account, so it is there on any phone or computer you sign in on. The layout already in your browser was moved to your account the first time you opened it.']},
@@ -1780,7 +1781,7 @@ window.FOXLayoutStore={
     return SB.from('user_layouts').select('data').eq('user_id',U.id).maybeSingle().then(function(r){if(r.error)throw r.error;return r.data?r.data.data:null;});},
   save:function(data){if(!SB||!U)return Promise.reject(new Error('signed out'));
     return SB.from('user_layouts').upsert({user_id:U.id,data:data,updated_at:new Date().toISOString()},{onConflict:'user_id'}).then(function(r){if(r.error)throw r.error;});}};
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261110-neighbours#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261110-globe#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
   /* On phones the frame grows to the whole planner page, so only the site page scrolls (no scroll inside a scroll). */
   var f=p.querySelector('iframe');f.onload=function(){var d=f.contentDocument,app=d&&d.querySelector('.app');if(!app)return;
     var size=function(){f.style.height=window.matchMedia('(max-width:820px)').matches?(app.scrollHeight+48)+'px':'';};
