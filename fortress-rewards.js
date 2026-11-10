@@ -22,11 +22,12 @@
     { id: 's3', label: 'Stronghold No. 3', amount: 600 },
     { id: 's4', label: 'Stronghold No. 4', amount: 150 }
   ];
-  /* Roles: R1–R3 share the rewards by contribution; Max always receives the per-player maximum.
-     Max replaced R4/R5 on 11 Nov 2026: saved R4/R5 members become Max (normRole), then anyone can be
-     switched to or from Max freely. */
-  var ROLES = ['r1', 'r2', 'r3', 'max'];
-  function normRole(role) { return role === 'r4' || role === 'r5' ? 'max' : ROLES.indexOf(role) >= 0 ? role : 'r1'; }
+  /* Roles: R1 to R5 share the rewards by contribution; only Max always receives the per-player maximum.
+     (11 Nov 2026: R4/R5 briefly became Max; restoreRanks() gives them back their R4/R5 role once.) */
+  var ROLES = ['r1', 'r2', 'r3', 'r4', 'r5', 'max'];
+  var ROLE_ORDER = { max: 0, r5: 1, r4: 2, r3: 3, r2: 4, r1: 5 };
+  function normRole(role) { return ROLES.indexOf(role) >= 0 ? role : 'r1'; }
+  function roleLabel(role) { return role === 'max' ? 'Max' : String(role).toUpperCase(); }
   function isMax(member) { return member.role === 'max'; }
   var LEADERS = [
     { name: 'Jim Lahey', role: 'r5' },
@@ -70,6 +71,18 @@
     state.rosterVersion = 1;
     save();
   }
+  function restoreRanks() {
+    if (state.rolesVersion === 2) return;
+    var known = {};
+    LEADERS.forEach(function (leader) { known[leader.name.toLowerCase()] = leader.role; });
+    (window.FOXFortressRoster || []).forEach(function (row) { if (row[2] === 'r4' || row[2] === 'r5') known[row[1].toLowerCase()] = row[2]; });
+    state.members.forEach(function (member) {
+      var rank = known[member.name.toLowerCase()];
+      if (member.role === 'max' && (rank === 'r4' || rank === 'r5')) member.role = rank;
+    });
+    state.rolesVersion = 2;
+    save();
+  }
   function applyKnownRewardLimits() {
     if (state.rewardPresetsVersion === 1) return;
     state.rewards.forEach(function (reward) {
@@ -87,10 +100,17 @@
     save();
   }
   function includedMembers() { return state.members.filter(function (member) { return !member.excluded; }); }
-  function alphabeticalMembers() {
-    return includedMembers().sort(function (a, b) {
-      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true });
+  function byName(a, b) { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }); }
+  /* "role": Max, R5, R4, R3, R2, R1, then by name; "name": by name only. */
+  function sortedMembers(list, mode) {
+    return list.slice().sort(function (a, b) {
+      return (mode === 'name' ? 0 : (ROLE_ORDER[a.role] - ROLE_ORDER[b.role])) || byName(a, b);
     });
+  }
+  function sortButtons(kind, mode, label) {
+    return '<div class="fr-sort" role="group" aria-label="' + label + '">' + [['role', 'Sort by role'], ['name', 'Sort by name']].map(function (o) {
+      return '<button type="button" data-sort-' + kind + '="' + o[0] + '" aria-pressed="' + (mode === o[0]) + '">' + o[1] + '</button>';
+    }).join('') + '</div>';
   }
   function fullMembers() { return includedMembers().filter(isMax); }
   function integer(value) {
@@ -120,6 +140,7 @@
         state.members.forEach(function (member) { member.role = normRole(member.role); });
         seedLeaders();
         seedRoster();
+        restoreRanks();
         applyKnownRewardLimits();
         return;
       }
@@ -127,6 +148,7 @@
     state = empty();
     seedLeaders();
     seedRoster();
+    restoreRanks();
     applyKnownRewardLimits();
   }
   function save() {
@@ -207,7 +229,7 @@
   }
   function roleOptions(member) {
     return ROLES.map(function (role) {
-      return '<option value="' + role + '"' + (member.role === role ? ' selected' : '') + '>' + (role === 'max' ? 'Max' : role.toUpperCase()) + '</option>';
+      return '<option value="' + role + '"' + (member.role === role ? ' selected' : '') + '>' + roleLabel(role) + '</option>';
     }).join('');
   }
   function contributionOptions(member) {
@@ -222,11 +244,8 @@
     var oldList = root.querySelector('.fr-members-scroll');
     var listScroll = oldList ? oldList.scrollTop : 0;
     var s = stats();
-    var memberRows = state.members.slice().sort(function (a, b) {
-      var aGroup = isMax(a) ? 0 : 1;
-      var bGroup = isMax(b) ? 0 : 1;
-      return aGroup - bGroup || state.members.indexOf(a) - state.members.indexOf(b);
-    }).map(function (member) {
+    var memberSort = state.memberSort === 'name' ? 'name' : 'role', allocSort = state.allocSort === 'role' ? 'role' : 'name';
+    var memberRows = sortedMembers(state.members, memberSort).map(function (member) {
       return '<tr data-member-name="' + escapeHTML(member.name.toLowerCase()) + '" class="' + (member.excluded ? 'fr-ignored' : '') + '"><th scope="row"><div class="fr-member-name"><input type="text" maxlength="60" value="' + escapeHTML(member.name) + '" data-member="' + member.id + '" data-field="name" aria-label="Member name"><button type="button" class="fr-remove" data-remove-member="' + member.id + '" aria-label="Remove ' + escapeHTML(member.name) + '">×</button></div></th>' +
         '<td><input type="checkbox" data-member="' + member.id + '" data-field="excluded" aria-label="Exclude ' + escapeHTML(member.name) + ' from calculations"' + (member.excluded ? ' checked' : '') + '></td>' +
         '<td><select data-member="' + member.id + '" data-field="role" aria-label="Role for ' + escapeHTML(member.name) + '">' + roleOptions(member) + '</select></td>' +
@@ -246,9 +265,9 @@
       return '<option value="' + reward.id + '"' + (reward.id === activeReward.id ? ' selected' : '') + '>' + escapeHTML(reward.name) + '</option>';
     }).join('') + '</select></label>' : '';
     var allocationRows = activeReward ? '<div class="fr-alloc-card"><h4>' + escapeHTML(activeReward.name) + '<span>' + rewardTotal(activeReward) + ' / ' + integer(activeReward.quantity) + '</span></h4>' +
-      (includedMembers().length ? '<div class="fr-alloc-grid">' + alphabeticalMembers().map(function (member) {
+      (includedMembers().length ? '<div class="fr-alloc-grid">' + sortedMembers(includedMembers(), allocSort).map(function (member) {
         var value = assigned(activeReward, member), over = integer(activeReward.cap) && value > integer(activeReward.cap);
-        return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + (isMax(member) ? ' <em>Max</em>' : '') + '</span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
+        return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + ' <em>' + roleLabel(member.role) + '</em></span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
       }).join('') + '</div>' : '<p class="fr-empty">Add members to assign rewards.</p>') + '</div>' : '';
     var siteCards = SITES.map(function (site) {
       var selected = state.sites.indexOf(site.id) >= 0;
@@ -260,12 +279,12 @@
       '<section class="fr-card"><div class="fr-card-head"><h3>Current sites</h3><span>' + state.sites.length + ' selected</span></div><p>Select only the fortresses and strongholds your alliance currently controls. Their chests and special rewards are added below.</p><div class="fr-sites">' + siteCards + '</div><p class="fr-note">Special reward names can be edited in the reward pools.</p></section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>1. Members</h3><span>' + state.members.length + '</span></div><p>Members with the Max role receive the per-player maximum. Excluded members, including Ricky Lahey, are ignored. Paste one additional name per line.</p>' +
       '<div class="fr-add"><textarea id="fr-names" rows="3" placeholder="One member per line" aria-label="Member names"></textarea><button type="button" class="fr-primary" data-action="add-members">Add members</button></div>' +
-      (state.members.length ? '<input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member"><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
-      '<p class="fr-note">Contribution rates each R1–R3 member’s engagement from 1 to 4. Max members do not need a rating.</p></section>' +
+      (state.members.length ? '<div class="fr-list-tools"><input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member">' + sortButtons('members', memberSort, 'Sort members') + '</div><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
+      '<p class="fr-note">Contribution rates each member’s engagement from 1 to 4. Max members do not need a rating.</p></section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before giving Max members their full share.</p>' +
       '<div class="fr-add fr-add-reward"><input id="fr-reward-name" type="text" maxlength="80" placeholder="Reward name" aria-label="Reward name"><input id="fr-reward-quantity" type="number" min="1" max="100000" value="1" aria-label="Available quantity"><input id="fr-reward-cap" type="number" min="0" max="100000" value="0" aria-label="Per-player limit"><button type="button" class="fr-primary" data-action="add-reward">Add reward</button></div>' +
       (state.rewards.length ? '<div class="fr-scroll"><table><thead><tr><th>Reward</th><th>Available</th><th>Limit / player</th><th>Assigned</th><th></th></tr></thead><tbody>' + rewardRows + '</tbody></table></div>' : '<p class="fr-empty">No reward pools yet.</p>') + '</section>' +
-      '<section class="fr-card"><div class="fr-card-head"><h3>3. Distribution</h3></div><div class="fr-controls">' + rewardPicker + '<label>Show players with<select id="fr-show-count" aria-label="Show players with this reward count"></select></label><button type="button" class="fr-primary" data-action="propose"' + (!includedMembers().length || !state.rewards.length ? ' disabled' : '') + '>Distribute by contribution</button><span id="fr-filter-count" class="fr-filter-count" aria-live="polite"></span></div>' +
+      '<section class="fr-card"><div class="fr-card-head"><h3>3. Distribution</h3></div><div class="fr-controls">' + rewardPicker + sortButtons('alloc', allocSort, 'Sort players') + '<label>Show players with<select id="fr-show-count" aria-label="Show players with this reward count"></select></label><button type="button" class="fr-primary" data-action="propose"' + (!includedMembers().length || !state.rewards.length ? ' disabled' : '') + '>Distribute by contribution</button><span id="fr-filter-count" class="fr-filter-count" aria-live="polite"></span></div>' +
       '<p class="fr-note">Max members receive their per-player maximum first. Remaining rewards are weighted by each member’s contribution, within the per-player limits. This replaces current allocations; you can edit the numbers below.</p>' +
       (allocationRows || '<p class="fr-empty">Add members and reward pools to start.</p>') + '</section></div>' +
       '<aside class="fr-card fr-summary"><h3>Distribution summary</h3><div class="fr-numbers"><div><strong>' + s.allocated + '</strong><span>Assigned</span></div><div><strong>' + Math.max(0, s.available - s.allocated) + '</strong><span>Remaining</span></div></div>' +
@@ -317,7 +336,9 @@
   function onClick(event) {
     var button = event.target.closest('button');
     if (!button || !root.contains(button)) return;
-    if (button.dataset.removeMember) {
+    if (button.dataset.sortMembers) state.memberSort = button.dataset.sortMembers === 'name' ? 'name' : 'role';
+    else if (button.dataset.sortAlloc) state.allocSort = button.dataset.sortAlloc === 'role' ? 'role' : 'name';
+    else if (button.dataset.removeMember) {
       var memberId = button.dataset.removeMember;
       state.members = state.members.filter(function (m) { return m.id !== memberId; });
       Object.keys(state.allocation).forEach(function (key) { delete state.allocation[key][memberId]; });

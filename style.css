@@ -837,6 +837,12 @@ html[lang="nb"] #p-charms .cost:before,html[lang="nb"] #p-charms .phone .cost:be
 .fr-member-name{display:flex;align-items:center;gap:6px}.fr-card table .fr-member-name input[type=text]{flex:1;min-width:0}.fr-member-name .fr-remove{flex:none}
 .fr-members-scroll{max-height:490px;overflow:auto}.fr-members-scroll thead{position:sticky;top:0;background:var(--panel);z-index:1}
 #fr-member-search{width:100%;margin:0 0 9px}
+.fr-list-tools{display:flex;align-items:center;gap:8px;margin:0 0 9px}.fr-list-tools #fr-member-search{flex:1;min-width:0;margin:0}
+.fr-sort{display:inline-flex;flex:none;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.fr-sort button{border:0;background:transparent;color:var(--muted);font-size:12px;padding:7px 10px;cursor:pointer;white-space:nowrap}
+.fr-sort button+button{border-left:1px solid var(--line)}.fr-sort button[aria-pressed="true"]{background:var(--ice-dim);color:var(--ice);font-weight:600}
+.fr-controls .fr-sort{margin-bottom:1px}
+@media(max-width:520px){.fr-list-tools{flex-wrap:wrap}.fr-list-tools .fr-sort{width:100%}.fr-list-tools .fr-sort button{flex:1}}
 .fr-card table select{min-width:82px}.fr-card table input[type=checkbox]{accent-color:var(--coral)}
 .fr-card tr.fr-ignored{opacity:.55}.fr-alloc-grid em{font-style:normal;font-size:10px;color:var(--gold);margin-left:3px}
 .fr-remove{border:0;background:none;color:var(--muted);font-size:20px!important;padding:0 5px}.fr-remove:hover{color:var(--coral)}

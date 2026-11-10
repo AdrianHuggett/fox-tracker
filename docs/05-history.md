@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 11 Nov 2026
 
+- Fortress rewards: R4 and R5 are roles again (Adrian), without any reward rule: roles R1–R5 share by contribution, only Max gets the per-player maximum. Members that the earlier change had turned from R4/R5 into Max get their R4/R5 back once (`restoreRanks()`, matched by name against the built-in leaders and roster; `rolesVersion: 2`). Members and Distribution each get "Sort by role" (Max, R5 … R1, then name) / "Sort by name", saved in the draft (`memberSort`, default role; `allocSort`, default name). The Distribution grid shows every member's role.
 - Fortress rewards: the R4 and R5 roles are replaced by one role, Max, at Adrian's request (he wants to choose who gets the per-player maximum instead of tying it to rank). Roles are now R1, R2, R3 and Max; saved R4/R5 members (and the R4/R5 of the built-in roster) become Max on load (`normRole()`), so nobody loses the maximum silently.
 
 ## 10 Nov 2026
