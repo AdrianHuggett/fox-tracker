@@ -341,10 +341,14 @@
      containing the other (3+ letters), the closest power breaking ties. */
   /* Look-alike letters of decorated names (ΔĐŘɨΔŇ → adrian): Greek, Cyrillic, stroked letters, small capitals. */
   var FOLD = (function () { var o = {}; 'Δa δd Λa λa Αa αa Βb βb Εe εe Σe σo ςs Ηh ηn Ιi ιi Κk κk Μm μu Νn νv Οo οo Ρp ρp Τt τt Υy υu Χx χx Ωo ωw Πn πn Θo θo Φo φo Γr γy Ζz ζz Аa аa Вb вb Еe еe Кk кk Мm мm Нh нh Оo оo Рp рp Сc сc Тt тt Уy уy Хx хx Ьb ьb Яr яr Иn иn Дd дd Лl лl Цu цu Гr гr Шw шw Щw щw Пn пn Фo фo Эe эe Đd đd Ɨi ɨi Łl łl Øo øo Ħh ħh Ŧt ŧt Ƀb ƀb Ɍr ɍr Ƶz ƶz ßb Ææe æae Œoe œoe ıi ȷj Ɇe ɇe Ɏy ɏy Ðd ðd Þp þp Ɛe ɛe Ɔo ɔo ɑa ɡg ᴀa ʙb ᴄc ᴅd ᴇe ꜰf ғf ɢg ʜh ɪi ᴊj ᴋk ʟl ᴍm ɴn ᴏo ᴘp ʀr ꜱs ᴛt ᴜu ᴠv ᴡw ʏy ᴢz @a $s €e ¥y £l ¢c'.split(' ').forEach(function (t) { o[t.charAt(0)] = t.slice(1); }); return o; }());
+  /* Members who changed their in-game name (old folded name → new one), confirmed by Adrian on 11 Nov 2026 and
+     paired by power growth (Talie 367.6M → Glitter Menace 432.6M, SkyMnky 425.5M → Hercutease 502.0M). */
+  var RENAMED = { talie: 'glittermenace', skymnky: 'hercutease' };
   function nameKey(value) {
-    return String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    var key = String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^\x00-\x7f]/g, function (c) { return FOLD[c] || ''; }).replace(/[@$]/g, function (c) { return FOLD[c]; })
       .toLowerCase().replace(/[^a-z0-9]/g, '');
+    return RENAMED[key] || key;
   }
   function strongMatch(r, name) {
     var key = nameKey(name);
