@@ -64,6 +64,7 @@ textarea{min-height:64px;font:12px var(--num);resize:vertical}
 .alrow .alTag{font:600 13px var(--head);letter-spacing:.06em;text-transform:uppercase}
 .alrow .btn{padding:7px 0}
 .alrow .btn:disabled{opacity:.3;cursor:default}
+.gsync{display:flex;flex-wrap:wrap;gap:6px}.gsync .btn{border-left-width:5px}.gsync .btn:disabled{opacity:.45;cursor:default}
 .alcnt{grid-column:2/-1;font-size:11px;color:var(--muted);margin:-1px 0 8px}
 .aladd{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:6px;margin-top:4px}
 .list{max-height:330px;overflow:auto;margin-top:8px;border-top:1px solid var(--line)}
@@ -155,8 +156,8 @@ input[type=range]{flex:1;min-width:0;accent-color:var(--ice)}
 
     <section class="card">
       <h2>In-game positions</h2>
-      <p class="sub" style="margin:0 0 8px">Puts each FOX and NGT member's city where it stands in game, from whiteoutstats.com (refreshed every few hours). The city with the member's name moves there; a member not on the map yet is added. Locked cities and other alliances stay as they are. Undo brings everything back.</p>
-      <div class="row"><button type="button" class="btn main" id="gameBtn" disabled>Place FOX + NGT cities from game</button></div>
+      <p class="sub" style="margin:0 0 8px">One button per alliance: it asks whiteoutstats.com for that alliance's members right now (state 3685, the tag must match the game) and moves each member's city to where it stands in game; a member not on the map yet is added. Locked cities and the other alliances stay as they are. Undo brings everything back.</p>
+      <div class="gsync" id="gameBtns"></div>
       <p class="msg" id="gameMsg"></p>
     </section>
 
@@ -461,7 +462,10 @@ function renderAlliances(){var cnt={};ALS.forEach(function(a){cnt[a.id]={flag:0,
   $('alPick').innerHTML=alOptions();$('alPick').value=curAl;$('alPick').style.borderLeftColor=alColor(curAl);$('selAl').innerHTML=alOptions();if(selected&&hasAl(selected.type))$('selAl').value=alOf(selected);
   $('legend').innerHTML=ALS.map(function(a){return '<li><i style="background:'+esc(a.color)+'"></i>'+esc(a.tag)+' banner</li><li><i style="background:'+shade(a.color,.4)+'"></i>'+esc(a.tag)+' city</li>';}).join('')
     +'<li><i style="background:#5A1E26"></i>City outside its banners</li><li><i style="background:#5C4318"></i>Same name as another city</li><li><i class="lk"></i>Locked</li><li><i class="hx"></i>Ground covered twice</li><li><i class="gz"></i>Globe buff (8 cities around)</li><li><i class="gb"></i>City boosted by a globe</li>';
-  paintLocks();}
+  renderGameButtons();paintLocks();}
+function renderGameButtons(){var box=$('gameBtns');if(!box)return;
+  box.innerHTML=ALS.map(function(a){return '<button type="button" class="btn" data-gsync="'+esc(a.id)+'" style="border-left-color:'+esc(a.color)+'" title="Ask whiteoutstats.com for '+esc(a.tag)+' now and place its cities">Sync '+esc(a.tag)+'</button>';}).join('');
+  if(window.__gameBusy)[].forEach.call(box.querySelectorAll('button'),function(b){b.disabled=true;});}
 /* Every city carries a unique number (num). New, pasted or imported cities get the next free one;
    "Renumber cities" redoes them in order: FOX then NGT, each from the closest to its own trap. */
 function ensureNums(){var seen={},max=0;ents.forEach(function(e){if(e.type==='city'&&e.num>max)max=e.num;});
@@ -815,24 +819,18 @@ if(cloud.store){cloud.msg='loading from your account…';panel();
    whiteoutstats.com: FOX and NGT members with their city's X:Y. "Place FOX + NGT cities from game" puts each
    member's city there: the city with that player id (e.cid) or, failing that, that name moves; a missing one
    is added. Locked cities, other alliances and every other element stay as they are. */
-var game={store:null,rows:null};
+var game={store:null};
 try{game.store=window.parent!==window&&window.parent.FOXGameData||null;}catch(e){game.store=null;}
 function ago(t){var m=Math.round((Date.now()-Date.parse(t))/60000);return !(m>=0)?'recently':m<1?'just now':m<60?m+' min ago':m<2880?Math.round(m/60)+' h ago':Math.round(m/1440)+' days ago';}
-/* The layout's alliance with that tag; FOX and NGT fall back to their historic ids, added if missing. */
-function gameAl(tag){var t=String(tag).toUpperCase(),a=ALS.filter(function(x){return x.tag.toUpperCase()===t;})[0];
-  if(!a){var id=t==='FOX'?'fox':t==='NGT'?'ngt':'a'+t.toLowerCase();a=ALS.filter(function(x){return x.id===id;})[0];if(!a){a=mkAl(id);a.tag=t;ALS.push(a);}}
-  return a.id;}
-function gameStatus(){var msg=$('gameMsg'),btn=$('gameBtn');
+function setGameBusy(on){window.__gameBusy=on;[].forEach.call(document.querySelectorAll('#gameBtns button'),function(b){b.disabled=on;});}
+/* What the site last read from the game, per alliance tag. */
+function gameStatus(){var msg=$('gameMsg');
   if(!game.store){msg.textContent='Open the planner on the FOX site, signed in, to use in-game positions.';return;}
-  msg.textContent='Reading in-game positions…';
   game.store.players().then(function(rows){
     if(rows===undefined){msg.textContent='Sign in on the site to use in-game positions.';return;}
-    game.rows=(rows||[]).filter(function(r){return r.alliance==='FOX'||r.alliance==='NGT';});
-    var pos=game.rows.filter(function(r){return r.x!=null&&r.y!=null;}),times=pos.map(function(r){return r.pos_at;}).filter(Boolean).sort();
-    btn.disabled=!pos.length;
-    msg.textContent=pos.length?pos.length+' of '+game.rows.length+' FOX and NGT members have a position (read '+(times.length?ago(times[times.length-1])+(times.length>1&&ago(times[0])!==ago(times[times.length-1])?', oldest '+ago(times[0]):''):'recently')+').'
-      :game.rows.length?game.rows.length+' members found, their positions are being read: try again in a few minutes.'
-      :'No in-game data yet: it appears once the whiteoutstats.com sync is running.';},
+    var per={},last='';(rows||[]).forEach(function(r){if(!r.alliance)return;per[r.alliance]=(per[r.alliance]||0)+1;if(r.pos_at&&r.pos_at>last)last=r.pos_at;});
+    var tags=Object.keys(per);
+    msg.textContent=tags.length?'Last read from the game: '+tags.map(function(t){return t+' '+per[t];}).join(', ')+' members'+(last?' ('+ago(last)+')':'')+'. Sync an alliance to read it again now.':'Nothing read from the game yet: press Sync on an alliance.';},
     function(e){msg.textContent='In-game positions unavailable: '+(e&&e.message||'error');});}
 /* Names compared loosely (decorated in-game names vs names typed by hand): compatibility letters folded, accents
    and symbols dropped, case ignored. Placeholder names (City 12, FOX 001) never match loosely. */
@@ -842,8 +840,35 @@ var FOLD=(function(){var o={};'Δa δd Λa λa Αa αa Βb βb Εe εe Σe σo �
 var RENAMED={talie:'glittermenace',skymnky:'hercutease'};
 function nameKey(v){var k=String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x00-\x7f]/g,function(c){return FOLD[c]||'';}).replace(/[@$]/g,function(c){return FOLD[c];}).toLowerCase().replace(/[^a-z0-9]/g,'');return RENAMED[k]||k;}
 function placeholderName(v){return !String(v||'').trim()||/^(city|fox|ngt)\s*\d*(\s*#\d+)?$/i.test(String(v).trim());}
-function placeFromGame(){var rows=(game.rows||[]).filter(function(r){return r.x!=null&&r.y!=null;});if(!rows.length)return;
-  pushHistory();var used=new Set(),n={moved:0,added:0,same:0,locked:0,out:0},per={},placed=[],cities=ents.filter(function(e){return e.type==='city';});
+/* Sync one alliance: the site's wos-sync function reads its roster and positions from whiteoutstats.com now
+   (admins and R4 editors only; it spends the API quota), a batch per call, until no position is older than
+   20 minutes. Everyone else places the cities from the last data read. */
+function gameSync(alId){if(window.__gameBusy||!game.store)return;var a=alById(alId),tag=a.tag,msg=$('gameMsg'),calls=0,note='',t0=Date.now();
+  setGameBusy(true);msg.textContent='Asking whiteoutstats.com for '+tag+'…';
+  var done=function(){game.store.players().then(function(rows){
+      if(rows===undefined){msg.textContent='Sign in on the site to use in-game positions.';setGameBusy(false);return;}
+      var mine=(rows||[]).filter(function(r){return r.alliance===tag;});
+      if(!mine.length){msg.textContent=note+'No '+tag+' members found in the game data.';setGameBusy(false);return;}
+      placeFromGame(mine,alId,tag,note);setGameBusy(false);},
+    function(e){msg.textContent='In-game positions unavailable: '+(e&&e.message||'error');setGameBusy(false);});};
+  if(!game.store.refresh){done();return;}
+  var step=function(){calls++;
+    game.store.refresh(tag,calls===1).then(function(res){var d=res&&res.data||{},st=res&&res.status;
+      if(st===401||st===403){note='Only admins and R4 editors can ask the game for fresh data; this uses the last data read. ';done();return;}
+      if(st===404||d.error==='not_found'){msg.textContent='whiteoutstats.com has no alliance tagged '+tag+' in state 3685. The tag must match the game exactly (capitals count).';setGameBusy(false);return;}
+      if(!d.ok){note='Fresh data could not be read ('+(d.error||st)+'); this uses the last data read. ';done();return;}
+      if(d.remaining>0&&calls<15&&Date.now()-t0<6*60000){
+        msg.textContent=tag+': '+d.members+' members, '+Math.max(0,d.members-d.remaining)+' positions up to date, '+d.remaining+' to go'+(d.limited?' (API limit reached, waiting 20 s)':'')+'…';
+        setTimeout(step,d.limited?20000:300);return;}
+      if(d.remaining>0)note=d.remaining+' positions could not be refreshed in time and use the last data read. ';
+      done();},
+      function(e){note='Fresh data could not be read ('+(e&&e.message||'error')+'); this uses the last data read. ';done();});};
+  step();}
+/* Puts each member of the synced alliance where the game says: the city with that player id or name (strong
+   match first, then loose) moves, a missing one is added; locked cities stay. */
+function placeFromGame(list,alId,tag,note){var rows=list.filter(function(r){return r.x!=null&&r.y!=null;});
+  if(!rows.length){$('gameMsg').textContent=(note||'')+'No '+tag+' member has a known position yet.';return;}
+  pushHistory();var used=new Set(),n={moved:0,added:0,same:0,locked:0,out:0},placed=[],cities=ents.filter(function(e){return e.type==='city';});
   /* Strong matches (player id, name, folded name) for every member first, then loose ones (one folded name inside the other). */
   var match=new Map(),free=function(e){return !used.has(e)&&!e.cid;};
   rows.forEach(function(r){var nm=(r.nick_name||'').trim(),k=nameKey(nm);
@@ -859,13 +884,14 @@ function placeFromGame(){var rows=(game.rows||[]).filter(function(r){return r.x!
     if(!inMap({x:gx,y:gy,w:2})){n.out++;return;}
     if(c){if(c.x===gx&&c.y===gy)n.same++;else n.moved++;c.x=gx;c.y=gy;}
     else{c={type:'city',x:gx,y:gy,w:2};ents.push(c);used.add(c);n.added++;}
-    c.al=gameAl(r.alliance);c.cid=r.chief_id;if(nm)c.name=nm;placed.push(c);per[r.alliance]=(per[r.alliance]||0)+1;});
-  var clash=placed.filter(function(c){return overlaps(c,c);}).length;
-  selected=null;multi=[];refresh();fit();
-  $('gameMsg').textContent=(placed.length?Object.keys(per).map(function(k){return per[k]+' '+k;}).join(' and ')+' cities placed: '+n.moved+' moved, '+n.added+' added, '+n.same+' already there.':'No city placed.')
+    c.al=alId;c.cid=r.chief_id;if(nm)c.name=nm;placed.push(c);});
+  var clash=placed.filter(function(c){return overlaps(c,c);}).length,times=rows.map(function(r){return r.pos_at;}).filter(Boolean).sort();
+  selected=null;multi=[];refresh();
+  $('gameMsg').textContent=(note||'')+(placed.length?tag+': '+placed.length+' cities placed ('+n.moved+' moved, '+n.added+' added, '+n.same+' already there)'+(times.length?', positions read '+ago(times[0])+(ago(times[0])!==ago(times[times.length-1])?' to '+ago(times[times.length-1]):''):'')+'.':'No '+tag+' city placed.')
     +(n.locked?' '+n.locked+' locked cit'+(n.locked>1?'ies were':'y was')+' left where '+(n.locked>1?'they are':'it is')+'.':'')+(n.out?' '+n.out+' outside the map were skipped.':'')
     +(clash?' '+clash+' stand on another element (a planned flag, trap or city): check them.':'')+' Undo brings the previous layout back.';}
-$('gameBtn').onclick=placeFromGame;
+$('gameBtns').addEventListener('click',function(ev){var b=ev.target.closest('[data-gsync]');if(b)gameSync(b.dataset.gsync);});
+renderGameButtons();
 gameStatus();
 })();
 </script>
