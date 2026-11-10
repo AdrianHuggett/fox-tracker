@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var root, state, storageKey, shownCount = '', gameMsg = '';
+  var root, state, storageKey, shownCount = '', gameMsg = '', gameGone = [], goneArmed = null;
   var nextId = 1;
   function id() { return String(Date.now()) + '-' + String(nextId++); }
   var SITES = [
@@ -281,6 +281,7 @@
       '<div class="fr-add"><textarea id="fr-names" rows="3" placeholder="One member per line" aria-label="Member names"></textarea><button type="button" class="fr-primary" data-action="add-members">Add members</button></div>' +
       '<div class="fr-game"><button type="button" class="fr-secondary" data-action="game-sync">Update from game</button><span>Names, ranks (R1–R5) and power of FOX members, from whiteoutstats.com. Max members stay Max.</span></div>' +
       (gameMsg ? '<p class="fr-game-msg" role="status">' + escapeHTML(gameMsg) + '</p>' : '') +
+      (goneMembers().length ? '<div class="fr-game"><button type="button" class="fr-secondary fr-danger" data-action="remove-gone">' + (goneArmed ? 'Tap again to remove ' + goneMembers().length + ' member' + (goneMembers().length === 1 ? '' : 's') : 'Remove the ' + goneMembers().length + ' member' + (goneMembers().length === 1 ? '' : 's') + ' not in FOX') + '</button><span>Deletes them and their rewards from this list. This cannot be undone.</span></div>' : '') +
       (state.members.length ? '<div class="fr-list-tools"><input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member">' + sortButtons('members', memberSort, 'Sort members') + '</div><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
       '<p class="fr-note">Contribution rates each member’s engagement from 1 to 4. Max members do not need a rating.</p></section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before giving Max members their full share.</p>' +
@@ -366,6 +367,18 @@
     found.sort(function (a, b) { return Math.abs((a.power || 0) - power) - Math.abs((b.power || 0) - power); });
     return found[0] || null;
   }
+  function goneMembers() { return state.members.filter(function (m) { return gameGone.indexOf(m.id) >= 0; }); }
+  function removeGone() {
+    var gone = goneMembers();
+    if (!gone.length) return;
+    if (!goneArmed) { goneArmed = setTimeout(function () { goneArmed = null; render(); }, 5000); render(); return; }
+    clearTimeout(goneArmed); goneArmed = null;
+    state.members = state.members.filter(function (m) { return gameGone.indexOf(m.id) < 0; });
+    Object.keys(state.allocation).forEach(function (key) { gone.forEach(function (m) { delete state.allocation[key][m.id]; }); });
+    gameGone = [];
+    gameMsg = gone.length + ' member' + (gone.length === 1 ? '' : 's') + ' not in FOX removed: ' + gone.map(function (m) { return m.name; }).join(', ') + '.';
+    save(); render();
+  }
   function syncFromGame() {
     var store = window.FOXGameData;
     if (!store) { gameMsg = 'In-game data is not available here.'; render(); return; }
@@ -392,10 +405,12 @@
         if (r.power != null) member.power = powerNumber(r.power);
         seen[member.id] = true;
       });
-      var gone = state.members.filter(function (m) { return !m.excluded && !seen[m.id]; });
+      /* Everyone the game roster did not match, excluded members included: "Remove" deletes them on request. */
+      var gone = state.members.filter(function (m) { return !seen[m.id]; });
+      gameGone = gone.map(function (m) { return m.id; });
       var latest = fox.map(function (r) { return r.roster_at; }).filter(Boolean).sort().pop();
       gameMsg = 'FOX roster from the game' + (latest ? ' (read ' + ago(latest) + ')' : '') + ': ' + fox.length + ' members, ' + added + ' added, ' + renamed + ' renamed to their in-game name, ' + roles + ' role' + (roles === 1 ? '' : 's') + ' updated.' +
-        (gone.length ? ' Not in FOX in game: ' + gone.map(function (m) { return m.name; }).join(', ') + '. Exclude or remove them if they left.' : '');
+        (gone.length ? ' Not in FOX in game: ' + gone.map(function (m) { return m.name; }).join(', ') + '.' : '');
       save(); render();
     }, function (e) { gameMsg = 'In-game data unavailable: ' + (e && e.message || 'error'); render(); });
   }
@@ -429,6 +444,9 @@
       var name = root.querySelector('#fr-reward-name').value.trim().slice(0, 80);
       if (!name) { root.querySelector('#fr-reward-name').focus(); return; }
       state.rewards.push({ id: id(), name: name, quantity: Math.max(1, integer(root.querySelector('#fr-reward-quantity').value)), cap: integer(root.querySelector('#fr-reward-cap').value) });
+    } else if (button.dataset.action === 'remove-gone') {
+      removeGone();
+      return;
     } else if (button.dataset.action === 'game-sync') {
       syncFromGame();
       return;
