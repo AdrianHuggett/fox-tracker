@@ -224,7 +224,7 @@ function isLocked(e){return !!locks[kindOf(e)];}
 var LOCKNAME={'flag-fox':'FOX flags','flag-ngt':'NGT flags','flag-other':'Other alliance flags',node:'Nodes',obstacle:'Obstacles',city:'Cities',building:'Bear Traps','hq-fox':'FOX HQs','hq-ngt':'NGT HQs'};
 function snapshot(){return JSON.stringify({ents:ents,anchor:anchor});}
 function pushHistory(){history.push(snapshot());if(history.length>60)history.shift();}
-function save(){try{localStorage.setItem(KEY,snapshot());}catch(e){}}
+function save(){try{localStorage.setItem(KEY,snapshot());}catch(e){}cloudSave();}
 function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.ents)){ents=s.ents;anchor=s.anchor||anchor;return true;}}catch(e){}return false;}
 /* Every member starts from the joint FOX + NGT map without its cities (HQs, Bear Traps, banners, nodes) and builds from there. */
 function rowEnt(r){var e={type:r[0],x:r[1],y:r[2],w:SIZE[r[0]]||1};if(r[0]==='city')e.name=r[3];if(r[4])e.al=r[4];return e;}
@@ -376,7 +376,7 @@ function panel(){analyse();var cities=ents.filter(function(e){return e.type==='c
     if(document.activeElement!==$('selX')&&document.activeElement!==$('selY')){$('selX').value=g.x;$('selY').value=g.y;}
     var t=isCity?marchTimes(selected):[];$('selInfo').textContent='In-game X:'+g.x+' Y:'+g.y+(isCity?' · march to Bear Trap '+(t.length?t.map(function(x){return x+'s';}).join(' / '):'–'):'');}
   else $('selCard').hidden=true;
-  $('meta').textContent=cities.length+' cities · anchor X:'+anchor.x+' Y:'+anchor.y;renderGen();}
+  $('meta').textContent=cities.length+' cities · anchor X:'+anchor.x+' Y:'+anchor.y+(cloud&&cloud.msg?' · '+cloud.msg:'');renderGen();}
 /* Every city carries a unique number (num). New, pasted or imported cities get the next free one;
    "Renumber cities" redoes them in order: FOX then NGT, each from the closest to its own trap. */
 function ensureNums(){var seen={},max=0;ents.forEach(function(e){if(e.type==='city'&&e.num>max)max=e.num;});
@@ -466,7 +466,7 @@ $('clearCities').onclick=function(){var b=this,n=ents.filter(function(e){return 
 var LOCKSVG={on:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
   off:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg>'};
 function paintLocks(){[].forEach.call(document.querySelectorAll('[data-lock]'),function(b){var on=!!locks[b.dataset.lock];b.setAttribute('aria-pressed',String(on));b.innerHTML=on?LOCKSVG.on:LOCKSVG.off;b.title=(on?'Unlock ':'Lock ')+LOCKNAME[b.dataset.lock];});}
-[].forEach.call(document.querySelectorAll('[data-lock]'),function(b){b.onclick=function(){var k=b.dataset.lock;locks[k]=!locks[k];try{localStorage.setItem(LOCKKEY,JSON.stringify(locks));}catch(e){}paintLocks();
+[].forEach.call(document.querySelectorAll('[data-lock]'),function(b){b.onclick=function(){var k=b.dataset.lock;locks[k]=!locks[k];try{localStorage.setItem(LOCKKEY,JSON.stringify(locks));}catch(e){}cloudSave();paintLocks();
   $('hint').textContent=LOCKNAME[k]+(locks[k]?' are locked: they stay put and cannot be deleted.':' are unlocked.');draw();};});
 paintLocks();
 $('list').onclick=function(ev){var li=ev.target.closest('.li');if(!li)return;selected=ents[+li.dataset.i];var r=wrap.getBoundingClientRect(),c=toScreen(selected.x+1,selected.y+1);view.ox+=r.width/2-c.x;view.oy+=r.height/2-c.y;if(view.s<18){view.s=18;c=toScreen(selected.x+1,selected.y+1);view.ox+=r.width/2-c.x;view.oy+=r.height/2-c.y;}refresh();};
@@ -616,7 +616,7 @@ function generateLayout(rebuild){
   var removed=rebuild?ents.filter(function(e){return e.type==='flag'&&alOf(e)!=='other'&&!isLocked(e);}).length:0;
   return {ents:keep.concat(newFlags,cities),traps:traps,added:newFlags.length,removed:removed};}
 $('genTraps').addEventListener('input',function(ev){var s=ev.target;if(!s.dataset||!s.dataset.k)return;genCounts[s.dataset.k]=+s.value;s.parentNode.querySelector('.genv').textContent=s.value;
-  try{localStorage.setItem('fox-layout-gen'+SFX,JSON.stringify(genCounts));}catch(e){}});
+  try{localStorage.setItem('fox-layout-gen'+SFX,JSON.stringify(genCounts));}catch(e){}cloudSave();});
 $('genBtn').onclick=function(){var btn=this;btn.disabled=true;$('genMsg').textContent='Generating…';
   setTimeout(function(){try{var r=generateLayout($('genRebuild').checked);pushHistory();ents=r.ents;selected=null;multi=[];refresh();fit();
       var lines=r.traps.map(function(t,i){var n=t.times.length+(t.want-t.need-t.times.length),avg=t.times.length?Math.round(t.times.reduce(function(a,b){return a+b;},0)/t.times.length):0,mx=t.times.length?Math.max.apply(null,t.times):0;
@@ -676,6 +676,26 @@ window.addEventListener('resize',resize);
 if(window.ResizeObserver)new ResizeObserver(function(){resize();}).observe(wrap);
 if(ents.some(function(e){return e.type==='city';})&&!ents.some(function(e){return e.type==='city'&&e.num>0;})){renumber();save();}
 ensureNums();resize();fit();panel();
+
+/* ---------- account storage ----------
+   The layout lives on the member's account (Supabase table user_layouts, reached through the site's
+   window.FOXLayoutStore), so it follows them on every device; localStorage stays as this browser's copy.
+   On opening, the account copy wins. An account with no layout yet receives this browser's layout, so
+   nothing made before account storage existed is lost. Saves are grouped 1.2 s after the last change. */
+var cloud={ready:false,timer:null,msg:'',store:null};
+try{cloud.store=window.parent!==window&&window.parent.FOXLayoutStore||null;}catch(e){cloud.store=null;}
+function cloudSave(){if(!cloud||!cloud.store||!cloud.ready)return;clearTimeout(cloud.timer);
+  cloud.timer=setTimeout(function(){cloud.msg='saving…';panel();
+    cloud.store.save({v:1,ents:ents,anchor:anchor,locks:locks,gen:genCounts}).then(function(){cloud.msg='saved to your account';panel();},
+      function(e){cloud.msg='not saved to your account: '+(e&&e.message||'error');panel();});},1200);}
+if(cloud.store){cloud.msg='loading from your account…';panel();
+  cloud.store.load().then(function(d){
+    if(d===undefined){cloud.msg='sign in to save to your account';panel();return;}
+    if(d&&Array.isArray(d.ents)){ents=d.ents;anchor=d.anchor||anchor;locks=d.locks||{};genCounts=d.gen||{};
+      try{localStorage.setItem(LOCKKEY,JSON.stringify(locks));localStorage.setItem('fox-layout-gen'+SFX,JSON.stringify(genCounts));}catch(e){}
+      $('genTraps').dataset.sig='';selected=null;multi=[];history=[];cloud.msg='saved to your account';paintLocks();ensureNums();refresh();fit();cloud.ready=true;}
+    else{cloud.ready=true;cloudSave();}},
+    function(e){cloud.msg='account copy unavailable, using this browser\'s copy';panel();});}
 })();
 </script>
 </body>

@@ -49,6 +49,7 @@ RLS is enabled on every table. `anon` has no grants anywhere, and TRUNCATE is re
   create policy user_exchanges_own_update on public.user_exchanges for update using (user_id = auth.uid()) with check (user_id = auth.uid());
   create policy user_exchanges_own_delete on public.user_exchanges for delete using (user_id = auth.uid());
   ```
+- `user_layouts(user_id uuid PK default auth.uid() → auth.users on delete cascade, data jsonb not null, updated_at timestamptz default now())`: one Layout planner layout per member, `data = {v:1, ents, anchor, locks, gen}`. Created 10 Nov 2026 (approved by Adrian, run from his dashboard session) with RLS enabled, `revoke all … from anon, public`, `grant select, insert, update, delete … to authenticated`, and own-row policies `user_layouts_own_read/insert/update/delete` written exactly like the `user_exchanges` ones above. Checked after creation: RLS on, 4 policies, no anon access.
 
 ### R4 roles (readable by every signed-in user; direct writes admin only)
 

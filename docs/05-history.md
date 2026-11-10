@@ -4,6 +4,7 @@ Newest first. The commit hashes are on `main`.
 
 ## 10 Nov 2026
 
+- Layout planner layouts moved to the member's account (table `user_layouts`, SQL approved by Adrian and run from his dashboard session), at his request: he wants his layout on any device. The browser copy is uploaded the first time, so no existing layout is lost.
 - Layout planner review: added a colour legend; phones get a one-row swipeable toolbar, a map sized by aspect ratio instead of `vh`, and an iframe that `mountLayout()` sizes to the planner page on screens ≤ 820px (one scroll instead of a scroll inside a scroll); the Generate text now describes spiral plus compaction; the "unlocked removed first" count no longer includes other-alliance flags, which Generate keeps.
 
 ## 2 Nov 2026

@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-10-layout-account',date:'2026-11-10',title:'Your layout on every device',points:['The Layout planner now saves your layout on your account, so it is there on any phone or computer you sign in on. The layout already in your browser was moved to your account the first time you opened it.']},
   {id:'2026-11-10-layout-legend-phone',date:'2026-11-10',title:'Layout planner: legend and phone view',points:['A legend explains the map colours. On phones the tool buttons sit in one row you can swipe, so they no longer hide the map.']},
   {id:'2026-11-09-foundry-player-roles',date:'2026-11-09',title:'Choose Foundry player roles',points:['Tap a player to choose Player, Rally leader or Loot gatherer. Changing their role also updates their placed markers and battle plan.']},
   {id:'2026-11-09-foundry-team-d',date:'2026-11-09',title:'Team D in the Foundry planner',points:['Add Team D players, use pink markers and routes, and include their assignments in both legions’ plans.']},
@@ -1769,8 +1770,15 @@ function mountFoundry(){var p=$('p-foundry');if(!p||p.querySelector('iframe'))re
 /* Canyon Clash planner: same idea as the Foundry planner, on the Lost Canyon map (canyon.html), R4s and admins only. */
 function mountCanyon(){var p=$('p-canyon');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="canyon.html?v=20261031-canyon-plan-fix" title="Canyon Clash planner"></iframe>';}
 /* Alliance layout planner: a self-contained page (layout.html) in an iframe, open to every member. Each member's
-   layout lives in their own browser; the account id goes in the hash so two accounts on one browser stay apart. */
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261110-legend-phone#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
+   layout is saved on their account (table user_layouts, own row only) through FOXLayoutStore, so it follows them
+   on every device; the browser keeps a copy, keyed by the account id passed in the hash. load() resolves
+   undefined when signed out, null when the account has no layout yet. */
+window.FOXLayoutStore={
+  load:function(){if(!SB||!U)return Promise.resolve(undefined);
+    return SB.from('user_layouts').select('data').eq('user_id',U.id).maybeSingle().then(function(r){if(r.error)throw r.error;return r.data?r.data.data:null;});},
+  save:function(data){if(!SB||!U)return Promise.reject(new Error('signed out'));
+    return SB.from('user_layouts').upsert({user_id:U.id,data:data,updated_at:new Date().toISOString()},{onConflict:'user_id'}).then(function(r){if(r.error)throw r.error;});}};
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261110-account#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
   /* On phones the frame grows to the whole planner page, so only the site page scrolls (no scroll inside a scroll). */
   var f=p.querySelector('iframe');f.onload=function(){var d=f.contentDocument,app=d&&d.querySelector('.app');if(!app)return;
     var size=function(){f.style.height=window.matchMedia('(max-width:820px)').matches?(app.scrollHeight+48)+'px':'';};
