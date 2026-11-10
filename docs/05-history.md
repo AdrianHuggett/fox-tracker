@@ -2,6 +2,10 @@
 
 Newest first. The commit hashes are on `main`.
 
+## 11 Nov 2026
+
+- Fortress rewards: the R4 and R5 roles are replaced by one role, Max, at Adrian's request (he wants to choose who gets the per-player maximum instead of tying it to rank). Roles are now R1, R2, R3 and Max; saved R4/R5 members (and the R4/R5 of the built-in roster) become Max on load (`normRole()`), so nobody loses the maximum silently.
+
 ## 10 Nov 2026
 
 - Layout planner: globe buff, at Adrian's request (a globe city boosts the damage of the 8 cities around it; he wanted the buff's outline on the map). The zone is taken as the 3×3 city spots around the globe (6×6 tiles), since cities are 2×2.

@@ -22,6 +22,12 @@
     { id: 's3', label: 'Stronghold No. 3', amount: 600 },
     { id: 's4', label: 'Stronghold No. 4', amount: 150 }
   ];
+  /* Roles: R1–R3 share the rewards by contribution; Max always receives the per-player maximum.
+     Max replaced R4/R5 on 11 Nov 2026: saved R4/R5 members become Max (normRole), then anyone can be
+     switched to or from Max freely. */
+  var ROLES = ['r1', 'r2', 'r3', 'max'];
+  function normRole(role) { return role === 'r4' || role === 'r5' ? 'max' : ROLES.indexOf(role) >= 0 ? role : 'r1'; }
+  function isMax(member) { return member.role === 'max'; }
   var LEADERS = [
     { name: 'Jim Lahey', role: 'r5' },
     { name: 'Lord Solo', role: 'r4' },
@@ -41,8 +47,8 @@
     if (state.leadersSeeded) return;
     LEADERS.forEach(function (leader) {
       var member = state.members.find(function (m) { return m.name.toLowerCase() === leader.name.toLowerCase(); });
-      if (member) { member.role = leader.role; member.excluded = !!leader.excluded; }
-      else state.members.push({ id: id(), name: leader.name, role: leader.role, excluded: !!leader.excluded });
+      if (member) { member.role = normRole(leader.role); member.excluded = !!leader.excluded; }
+      else state.members.push({ id: id(), name: leader.name, role: normRole(leader.role), excluded: !!leader.excluded });
     });
     state.leadersSeeded = true;
     save();
@@ -56,7 +62,7 @@
         state.members.push(member);
       }
       member.rank = row[0];
-      member.role = row[2];
+      member.role = normRole(row[2]);
       member.power = row[3];
       if (row[1] === 'Ricky Lahey') member.excluded = true;
     });
@@ -86,7 +92,7 @@
       return a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true });
     });
   }
-  function fullMembers() { return includedMembers().filter(function (member) { return member.role === 'r4' || member.role === 'r5'; }); }
+  function fullMembers() { return includedMembers().filter(isMax); }
   function integer(value) {
     var n = Number(value);
     return Number.isFinite(n) ? Math.max(0, Math.min(100000, Math.floor(n))) : 0;
@@ -111,6 +117,7 @@
         state = saved;
         state.sites = Array.isArray(state.sites) ? state.sites : [];
         state.allocation = state.allocation || {};
+        state.members.forEach(function (member) { member.role = normRole(member.role); });
         seedLeaders();
         seedRoster();
         applyKnownRewardLimits();
@@ -151,12 +158,12 @@
           issues.push(member.name + ' / ' + reward.name + ': above per-player limit.');
       });
       if (fullMembers().length) {
-        if (!cap) issues.push(reward.name + ': set the per-player maximum for R4/R5.');
+        if (!cap) issues.push(reward.name + ': set the per-player maximum for Max members.');
         else if (fullMembers().length * cap > quantity)
-          issues.push(reward.name + ': not enough rewards to give every R4/R5 the maximum.');
+          issues.push(reward.name + ': not enough rewards to give every Max member the maximum.');
         else {
           var missing = fullMembers().filter(function (member) { return assigned(reward, member) !== cap; }).length;
-          if (missing) issues.push(reward.name + ': ' + missing + ' R4/R5 members are not at the maximum.');
+          if (missing) issues.push(reward.name + ': ' + missing + ' Max members are not at the maximum.');
         }
       }
     });
@@ -172,7 +179,7 @@
       return leaders.length && (!integer(reward.cap) || leaders.length * integer(reward.cap) > integer(reward.quantity));
     });
     if (impossible) {
-      message(impossible.name + ': enter a per-player limit and enough rewards for every R4/R5.');
+      message(impossible.name + ': enter a per-player limit and enough rewards for every Max member.');
       return;
     }
     var awarded = {};
@@ -199,8 +206,8 @@
     render();
   }
   function roleOptions(member) {
-    return ['r1', 'r2', 'r3', 'r4', 'r5'].map(function (role) {
-      return '<option value="' + role + '"' + (member.role === role ? ' selected' : '') + '>' + role.toUpperCase() + '</option>';
+    return ROLES.map(function (role) {
+      return '<option value="' + role + '"' + (member.role === role ? ' selected' : '') + '>' + (role === 'max' ? 'Max' : role.toUpperCase()) + '</option>';
     }).join('');
   }
   function contributionOptions(member) {
@@ -216,14 +223,14 @@
     var listScroll = oldList ? oldList.scrollTop : 0;
     var s = stats();
     var memberRows = state.members.slice().sort(function (a, b) {
-      var aGroup = a.role === 'r5' ? 0 : a.role === 'r4' ? 1 : 2;
-      var bGroup = b.role === 'r5' ? 0 : b.role === 'r4' ? 1 : 2;
+      var aGroup = isMax(a) ? 0 : 1;
+      var bGroup = isMax(b) ? 0 : 1;
       return aGroup - bGroup || state.members.indexOf(a) - state.members.indexOf(b);
     }).map(function (member) {
       return '<tr data-member-name="' + escapeHTML(member.name.toLowerCase()) + '" class="' + (member.excluded ? 'fr-ignored' : '') + '"><th scope="row"><div class="fr-member-name"><input type="text" maxlength="60" value="' + escapeHTML(member.name) + '" data-member="' + member.id + '" data-field="name" aria-label="Member name"><button type="button" class="fr-remove" data-remove-member="' + member.id + '" aria-label="Remove ' + escapeHTML(member.name) + '">×</button></div></th>' +
         '<td><input type="checkbox" data-member="' + member.id + '" data-field="excluded" aria-label="Exclude ' + escapeHTML(member.name) + ' from calculations"' + (member.excluded ? ' checked' : '') + '></td>' +
         '<td><select data-member="' + member.id + '" data-field="role" aria-label="Role for ' + escapeHTML(member.name) + '">' + roleOptions(member) + '</select></td>' +
-        '<td>' + (member.role === 'r4' || member.role === 'r5' ? '—' : '<select data-member="' + member.id + '" data-field="contribution" aria-label="Contribution for ' + escapeHTML(member.name) + '">' + contributionOptions(member) + '</select>') + '</td></tr>';
+        '<td>' + (isMax(member) ? '—' : '<select data-member="' + member.id + '" data-field="contribution" aria-label="Contribution for ' + escapeHTML(member.name) + '">' + contributionOptions(member) + '</select>') + '</td></tr>';
     }).join('');
     var rewardRows = state.rewards.map(function (reward) {
       var total = rewardTotal(reward), quantity = integer(reward.quantity);
@@ -241,7 +248,7 @@
     var allocationRows = activeReward ? '<div class="fr-alloc-card"><h4>' + escapeHTML(activeReward.name) + '<span>' + rewardTotal(activeReward) + ' / ' + integer(activeReward.quantity) + '</span></h4>' +
       (includedMembers().length ? '<div class="fr-alloc-grid">' + alphabeticalMembers().map(function (member) {
         var value = assigned(activeReward, member), over = integer(activeReward.cap) && value > integer(activeReward.cap);
-        return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + ((member.role === 'r4' || member.role === 'r5') ? ' <em>' + member.role.toUpperCase() + '</em>' : '') + '</span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
+        return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + (isMax(member) ? ' <em>Max</em>' : '') + '</span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
       }).join('') + '</div>' : '<p class="fr-empty">Add members to assign rewards.</p>') + '</div>' : '';
     var siteCards = SITES.map(function (site) {
       var selected = state.sites.indexOf(site.id) >= 0;
@@ -251,15 +258,15 @@
     root.innerHTML = '<div class="fr-head"><div><h2>Fortress rewards</h2><p>Prepare an alliance distribution, then copy it for R4/R5 assignment in game.</p></div><span class="fr-local">Saved in this browser</span></div>' +
       '<div class="fr-layout"><div class="fr-main">' +
       '<section class="fr-card"><div class="fr-card-head"><h3>Current sites</h3><span>' + state.sites.length + ' selected</span></div><p>Select only the fortresses and strongholds your alliance currently controls. Their chests and special rewards are added below.</p><div class="fr-sites">' + siteCards + '</div><p class="fr-note">Special reward names can be edited in the reward pools.</p></section>' +
-      '<section class="fr-card"><div class="fr-card-head"><h3>1. Members</h3><span>' + state.members.length + '</span></div><p>R4/R5 receive the per-player maximum. Excluded members, including Ricky Lahey, are ignored. Paste one additional name per line.</p>' +
+      '<section class="fr-card"><div class="fr-card-head"><h3>1. Members</h3><span>' + state.members.length + '</span></div><p>Members with the Max role receive the per-player maximum. Excluded members, including Ricky Lahey, are ignored. Paste one additional name per line.</p>' +
       '<div class="fr-add"><textarea id="fr-names" rows="3" placeholder="One member per line" aria-label="Member names"></textarea><button type="button" class="fr-primary" data-action="add-members">Add members</button></div>' +
       (state.members.length ? '<input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member"><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
-      '<p class="fr-note">Contribution rates each R1–R3 member’s engagement from 1 to 4. R4/R5 do not need a rating.</p></section>' +
-      '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before generating a full R4/R5 allocation.</p>' +
+      '<p class="fr-note">Contribution rates each R1–R3 member’s engagement from 1 to 4. Max members do not need a rating.</p></section>' +
+      '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before giving Max members their full share.</p>' +
       '<div class="fr-add fr-add-reward"><input id="fr-reward-name" type="text" maxlength="80" placeholder="Reward name" aria-label="Reward name"><input id="fr-reward-quantity" type="number" min="1" max="100000" value="1" aria-label="Available quantity"><input id="fr-reward-cap" type="number" min="0" max="100000" value="0" aria-label="Per-player limit"><button type="button" class="fr-primary" data-action="add-reward">Add reward</button></div>' +
       (state.rewards.length ? '<div class="fr-scroll"><table><thead><tr><th>Reward</th><th>Available</th><th>Limit / player</th><th>Assigned</th><th></th></tr></thead><tbody>' + rewardRows + '</tbody></table></div>' : '<p class="fr-empty">No reward pools yet.</p>') + '</section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>3. Distribution</h3></div><div class="fr-controls">' + rewardPicker + '<label>Show players with<select id="fr-show-count" aria-label="Show players with this reward count"></select></label><button type="button" class="fr-primary" data-action="propose"' + (!includedMembers().length || !state.rewards.length ? ' disabled' : '') + '>Distribute by contribution</button><span id="fr-filter-count" class="fr-filter-count" aria-live="polite"></span></div>' +
-      '<p class="fr-note">R4/R5 receive their per-player maximum first. Remaining rewards are weighted by each member’s contribution, within the per-player limits. This replaces current allocations; you can edit the numbers below.</p>' +
+      '<p class="fr-note">Max members receive their per-player maximum first. Remaining rewards are weighted by each member’s contribution, within the per-player limits. This replaces current allocations; you can edit the numbers below.</p>' +
       (allocationRows || '<p class="fr-empty">Add members and reward pools to start.</p>') + '</section></div>' +
       '<aside class="fr-card fr-summary"><h3>Distribution summary</h3><div class="fr-numbers"><div><strong>' + s.allocated + '</strong><span>Assigned</span></div><div><strong>' + Math.max(0, s.available - s.allocated) + '</strong><span>Remaining</span></div></div>' +
       (s.issues.length ? '<div class="fr-issues" role="alert"><strong>Check allocations</strong><ul>' + s.issues.map(function (issue) { return '<li>' + escapeHTML(issue) + '</li>'; }).join('') + '</ul></div>' : '<p class="fr-ok">No limits exceeded.</p>') +
@@ -382,8 +389,8 @@
       member = state.members.find(function (m) { return m.id === target.dataset.member; });
       if (member) {
         if (target.dataset.field === 'name') member.name = target.value.trim().slice(0, 60) || member.name;
-        else if (target.dataset.field === 'role') member.role = ['r1', 'r2', 'r3', 'r4', 'r5'].indexOf(target.value) >= 0 ? target.value : 'r1';
-        else if (target.dataset.field === 'contribution' && member.role !== 'r4' && member.role !== 'r5') member.contribution = Math.min(4, Math.max(1, integer(target.value)));
+        else if (target.dataset.field === 'role') member.role = normRole(target.value);
+        else if (target.dataset.field === 'contribution' && !isMax(member)) member.contribution = Math.min(4, Math.max(1, integer(target.value)));
         else if (target.dataset.field === 'power') member.power = powerNumber(target.value);
         else if (target.dataset.field === 'excluded') {
           member.excluded = target.checked;

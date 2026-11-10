@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-11-fortress-max',date:'2026-11-11',title:'Fortress rewards: Max role',points:['R4 and R5 no longer get the maximum automatically. Give the Max role to anyone who should receive the per-player maximum; former R4/R5 members start as Max and can be changed.']},
   {id:'2026-11-10-layout-globe',date:'2026-11-10',title:'Layout planner: globe buff',points:['Select a city and tick Globe buff: a dashed yellow square shows the 8 city spots around it that get the damage boost, and each boosted city gets a yellow dot.']},
   {id:'2026-11-10-layout-neighbours',date:'2026-11-10',title:'Layout planner: neighbours stay put',points:['Generate only plans alliances with players on a Bear Trap slider. Set a neighbour\'s traps to 0 and its cities and banners stay exactly where they are.']},
   {id:'2026-11-10-layout-alliances',date:'2026-11-10',title:'Layout planner: any alliance',points:['Add any alliance of the state with its tag, name and colour in the Alliances card, pick it in the toolbar, and its flags and HQ show its tag and colour automatically.']},
