@@ -4,6 +4,9 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Fortress rewards: power","Fortress rewards: poder","Fortress rewards: güç","Fortress rewards: styrke"],
+["Each member's power is shown in Members and Distribution, and both lists can be sorted by power.","El poder de cada miembro aparece en Miembros y en el reparto, y ambas listas se pueden ordenar por poder.","Her üyenin gücü Üyeler ve Dağıtım bölümlerinde gösterilir; iki liste de güce göre sıralanabilir.","Hvert medlems styrke vises i Medlemmer og Fordeling, og begge listene kan sorteres etter styrke."],
+["Sort by power","Ordenar por poder","Güce göre sırala","Sorter etter styrke"],
 ["Fortress rewards: remove members who left","Fortress rewards: quitar a los que se fueron","Fortress rewards: ayrılan üyeleri kaldır","Fortress rewards: fjern medlemmer som har gått"],
 ["After Update from game, one button removes every member who is no longer in FOX in game, with their rewards.","Tras Update from game, un botón elimina a todos los miembros que ya no están en FOX en el juego, con sus recompensas.","Update from game sonrası tek bir düğme, oyunda artık FOX'ta olmayan tüm üyeleri ödülleriyle birlikte kaldırır.","Etter Update from game fjerner én knapp alle medlemmer som ikke lenger er i FOX i spillet, sammen med belønningene deres."],
 ["Deletes them and their rewards from this list. This cannot be undone.","Los elimina de esta lista junto con sus recompensas. No se puede deshacer.","Onları ödülleriyle birlikte bu listeden siler. Geri alınamaz.","Sletter dem og belønningene deres fra denne listen. Kan ikke angres."],

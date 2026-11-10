@@ -838,6 +838,7 @@ html[lang="nb"] #p-charms .cost:before,html[lang="nb"] #p-charms .phone .cost:be
 .fr-members-scroll{max-height:490px;overflow:auto}.fr-members-scroll thead{position:sticky;top:0;background:var(--panel);z-index:1}
 #fr-member-search{width:100%;margin:0 0 9px}
 .fr-game{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-2px 0 12px}.fr-game span{color:var(--faint);font-size:12px}
+.fr-card td.fr-power{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
 .fr-secondary.fr-danger{border-color:var(--coral);color:var(--coral)}
 .fr-game-msg{margin:-4px 0 12px;font-size:12px;color:var(--good)}
 .fr-list-tools{display:flex;align-items:center;gap:8px;margin:0 0 9px}.fr-list-tools #fr-member-search{flex:1;min-width:0;margin:0}

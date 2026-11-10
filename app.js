@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {id:'2026-11-11-fortress-power',date:'2026-11-11',title:'Fortress rewards: power',points:['Each member\'s power is shown in Members and Distribution, and both lists can be sorted by power.']},
   {id:'2026-11-11-fortress-remove-gone',date:'2026-11-11',title:'Fortress rewards: remove members who left',points:['After Update from game, one button removes every member who is no longer in FOX in game, with their rewards.']},
   {id:'2026-11-11-fortress-game',date:'2026-11-11',title:'Fortress rewards: members from the game',points:['Update from game adds missing FOX members and updates their rank (R1–R5) and power from whiteoutstats.com. Max members stay Max, and nobody is removed.']},
   {id:'2026-11-11-layout-gamepos',date:'2026-11-11',title:'Layout planner: cities from the game',points:['Place FOX + NGT cities from game puts every FOX and NGT member\'s city where it stands in game, read from whiteoutstats.com every few hours. Undo brings your layout back.']},
@@ -1791,7 +1792,7 @@ window.FOXLayoutStore={
 window.FOXGameData={
   players:function(){if(!SB||!U)return Promise.resolve(undefined);
     return SB.from('wos_players').select('chief_id,nick_name,alliance,alliance_rank,power,furnace_level,x,y,pos_at,roster_at').then(function(r){if(r.error)throw r.error;return r.data||[];});}};
-function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261111-removegone#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
+function mountLayout(){var p=$('p-layout');if(!p||p.querySelector('iframe'))return;p.innerHTML='<iframe class="foundry-frame" src="layout.html?v=20261111-power#u='+encodeURIComponent(U&&U.id||'')+'" title="Alliance layout planner"></iframe>';
   /* On phones the frame grows to the whole planner page, so only the site page scrolls (no scroll inside a scroll). */
   var f=p.querySelector('iframe');f.onload=function(){var d=f.contentDocument,app=d&&d.querySelector('.app');if(!app)return;
     var size=function(){f.style.height=window.matchMedia('(max-width:820px)').matches?(app.scrollHeight+48)+'px':'';};

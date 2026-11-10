@@ -101,14 +101,22 @@
   }
   function includedMembers() { return state.members.filter(function (member) { return !member.excluded; }); }
   function byName(a, b) { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }); }
-  /* "role": Max, R5, R4, R3, R2, R1, then by name; "name": by name only. */
+  /* "role": Max, R5, R4, R3, R2, R1, then by name; "name": by name only; "power": strongest first, then by name. */
+  var SORTS = ['role', 'name', 'power'];
+  function sortMode(value, fallback) { return SORTS.indexOf(value) >= 0 ? value : fallback; }
   function sortedMembers(list, mode) {
     return list.slice().sort(function (a, b) {
-      return (mode === 'name' ? 0 : (ROLE_ORDER[a.role] - ROLE_ORDER[b.role])) || byName(a, b);
+      var first = mode === 'role' ? ROLE_ORDER[a.role] - ROLE_ORDER[b.role] : mode === 'power' ? powerNumber(b.power) - powerNumber(a.power) : 0;
+      return first || byName(a, b);
     });
   }
+  /* Power as the game shows it: 432.6M, 1.25B. */
+  function powerLabel(value) {
+    var n = powerNumber(value);
+    return !n ? '–' : n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
+  }
   function sortButtons(kind, mode, label) {
-    return '<div class="fr-sort" role="group" aria-label="' + label + '">' + [['role', 'Sort by role'], ['name', 'Sort by name']].map(function (o) {
+    return '<div class="fr-sort" role="group" aria-label="' + label + '">' + [['role', 'Sort by role'], ['name', 'Sort by name'], ['power', 'Sort by power']].map(function (o) {
       return '<button type="button" data-sort-' + kind + '="' + o[0] + '" aria-pressed="' + (mode === o[0]) + '">' + o[1] + '</button>';
     }).join('') + '</div>';
   }
@@ -244,11 +252,12 @@
     var oldList = root.querySelector('.fr-members-scroll');
     var listScroll = oldList ? oldList.scrollTop : 0;
     var s = stats();
-    var memberSort = state.memberSort === 'name' ? 'name' : 'role', allocSort = state.allocSort === 'role' ? 'role' : 'name';
+    var memberSort = sortMode(state.memberSort, 'role'), allocSort = sortMode(state.allocSort, 'name');
     var memberRows = sortedMembers(state.members, memberSort).map(function (member) {
       return '<tr data-member-name="' + escapeHTML(member.name.toLowerCase()) + '" class="' + (member.excluded ? 'fr-ignored' : '') + '"><th scope="row"><div class="fr-member-name"><input type="text" maxlength="60" value="' + escapeHTML(member.name) + '" data-member="' + member.id + '" data-field="name" aria-label="Member name"><button type="button" class="fr-remove" data-remove-member="' + member.id + '" aria-label="Remove ' + escapeHTML(member.name) + '">×</button></div></th>' +
         '<td><input type="checkbox" data-member="' + member.id + '" data-field="excluded" aria-label="Exclude ' + escapeHTML(member.name) + ' from calculations"' + (member.excluded ? ' checked' : '') + '></td>' +
         '<td><select data-member="' + member.id + '" data-field="role" aria-label="Role for ' + escapeHTML(member.name) + '">' + roleOptions(member) + '</select></td>' +
+        '<td class="fr-power" title="' + (powerNumber(member.power) ? powerNumber(member.power).toLocaleString('en-US') : 'Unknown') + '">' + powerLabel(member.power) + '</td>' +
         '<td>' + (isMax(member) ? '—' : '<select data-member="' + member.id + '" data-field="contribution" aria-label="Contribution for ' + escapeHTML(member.name) + '">' + contributionOptions(member) + '</select>') + '</td></tr>';
     }).join('');
     var rewardRows = state.rewards.map(function (reward) {
@@ -267,7 +276,7 @@
     var allocationRows = activeReward ? '<div class="fr-alloc-card"><h4>' + escapeHTML(activeReward.name) + '<span>' + rewardTotal(activeReward) + ' / ' + integer(activeReward.quantity) + '</span></h4>' +
       (includedMembers().length ? '<div class="fr-alloc-grid">' + sortedMembers(includedMembers(), allocSort).map(function (member) {
         var value = assigned(activeReward, member), over = integer(activeReward.cap) && value > integer(activeReward.cap);
-        return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + ' <em>' + roleLabel(member.role) + '</em></span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
+        return '<label class="' + (over ? 'fr-bad' : '') + '"><span>' + escapeHTML(member.name) + ' <em>' + roleLabel(member.role) + (powerNumber(member.power) ? ' · ' + powerLabel(member.power) : '') + '</em></span><input type="number" min="0" max="100000" value="' + value + '" data-cell-reward="' + activeReward.id + '" data-cell-member="' + member.id + '" aria-label="' + escapeHTML(activeReward.name + ' for ' + member.name) + '"></label>';
       }).join('') + '</div>' : '<p class="fr-empty">Add members to assign rewards.</p>') + '</div>' : '';
     var siteCards = SITES.map(function (site) {
       var selected = state.sites.indexOf(site.id) >= 0;
@@ -282,7 +291,7 @@
       '<div class="fr-game"><button type="button" class="fr-secondary" data-action="game-sync">Update from game</button><span>Names, ranks (R1–R5) and power of FOX members, from whiteoutstats.com. Max members stay Max.</span></div>' +
       (gameMsg ? '<p class="fr-game-msg" role="status">' + escapeHTML(gameMsg) + '</p>' : '') +
       (goneMembers().length ? '<div class="fr-game"><button type="button" class="fr-secondary fr-danger" data-action="remove-gone">' + (goneArmed ? 'Tap again to remove ' + goneMembers().length + ' member' + (goneMembers().length === 1 ? '' : 's') : 'Remove the ' + goneMembers().length + ' member' + (goneMembers().length === 1 ? '' : 's') + ' not in FOX') + '</button><span>Deletes them and their rewards from this list. This cannot be undone.</span></div>' : '') +
-      (state.members.length ? '<div class="fr-list-tools"><input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member">' + sortButtons('members', memberSort, 'Sort members') + '</div><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
+      (state.members.length ? '<div class="fr-list-tools"><input id="fr-member-search" type="search" placeholder="Find member" aria-label="Find member">' + sortButtons('members', memberSort, 'Sort members') + '</div><div class="fr-scroll fr-members-scroll"><table><thead><tr><th>Member</th><th>Exclude</th><th>Role</th><th>Power</th><th>Contribution</th></tr></thead><tbody>' + memberRows + '</tbody></table></div>' : '<p class="fr-empty">No members yet.</p>') +
       '<p class="fr-note">Contribution rates each member’s engagement from 1 to 4. Max members do not need a rating.</p></section>' +
       '<section class="fr-card"><div class="fr-card-head"><h3>2. Reward pools</h3><span>' + state.rewards.length + '</span></div><p>Enter the in-game per-player maximum for each pool before giving Max members their full share.</p>' +
       '<div class="fr-add fr-add-reward"><input id="fr-reward-name" type="text" maxlength="80" placeholder="Reward name" aria-label="Reward name"><input id="fr-reward-quantity" type="number" min="1" max="100000" value="1" aria-label="Available quantity"><input id="fr-reward-cap" type="number" min="0" max="100000" value="0" aria-label="Per-player limit"><button type="button" class="fr-primary" data-action="add-reward">Add reward</button></div>' +
@@ -425,8 +434,8 @@
   function onClick(event) {
     var button = event.target.closest('button');
     if (!button || !root.contains(button)) return;
-    if (button.dataset.sortMembers) state.memberSort = button.dataset.sortMembers === 'name' ? 'name' : 'role';
-    else if (button.dataset.sortAlloc) state.allocSort = button.dataset.sortAlloc === 'role' ? 'role' : 'name';
+    if (button.dataset.sortMembers) state.memberSort = sortMode(button.dataset.sortMembers, 'role');
+    else if (button.dataset.sortAlloc) state.allocSort = sortMode(button.dataset.sortAlloc, 'name');
     else if (button.dataset.removeMember) {
       var memberId = button.dataset.removeMember;
       state.members = state.members.filter(function (m) { return m.id !== memberId; });
