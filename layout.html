@@ -834,12 +834,23 @@ function gameStatus(){var msg=$('gameMsg'),btn=$('gameBtn');
       :game.rows.length?game.rows.length+' members found, their positions are being read: try again in a few minutes.'
       :'No in-game data yet: it appears once the whiteoutstats.com sync is running.';},
     function(e){msg.textContent='In-game positions unavailable: '+(e&&e.message||'error');});}
+/* Names compared loosely (decorated in-game names vs names typed by hand): compatibility letters folded, accents
+   and symbols dropped, case ignored. Placeholder names (City 12, FOX 001) never match loosely. */
+function nameKey(v){return String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function placeholderName(v){return !String(v||'').trim()||/^(city|fox|ngt)\s*\d*(\s*#\d+)?$/i.test(String(v).trim());}
 function placeFromGame(){var rows=(game.rows||[]).filter(function(r){return r.x!=null&&r.y!=null;});if(!rows.length)return;
   pushHistory();var used=new Set(),n={moved:0,added:0,same:0,locked:0,out:0},per={},placed=[],cities=ents.filter(function(e){return e.type==='city';});
-  rows.forEach(function(r){var nm=(r.nick_name||'').trim(),gx=anchor.y-r.y-1,gy=anchor.x-r.x-1;
+  /* Strong matches (player id, name, folded name) for every member first, then loose ones (one folded name inside the other). */
+  var match=new Map(),free=function(e){return !used.has(e)&&!e.cid;};
+  rows.forEach(function(r){var nm=(r.nick_name||'').trim(),k=nameKey(nm);
     var c=cities.filter(function(e){return !used.has(e)&&e.cid===r.chief_id;})[0]
-      ||cities.filter(function(e){return !used.has(e)&&!e.cid&&nm&&(e.name||'').trim().toLowerCase()===nm.toLowerCase();})[0];
-    if(c)used.add(c);
+      ||cities.filter(function(e){return free(e)&&nm&&(e.name||'').trim().toLowerCase()===nm.toLowerCase();})[0]
+      ||(k.length>=3?cities.filter(function(e){return free(e)&&!placeholderName(e.name)&&nameKey(e.name)===k;})[0]:null);
+    if(c){used.add(c);match.set(r,c);}});
+  rows.forEach(function(r){if(match.has(r))return;var k=nameKey(r.nick_name);if(k.length<3)return;
+    var c=cities.filter(function(e){var ek=nameKey(e.name);return free(e)&&!placeholderName(e.name)&&ek.length>=3&&(ek.indexOf(k)>=0||k.indexOf(ek)>=0);})[0];
+    if(c){used.add(c);match.set(r,c);}});
+  rows.forEach(function(r){var nm=(r.nick_name||'').trim(),gx=anchor.y-r.y-1,gy=anchor.x-r.x-1,c=match.get(r);
     if(c&&isLocked(c)){n.locked++;return;}
     if(!inMap({x:gx,y:gy,w:2})){n.out++;return;}
     if(c){if(c.x===gx&&c.y===gy)n.same++;else n.moved++;c.x=gx;c.y=gy;}

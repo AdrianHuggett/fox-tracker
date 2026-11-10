@@ -335,6 +335,27 @@
      (window.FOXGameData in app.js). Members are matched by player id (cid), then by name; missing ones are
      added; the in-game rank sets R1–R5 unless the member is Max; power follows the game. Nobody is removed:
      members no longer in FOX are listed so the user can exclude or remove them. */
+  /* Names compared loosely, because the built-in list was typed from screenshots while the game sends the real,
+     often decorated names: compatibility letters folded (ᴬᴰᴿᴵᴬᴺ → adrian), accents and symbols dropped, case
+     ignored. A strong match (same player id, same name or same folded name) wins; otherwise one folded name
+     containing the other (3+ letters), the closest power breaking ties. */
+  function nameKey(value) { return String(value || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+  function strongMatch(r, name) {
+    var key = nameKey(name);
+    return state.members.find(function (m) { return m.cid === r.chief_id; }) ||
+      state.members.find(function (m) { return !m.cid && m.name.toLowerCase() === name.toLowerCase(); }) ||
+      (key.length >= 3 ? state.members.find(function (m) { return !m.cid && nameKey(m.name) === key; }) : null);
+  }
+  function looseMatch(r, name) {
+    var key = nameKey(name), power = Number(r.power) || 0;
+    if (key.length < 3) return null;
+    var found = state.members.filter(function (m) {
+      var k = nameKey(m.name);
+      return !m.cid && k.length >= 3 && (k.indexOf(key) >= 0 || key.indexOf(k) >= 0);
+    });
+    found.sort(function (a, b) { return Math.abs((a.power || 0) - power) - Math.abs((b.power || 0) - power); });
+    return found[0] || null;
+  }
   function syncFromGame() {
     var store = window.FOXGameData;
     if (!store) { gameMsg = 'In-game data is not available here.'; render(); return; }
@@ -343,14 +364,19 @@
       if (rows === undefined) { gameMsg = 'Sign in to read the FOX roster from the game.'; render(); return; }
       var fox = (rows || []).filter(function (r) { return r.alliance === 'FOX' && String(r.nick_name || '').trim(); });
       if (!fox.length) { gameMsg = 'No FOX roster yet: it appears once the whiteoutstats.com sync is running.'; render(); return; }
-      var added = 0, roles = 0, seen = {};
+      var added = 0, roles = 0, renamed = 0, seen = {}, matched = {};
+      /* Strong matches first for everyone, so a loose match never takes a member that has an exact one. */
+      fox.forEach(function (r) {
+        var member = strongMatch(r, String(r.nick_name).trim().slice(0, 60));
+        if (member) { matched[r.chief_id] = member; member.cid = r.chief_id; }
+      });
       fox.forEach(function (r) {
         var name = String(r.nick_name).trim().slice(0, 60);
-        var member = state.members.find(function (m) { return m.cid === r.chief_id; }) ||
-          state.members.find(function (m) { return !m.cid && m.name.toLowerCase() === name.toLowerCase(); });
+        var member = matched[r.chief_id] || looseMatch(r, name);
         var role = r.alliance_rank >= 1 && r.alliance_rank <= 5 ? 'r' + r.alliance_rank : null;
         if (!member) { member = { id: id(), name: name, role: role || 'r1', power: 0, contribution: 1, excluded: false }; state.members.push(member); added++; }
         else if (role && !isMax(member) && member.role !== role) { member.role = role; roles++; }
+        if (member.name !== name && seen[member.id] === undefined && member.name) renamed++;
         member.cid = r.chief_id;
         member.name = name;
         if (r.power != null) member.power = powerNumber(r.power);
@@ -358,7 +384,7 @@
       });
       var gone = state.members.filter(function (m) { return !m.excluded && !seen[m.id]; });
       var latest = fox.map(function (r) { return r.roster_at; }).filter(Boolean).sort().pop();
-      gameMsg = 'FOX roster from the game' + (latest ? ' (read ' + ago(latest) + ')' : '') + ': ' + fox.length + ' members, ' + added + ' added, ' + roles + ' role' + (roles === 1 ? '' : 's') + ' updated.' +
+      gameMsg = 'FOX roster from the game' + (latest ? ' (read ' + ago(latest) + ')' : '') + ': ' + fox.length + ' members, ' + added + ' added, ' + renamed + ' renamed to their in-game name, ' + roles + ' role' + (roles === 1 ? '' : 's') + ' updated.' +
         (gone.length ? ' Not in FOX in game: ' + gone.map(function (m) { return m.name; }).join(', ') + '. Exclude or remove them if they left.' : '');
       save(); render();
     }, function (e) { gameMsg = 'In-game data unavailable: ' + (e && e.message || 'error'); render(); });
