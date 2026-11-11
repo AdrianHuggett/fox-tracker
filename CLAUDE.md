@@ -13,6 +13,7 @@ This is the entry point. Read it fully, then open the doc you need:
 | `docs/04-workflow.md` | Setup on Adrian's Windows PC, edit/test/deploy loop, SQL procedure, verification, commit style |
 | `docs/05-history.md` | Change log and the decisions behind the current design |
 | `docs/06-open-items.md` | What is pending, in priority order, with ready-to-use SQL/code where prepared |
+| `docs/optimizer-api-handoff.md` | WhiteoutStats import plan for the private profile optimizer; resume work from another computer |
 | `tools/mock-supabase.js`, `tools/smoke_test.py` | Local test harness: the site runs against a fake Supabase in Playwright |
 
 ## The project in one paragraph
