@@ -1,5 +1,15 @@
 /* Curated game news. */
 window.FOX_NEWS_POSTS = [
+{
+  "id": 9,
+  "title": "November State Transfer: State #3685 in Group 14",
+  "body": "The transfer event runs from November 8 through November 14 (UTC).\nState #3685 is in Group 14 (States 3385–3745). Transfers stay within the group.\nNovember 11–12: invitation phase. November 13–14: open transfers for players who meet the destination's power cap.\nCheck the destination's power cap and the number of Transfer Passes you need in the game.",
+  "category": "game",
+  "pinned": false,
+  "source_url": "https://www.centurygames.com/whiteout-survival-state-transfer/",
+  "created_at": "2026-11-06T00:00:00Z",
+  "banner": "news-november-state-transfer.png"
+},
   {
     "id": 8,
     "title": "Halloween Party: rewards and closing dates",

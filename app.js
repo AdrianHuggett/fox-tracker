@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+  {"id":"2026-11-11-state-transfer","date":"2026-11-11","title":"November State Transfer: State #3685 in Group 14","points":["The transfer event runs from November 8 through November 14 (UTC)."]},
   {id:'2026-11-11-layout-sync',date:'2026-11-11',title:'Layout planner: sync each alliance from the game',points:['In-game positions has one Sync button per alliance: it reads that alliance from whiteoutstats.com right now and moves every member\'s city to where it stands in game. Admins and R4 editors get fresh data; others use the last data read.']},
   {id:'2026-11-11-fortress-power',date:'2026-11-11',title:'Fortress rewards: power',points:['Each member\'s power is shown in Members and Distribution, and both lists can be sorted by power.']},
   {id:'2026-11-11-fortress-remove-gone',date:'2026-11-11',title:'Fortress rewards: remove members who left',points:['After Update from game, one button removes every member who is no longer in FOX in game, with their rewards.']},

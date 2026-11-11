@@ -19,7 +19,10 @@ const path = require('path');
   await page.locator('[data-category="foxnews"]').click();
   await page.getByRole('heading',{name:'How pack promotion percentages work'}).waitFor();
   await page.screenshot({path:`tools/out/news-${width}.png`,fullPage:true});
-  if(await page.locator('#fox-news-list article').count() !== 3) throw Error('Expected three news articles');
+  if(await page.locator('#fox-news-list article').count() !== await page.evaluate(()=>window.FOX_NEWS_POSTS.length)) throw Error('News article count does not match the production feed');
+  const transferBanner=page.locator('#fox-news-list img[src="news-november-state-transfer.png"]');
+  await transferBanner.scrollIntoViewIfNeeded();
+  await transferBanner.evaluate(img=>img.decode());
   if(await page.locator('#fox-news-list li').count() < 10) throw Error('Missing summaries');
   for(const [group,tab] of [['prep','dash'],['prep','stock'],['prep','packs'],['resources','matrix'],['resources','ref'],['alliance','r4'],['alliance','admin']]) {
    await page.locator(`[data-category="${group}"]`).click();
