@@ -113,12 +113,11 @@ input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px
 .chip[aria-pressed="true"] { background: var(--ice); color: #06121c; border-color: var(--ice); opacity: 1; }
 .cardhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .chipwrap { display: inline-flex; align-items: center; gap: 2px; }
-.chip-selection { flex-wrap: wrap; gap: 5px; max-width: 100%; }
-.player-role { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
 .chipx { font: 700 12px var(--body); color: var(--enemy); background: transparent; border: 0; cursor: pointer; padding: 2px 4px; }
 .addrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 5px; margin-bottom: 6px; }
 .addrow input { padding: 5px 8px; font-size: 13px; }
-.addrow select, .player-role select { font: 600 12px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px; }
+.addrow select, .player-team { font: 600 12px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px; }
+.player-team { justify-self: start; }
 .addrow .btn { padding: 5px 9px; }
 svg#map.t-roster { cursor: crosshair; }
 .planbtn { font: 700 15px var(--display); letter-spacing: .06em; text-transform: uppercase; color: #0a131d; background: var(--fox); border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; }
@@ -230,7 +229,7 @@ svg#map.t-roster { cursor: crosshair; }
   <aside>
     <section class="card" aria-labelledby="rosH">
       <div class="cardhead"><h2 id="rosH">Players</h2><button type="button" class="btn" id="rosterEdit" aria-pressed="false">Edit players</button></div>
-      <p class="hint" id="rosterHint">Tap a player to choose their role or place them on the map.</p>
+      <p class="hint" id="rosterHint" aria-live="polite">Tap a player to move them to another team, change their role, or place them on the map.</p>
       <div id="roster"></div>
     </section>
 
@@ -718,8 +717,16 @@ svg#map.t-roster { cursor: crosshair; }
     save();
   }
   const PLAYER_MARKERS = { member: 'team', rally: 'rally', loot: 'loot' };
+  const PLAYER_CLICK_ACTIONS = ['move', 'rally', 'loot'];
   function rosterPlayer(teams, team, name) {
     return teams.find((t) => t.team === team)?.players.find((p) => p.name === name);
+  }
+  function updatePlayerMarkers(team, name, changes) {
+    for (const item of state.items) {
+      if (item.type === 'marker' && item.color === team && item.label === name && ['team', 'rally', 'loot'].includes(item.kind)) {
+        Object.assign(item, changes);
+      }
+    }
   }
   function changePlayerRole(team, name, role) {
     const teams = teamsFull();
@@ -728,13 +735,8 @@ svg#map.t-roster { cursor: crosshair; }
 
     snapshot();
     player.role = role;
-    for (const item of state.items) {
-      if (item.type === 'marker' && item.color === team && item.label === name && ['team', 'rally', 'loot'].includes(item.kind)) {
-        item.kind = PLAYER_MARKERS[role];
-      }
-    }
+    updatePlayerMarkers(team, name, { kind: PLAYER_MARKERS[role] });
     saveTeams(teams);
-    render();
   }
   function renderRoster() {
     const teams = teamsFull();
@@ -748,14 +750,13 @@ svg#map.t-roster { cursor: crosshair; }
           const on = pending?.name === pl.name && pending.team === t.team;
           const chip = `<button type="button" class="chip ${pl.role === 'rally' ? 'rally' : ''} ${placed.has(pl.name) && !rosterEdit ? 'placed' : ''}" data-player="${esc(pl.name)}" data-team="${t.team}" data-role="${pl.role}" aria-pressed="${on}">${g}${esc(pl.name)}</button>`;
           if (rosterEdit) return `<span class="chipwrap">${chip}<button type="button" class="chipx" data-remove="${esc(pl.name)}" data-team="${t.team}" aria-label="Remove ${esc(pl.name)}">×</button></span>`;
-          if (!on) return chip;
-          return `<span class="chipwrap chip-selection">${chip}<label class="player-role">Role
-            <select data-player-role aria-label="Role for ${esc(pl.name)}">
-              <option value="member" ${pl.role === 'member' ? 'selected' : ''}>Player</option>
-              <option value="rally" ${pl.role === 'rally' ? 'selected' : ''}>⭐ Rally leader</option>
-              <option value="loot" ${pl.role === 'loot' ? 'selected' : ''}>💰 Loot gatherer</option>
-            </select></label></span>`;
+          return chip;
         }).join('') || '<span class="hint">No players yet</span>'}</div>
+        ${pending?.team === t.team && pending.step === 0 ? `
+          <select class="player-team" data-player-team aria-label="Move ${esc(pending.name)} to another team">
+            <option value="">Move to team</option>
+            ${TEAM_IDS.filter((team) => team !== t.team).map((team) => `<option value="${team}">Team ${team}</option>`).join('')}
+          </select>` : ''}
         <form class="addrow" data-addteam="${t.team}">
           <input type="text" data-addname="${t.team}" placeholder="Add player" aria-label="Add a player to Team ${t.team}" maxlength="30" autocomplete="off" value="${esc(drafts[t.team] || '')}">
           <select data-addrole="${t.team}" aria-label="Role"><option value="member">Player</option><option value="rally">⭐ Rally</option><option value="loot">💰 Loot</option></select>
@@ -765,15 +766,37 @@ svg#map.t-roster { cursor: crosshair; }
     if (active) { const el = document.querySelector('[data-addname="' + active + '"]'); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
     $('#rosterEdit').setAttribute('aria-pressed', String(rosterEdit));
     $('#rosterEdit').textContent = rosterEdit ? 'Done' : 'Edit players';
-    $('#rosterHint').textContent = pending ? 'Tap the map to place ' + pending.name + '. Press Esc to cancel.'
+    $('#rosterHint').textContent = pending ? 'Tap the map to place ' + pending.name + '. ' + [
+      'Tap their name again to make them Lead.',
+      'Tap their name again to make them Gatherer.',
+      'Tap their name again to reopen the team menu.'
+    ][pending.step]
       : rosterEdit ? 'Tap a player to switch between player, ⭐ rally leader and 💰 loot gatherer. Tap × to remove them.'
-      : 'Tap a player to choose their role or place them on the map.';
+      : 'Tap a player to move them to another team, change their role, or place them on the map.';
   }
   document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.addname) drafts[e.target.dataset.addname] = e.target.value; });
   $('#roster').addEventListener('change', (e) => {
-    if (!pending || !e.target.matches('[data-player-role]')) return;
-    changePlayerRole(pending.team, pending.name, e.target.value);
-    $('#roster [data-player-role]')?.focus({ preventScroll: true });
+    if (!pending || !e.target.matches('[data-player-team]')) return;
+    const { name, team } = pending;
+    const teams = teamsFull();
+    const from = teams.find((t) => t.team === team);
+    const to = teams.find((t) => t.team === e.target.value);
+    const player = from?.players.find((pl) => pl.name === name);
+    if (!player || !to || to === from) return;
+    if (to.players.some((pl) => pl.name === name)) {
+      e.target.value = '';
+      toast(name + ' is already in Team ' + to.team);
+      return;
+    }
+    snapshot();
+    from.players.splice(from.players.indexOf(player), 1);
+    to.players.push(player);
+    updatePlayerMarkers(team, name, { color: to.team });
+    pending.team = to.team;
+    saveTeams(teams);
+    render();
+    $(`#roster [data-player="${CSS.escape(name)}"][data-team="${to.team}"]`)?.focus();
+    toast(name + ' moved to Team ' + to.team);
   });
   document.addEventListener('submit', (e) => {
     const f = e.target.closest('[data-addteam]'); if (!f) return;
@@ -828,9 +851,13 @@ svg#map.t-roster { cursor: crosshair; }
         changePlayerRole(team, name, nextRole);
       } else {
         const same = pending?.name === name && pending.team === team;
-        pending = same ? null : { name, team };
-        tool = pending ? 'roster' : 'select'; clearSel(); render();
+        const step = same ? (pending.step + 1) % PLAYER_CLICK_ACTIONS.length : 0;
+        pending = { name, team, step };
+        tool = 'roster';
+        clearSel();
+        if (step > 0) changePlayerRole(team, name, PLAYER_CLICK_ACTIONS[step]);
       }
+      render();
       $(`#roster [data-player="${CSS.escape(name)}"][data-team="${team}"]`)?.focus({ preventScroll: true });
       return;
     }
@@ -896,14 +923,18 @@ svg#map.t-roster { cursor: crosshair; }
       const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
       if (!Array.isArray(data.items)) throw new Error('bad');
       snapshot(); state = normalize(data);
-      state.roster = state.roster || DEFAULT_ROSTER; clearSel(); selectedB = null; save(); buildBg(); render(); toast('Plan loaded');
+      state.roster = state.roster || DEFAULT_ROSTER; clearSel(); selectedB = null;
+      if (pending) { pending = null; tool = 'select'; }
+      save(); buildBg(); render(); toast('Plan loaded');
     } catch (e) { toast('That code could not be read. Copy it again in full.'); }
   };
 
   function undo() {
     const prev = undoStack.pop();
     if (!prev) { toast('Nothing to undo'); return; }
-    state = JSON.parse(prev); clearSel(); save(); buildBg(); render();
+    state = JSON.parse(prev);
+    if (pending) { pending = null; tool = 'select'; }
+    clearSel(); save(); buildBg(); render();
   }
   function deleteSelected() {
     const ids = selIds();

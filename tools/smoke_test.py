@@ -79,6 +79,42 @@ def run(p, width, name):
     print(f'[{name}] projected:', proj)
     open_tab(pg, 'r4'); pg.wait_for_timeout(400)
     print(f'[{name}] r4 workload:', pg.inner_text('#r4-load').replace('\n', ' | ') if pg.query_selector('#r4-load') else 'missing')
+    # Foundry roster changes also update markers in earlier phases.
+    assert open_tab(pg, 'foundry'), 'Foundry tab unavailable to mock admin'
+    ff = pg.frame_locator('#p-foundry iframe')
+    ff.locator('[data-legion="2"]').click()
+    team_a = ff.locator('[data-addteam="A"]')
+    team_a.locator('input').fill('Captain')
+    team_a.get_by_role('button', name='Add', exact=True).click()
+    captain = ff.locator('[data-player="Captain"]')
+    move_team = ff.get_by_role('combobox', name='Move Captain to another team')
+    for phase in (1, 2):
+        ff.locator(f'[data-phase="{phase}"]').click()
+        captain.click()
+        assert move_team.is_visible()
+        ff.locator('#map').click(position={'x': 40, 'y': 80})
+    captain.click()
+    move_team.select_option('D')
+    assert captain.get_attribute('data-team') == 'D'
+    ff.locator('#undo').click()
+    assert captain.get_attribute('data-team') == 'A' and not move_team.is_visible()
+    captain.click()
+    move_team.select_option('D')
+    captain.click()
+    assert captain.get_attribute('data-role') == 'rally' and not move_team.is_visible()
+    captain.click()
+    assert captain.get_attribute('data-role') == 'loot'
+    captain.click()
+    assert move_team.is_visible() and captain.get_attribute('data-role') == 'loot'
+    foundry = next(f for f in pg.frames if 'foundry.html' in f.url)
+    markers = foundry.evaluate("""() =>
+        JSON.parse(localStorage.getItem('fox-foundry-war-room-v4-L2')).items
+            .filter(m => m.label === 'Captain').map(m => [m.phase, m.color, m.kind])
+    """)
+    assert markers == [[1, 'D', 'loot'], [2, 'D', 'loot']], markers
+    foundry.goto(foundry.url)
+    assert captain.get_attribute('data-team') == 'D' and captain.get_attribute('data-role') == 'loot'
+
     # Layout planner: the iframe loads, Generate seats players, and the layout is saved under the account's own key
     open_tab(pg, 'layout'); pg.wait_for_timeout(800)
     lf = pg.frame_locator('#p-layout iframe')
