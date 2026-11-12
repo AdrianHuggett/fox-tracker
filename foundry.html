@@ -717,7 +717,7 @@ svg#map.t-roster { cursor: crosshair; }
     save();
   }
   const PLAYER_MARKERS = { member: 'team', rally: 'rally', loot: 'loot' };
-  const PLAYER_CLICK_ACTIONS = ['move', 'rally', 'loot'];
+  const PLAYER_CLICK_ACTIONS = ['move', 'rally', 'loot', 'member'];
   function rosterPlayer(teams, team, name) {
     return teams.find((t) => t.team === team)?.players.find((p) => p.name === name);
   }
@@ -769,6 +769,7 @@ svg#map.t-roster { cursor: crosshair; }
     $('#rosterHint').textContent = pending ? 'Tap the map to place ' + pending.name + '. ' + [
       'Tap their name again to make them Lead.',
       'Tap their name again to make them Gatherer.',
+      'Tap their name again to make them a regular player.',
       'Tap their name again to reopen the team menu.'
     ][pending.step]
       : rosterEdit ? 'Tap a player to switch between player, ⭐ rally leader and 💰 loot gatherer. Tap × to remove them.'

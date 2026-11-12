@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Foundry player roles","Roles de jugadores de Fundición","Dökümhane oyuncu rolleri","Spillerroller i støperiet"],
+["Keep tapping the same player to cycle through the team menu, Lead, Gatherer and regular player.","Sigue tocando al mismo jugador para alternar entre el menú de equipos, líder, recolector y jugador normal.","Takım menüsü, lider, toplayıcı ve normal oyuncu arasında geçiş yapmak için aynı oyuncuya dokunmaya devam et.","Fortsett å trykke på samme spiller for å bla gjennom lagmenyen, leder, sanker og vanlig spiller."],
 ["Move players between Foundry teams","Mueve jugadores entre equipos de Fundición","Dökümhane takımları arasında oyuncu taşı","Flytt spillere mellom støperilag"],
 ["Tap a player to open the team menu. Tap the same name again for Lead, then Gatherer, then back to the team menu.","Toca a un jugador para abrir el menú de equipos. Vuelve a tocar el mismo nombre para asignarlo como líder, después como recolector y volver al menú de equipos.","Takım menüsünü açmak için bir oyuncuya dokun. Aynı ada tekrar dokunarak önce lideri, sonra toplayıcıyı seç ve ardından takım menüsüne dön.","Trykk på en spiller for å åpne lagmenyen. Trykk på samme navn igjen for å gjøre spilleren til leder, deretter sanker, og så åpne lagmenyen igjen."],
 ["November State Transfer: State #3685 in Group 14","Traslado de estado de noviembre: estado #3685 en el grupo 14","Kasım Eyalet Transferi: #3685, Grup 14’te","November-overføring: stat #3685 i gruppe 14"],

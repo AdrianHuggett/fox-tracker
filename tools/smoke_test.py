@@ -105,15 +105,17 @@ def run(p, width, name):
     captain.click()
     assert captain.get_attribute('data-role') == 'loot'
     captain.click()
-    assert move_team.is_visible() and captain.get_attribute('data-role') == 'loot'
+    assert captain.get_attribute('data-role') == 'member' and not move_team.is_visible()
+    captain.click()
+    assert move_team.is_visible() and captain.get_attribute('data-role') == 'member'
     foundry = next(f for f in pg.frames if 'foundry.html' in f.url)
     markers = foundry.evaluate("""() =>
         JSON.parse(localStorage.getItem('fox-foundry-war-room-v4-L2')).items
             .filter(m => m.label === 'Captain').map(m => [m.phase, m.color, m.kind])
     """)
-    assert markers == [[1, 'D', 'loot'], [2, 'D', 'loot']], markers
+    assert markers == [[1, 'D', 'team'], [2, 'D', 'team']], markers
     foundry.goto(foundry.url)
-    assert captain.get_attribute('data-team') == 'D' and captain.get_attribute('data-role') == 'loot'
+    assert captain.get_attribute('data-team') == 'D' and captain.get_attribute('data-role') == 'member'
 
     # Layout planner: the iframe loads, Generate seats players, and the layout is saved under the account's own key
     open_tab(pg, 'layout'); pg.wait_for_timeout(800)
