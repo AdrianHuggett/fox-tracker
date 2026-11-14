@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Current and target Hero Gear icons","Iconos del equipo de héroe actual y objetivo","Mevcut ve hedef Kahraman Ekipmanı simgeleri","Ikoner for nåværende og ønsket helteutstyr"],
+["Each piece shows its current and target appearance, enhancement and Mastery Forging level.","Cada pieza muestra su aspecto, mejora y nivel de forja de maestría actuales y objetivo.","Her parça mevcut ve hedef görünümünü, geliştirme ve Ustalık Dövme seviyesini gösterir.","Hver del viser nåværende og ønsket utseende, forbedring og mestringsnivå."],
 ["Foundry player roles","Roles de jugadores de Fundición","Dökümhane oyuncu rolleri","Spillerroller i støperiet"],
 ["Keep tapping the same player to cycle through the team menu, Lead, Gatherer and regular player.","Sigue tocando al mismo jugador para alternar entre el menú de equipos, líder, recolector y jugador normal.","Takım menüsü, lider, toplayıcı ve normal oyuncu arasında geçiş yapmak için aynı oyuncuya dokunmaya devam et.","Fortsett å trykke på samme spiller for å bla gjennom lagmenyen, leder, sanker og vanlig spiller."],
 ["Move players between Foundry teams","Mueve jugadores entre equipos de Fundición","Dökümhane takımları arasında oyuncu taşı","Flytt spillere mellom støperilag"],

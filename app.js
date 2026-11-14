@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+ {id:'2026-11-14-hero-gear-icons',date:'2026-11-14',title:'Current and target Hero Gear icons',points:['Each piece shows its current and target appearance, enhancement and Mastery Forging level.']},
  {id:'2026-11-12-foundry-regular-player',date:'2026-11-12',title:'Foundry player roles',points:['Keep tapping the same player to cycle through the team menu, Lead, Gatherer and regular player.']},
  {id:'2026-11-12-foundry-roster',date:'2026-11-12',title:'Move players between Foundry teams',points:['Tap a player to open the team menu. Tap the same name again for Lead, then Gatherer, then back to the team menu.']},
   {"id":"2026-11-11-state-transfer","date":"2026-11-11","title":"November State Transfer: State #3685 in Group 14","points":["The transfer event runs from November 8 through November 14 (UTC)."]},
