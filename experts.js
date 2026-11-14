@@ -5,7 +5,7 @@
 (function(){'use strict';window.FOXExperts={mount:function(host,api){
 const data=window.EXPERTS_DATA,P=data.points;
 const SIGIL_ITEM={cyrille:'Ciryl Sigils',agnes:'Agnes Sigils',holger:'Holger Sigils',romulus:'Romulus Sigils',baldur:'Baldur Sigils',fabian:'Fabian Sigils',valeria:'Valeria Sigils',ronne:'Ronne Sigils',kathy:'Kathy Sigils',gareth:'Gareth Sigils',justus:'Justus Sigils'};
-const GENERAL='General Expert Sigils',BOOKS='Books of Knowledge';
+const GENERAL='General Expert Sigils',BOOKS='Books of Knowledge',SPEEDUPS='Expert Skill Learning Speedups';
 const ART={'Books of Knowledge':'item-books-of-knowledge.png','General Expert Sigils':'item-general-expert-sigils.png','Ciryl Sigils':'item-ciryl-sigils.png','Agnes Sigils':'item-agnes-sigils.png','Holger Sigils':'item-holger-sigils.png','Romulus Sigils':'item-romulus-sigils.png','Baldur Sigils':'item-baldur-sigils.png','Fabian Sigils':'item-fabian-sigils.png','Valeria Sigils':'item-valeria-sigils.png','Ronne Sigils':'item-ronne-sigils.png','Kathy Sigils':'item-kathy-sigils.png','Gareth Sigils':'item-gareth-sigils.png','Justus Sigils':'item-justus-sigils-v2.png'};
 /* Relationship levels: a multiple of 10 is first reached (x - 0.5) and then advanced (x) with sigils. */
 const REL=[0];for(let a=1;a<=100;a++){if(a%10===0)REL.push(a-.5);REL.push(a);}
@@ -59,7 +59,10 @@ function expertBlock(e){const p=state.experts[e.id],c=expertCost(e),saving=state
 function render(){const t=totals(),saving=state.view==='saved',stock=api.stock()||{};
   const mats=[[BOOKS,t.books]].concat(data.experts.filter(e=>t.perExpert[e.id]>0).map(e=>[SIGIL_ITEM[e.id],t.perExpert[e.id]]));
   if(t.general>0)mats.push([GENERAL,t.general]);
-  const usable=mats.filter(([n,v])=>v>0&&stock[n]),missing=mats.filter(([n,v])=>v>0&&!stock[n]);
+  // Backpack speedups are stored in days; retain the full learning time, including minutes.
+const targets=mats.concat(t.minutes>0?[[SPEEDUPS,t.minutes/1440]]:[]);
+const usable=targets.filter(([n,v])=>v>0&&stock[n]),missing=targets.filter(([n,v])=>v>0&&!stock[n]);
+const targetLabel=(name,value)=>name===SPEEDUPS?duration(value*1440):fmt(value);
   const icon=n=>ART[n]?`<img src="${ART[n]}" alt="">`:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v6c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg>';
   const list=data.experts.filter(e=>e.generation===gen&&(!saving||planned(e)));
   host.innerHTML=`<h1>Plan your Dawn Academy Experts.</h1><p class="lead">Plan relationship levels and skills for every Expert. Turn the sigils and books into Backpack targets.</p>
@@ -72,12 +75,12 @@ function render(){const t=totals(),saving=state.view==='saved',stock=api.stock()
 ${mats.filter(([n,v])=>v>0).map(([n,v])=>{const s=stock[n];return `<div class="ex-material">${icon(n)}<div><strong>${fmt(v)}</strong><span>${esc(n)}</span><small>${s?`Have ${fmt(s.have||0)} · Still needed ${fmt(Math.max(0,v-(s.have||0)))}`:'Not in your Backpack'}</small></div></div>`;}).join('')||'<p class="ex-small">No upgrades planned yet.</p>'}
 <p class="ex-small">Each Expert uses its own sigils first. General Expert Sigils cover what its own sigils do not.</p>
 <div class="ex-time"><span>Affinity</span><strong>${fmt(t.affinity)}</strong><small>Compass 10 · Fiery Heart 100 · Sail of Conquest 1,000 each. Not tracked in the Backpack.</small></div>
-<div class="ex-time"><span>Learning time</span><strong>${duration(t.minutes)}</strong><small>Before learning speedups.</small></div>
+<div class="ex-time"><span>Learning time</span><strong>${duration(t.minutes)}</strong><small>Before learning speedups. Included in Backpack targets.</small></div>
 <button class="ex-primary" id="ex-push" ${usable.length&&!busy?'':'disabled'}>Push to Backpack as Target</button>
 <p class="ex-small">${missing.length?'Not in your Backpack, so not updated: '+missing.map(([n])=>esc(n)).join(', ')+'.':'Review the targets before applying.'}</p></section>
 <section><h3>SvS points</h3><strong class="ex-points">${fmt(t.sigils*P.sigil+t.books*P.book)} <small>pts</small></strong><p class="ex-small">${fmt(t.sigils)} sigils × ${fmt(P.sigil)} + ${fmt(t.books)} books × ${fmt(P.book)}</p><p class="ex-small">Learning speedups (${P.learningMinute} pts per minute) and bonuses are excluded.</p></section></aside></div>
 <p class="ex-source">Cost reference: <a href="https://wostools.net/experts-calculator" target="_blank" rel="noopener">WoSTools Experts calculator</a>, checked ${esc(data.source.retrieved)}. Ronne and Kathy costs are estimates in the source. Verify skill caps in game before spending. <a href="https://wostools.net/wiki/experts/justus" target="_blank" rel="noopener">Justus data</a>: 2026-11-07.</p>
-<dialog id="ex-dialog"><h3>Update your Backpack targets?</h3><p>Replace these targets with your plan totals.</p>${usable.map(([n,v])=>`<p class="ex-resource"><span>${esc(n)}</span><strong>${fmt((stock[n]||{}).target||0)} → ${fmt(v)}</strong></p>`).join('')}<p>Your current stock stays unchanged.</p><p id="ex-error" role="alert"></p><div class="ex-actions"><button id="ex-cancel">Keep current targets</button><button id="ex-apply" class="ex-primary">Apply targets</button></div></dialog>`;
+<dialog id="ex-dialog"><h3>Update your Backpack targets?</h3><p>Replace these targets with your plan totals.</p>${usable.map(([n,v])=>`<p class="ex-resource"><span>${esc(n)}</span><strong>${targetLabel(n,(stock[n]||{}).target||0)} → ${targetLabel(n,v)}</strong></p>`).join('')}<p>Your current stock stays unchanged.</p><p id="ex-error" role="alert"></p><div class="ex-actions"><button id="ex-cancel">Keep current targets</button><button id="ex-apply" class="ex-primary">Apply targets</button></div></dialog>`;
   host.querySelectorAll('select,#ex-save,#ex-edit').forEach(x=>x.disabled=busy);
   host.querySelector('#ex-save').onclick=save;host.querySelector('#ex-edit').onclick=()=>{if(!busy){state.view='edit';render();}};
   host.querySelectorAll('[data-gen]').forEach(b=>b.onclick=()=>{gen=+b.dataset.gen;render();});

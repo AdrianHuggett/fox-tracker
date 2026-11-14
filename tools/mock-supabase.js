@@ -23,7 +23,8 @@ var DB = window.__DB = {
     {sort:7, grp:'📚 Expert Materials', icon:'', name:'Kathy Sigils', have:12, target:20, free:0},
     {sort:8, grp:'📚 Expert Materials', icon:'⚜', name:'Gareth Sigils', have:34, target:60, free:0},
     {sort:9, grp:'📚 Expert Materials', icon:'', name:'Books of Knowledge', have:100, target:500, free:0},
-    {sort:50, grp:'📚 Expert Materials', icon:'📜', name:'Justus Sigils', have:0, target:0, free:0}],
+    {sort:50, grp:'📚 Expert Materials', icon:'📜', name:'Justus Sigils', have:0, target:0, free:0},
+    {sort:51, grp:'⚡ Speedups', icon:'', name:'Expert Skill Learning Speedups', have:12.5, target:8, free:0}],
   user_packs: [{user_id:'u1', pack_id:1, freq:0}],
   user_exchanges: [{xid:'charm-g2d', qty:20}],
   stock_history: [

@@ -80,6 +80,25 @@ def run(p, width, name):
     print(f'[{name}] projected:', proj)
     open_tab(pg, 'r4'); pg.wait_for_timeout(400)
     print(f'[{name}] r4 workload:', pg.inner_text('#r4-load').replace('\n', ' | ') if pg.query_selector('#r4-load') else 'missing')
+    # Learning time transfers in Backpack days, without losing minutes or changing Have.
+    assert open_tab(pg, 'experts')
+    pg.locator('#p-experts [data-gen="3"]').click()
+    pg.locator('#p-experts details[data-open="justus"] summary').click()
+    pg.locator('#p-experts select[data-rel="justus"][data-field="from"]').select_option('40')
+    pg.locator('#p-experts select[data-ex="justus"][data-skill="glorious-gains"][data-field="from"]').select_option('1')
+    pg.locator('#p-experts select[data-ex="justus"][data-skill="glorious-gains"][data-field="to"]').select_option('2')
+    pg.locator('#ex-push').click()
+    review = pg.locator('#ex-dialog .ex-resource').filter(has_text='Expert Skill Learning Speedups')
+    assert '1d 4h 40m' in review.inner_text(), review.inner_text()
+    pg.locator('#ex-cancel').click()
+    assert pg.evaluate("window.__DB.user_items.find(x=>x.name==='Expert Skill Learning Speedups').target") == 8
+    pg.locator('#ex-push').click()
+    pg.locator('#ex-apply').click()
+    pg.wait_for_function("Math.abs(window.__DB.user_items.find(x=>x.name==='Expert Skill Learning Speedups').target - 1720/1440) < 1e-10")
+    assert pg.evaluate("window.__DB.user_items.find(x=>x.name==='Expert Skill Learning Speedups').have") == 12.5
+    assert pg.evaluate("window.__DB.user_items.find(x=>x.name==='Charm Designs').target") == 40
+    assert open_tab(pg, 'stock')
+    assert abs(float(pg.get_by_role('spinbutton', name='Expert Skill Learning Speedups target', exact=True).input_value()) - 1720/1440) < 1e-10
     # Gen 6 is available to existing widget plans, with the same cost and stock rules.
     for hero in ('Wu Ming', 'Renee', 'Wayne'):
         assert pg.locator(f'#stock tr[data-q="{hero.lower()}"]').count() == 1

@@ -6,6 +6,8 @@
 
 ## Rules (as implemented in `experts.js`)
 
+- Pushing Backpack targets includes the full learning time in `Expert Skill Learning Speedups`, stored as fractional days (`minutes / 1440`). The confirmation displays days, hours and minutes. Existing Have amounts and unrelated targets are preserved; no target is sent for zero learning time.
+
 - Relationship 0 to 100. A multiple of 10 is first reached (stored as x − 0.5, shown "Lv. x") and then advanced (x, "Lv. x · Advanced").
 - Affinity from a to b = sum of `affinityCosts[ceil(a) .. ceil(b) − 1]` (index i = level i to i+1). Advancing costs no affinity.
 - Sigils from a to b = sum of `sigilCosts[x/10 − 1]` for every multiple of 10 with a < x ≤ b.
