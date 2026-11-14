@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Smaller Hero Gear icons","Iconos de equipo de héroe más pequeños","Daha küçük Kahraman Ekipmanı simgeleri","Mindre ikoner for helteutstyr"],
+["Current and target icons now take up less space.","Los iconos actuales y objetivo ahora ocupan menos espacio.","Mevcut ve hedef simgeler artık daha az yer kaplıyor.","Ikonene for nåværende og ønsket utstyr tar nå mindre plass."],
 ["Current and target Hero Gear icons","Iconos del equipo de héroe actual y objetivo","Mevcut ve hedef Kahraman Ekipmanı simgeleri","Ikoner for nåværende og ønsket helteutstyr"],
 ["Each piece shows its current and target appearance, enhancement and Mastery Forging level.","Cada pieza muestra su aspecto, mejora y nivel de forja de maestría actuales y objetivo.","Her parça mevcut ve hedef görünümünü, geliştirme ve Ustalık Dövme seviyesini gösterir.","Hver del viser nåværende og ønsket utseende, forbedring og mestringsnivå."],
 ["Foundry player roles","Roles de jugadores de Fundición","Dökümhane oyuncu rolleri","Spillerroller i støperiet"],
