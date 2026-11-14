@@ -19,3 +19,22 @@
 }
 
 #p-gear .gear-target-choice{display:flex;align-items:center;gap:10px;margin-top:5px}#p-gear .gear-target-choice select{flex:1;min-width:0;margin:0}#p-gear .gear-range{display:flex;align-items:center;flex-wrap:wrap;gap:10px}#p-gear .gear-destination{display:inline-flex;align-items:center;gap:10px}#p-gear .gear-target-choice .cg-icon{width:48px;height:48px}#p-gear .gear-target-choice .cg-icon-stars{font-size:10px}
+/* Phone comparisons stay compact without squeezing tier names beside artwork. */
+@media(max-width:650px){
+  #p-gear .cg-icon,#p-gear .gear-target-choice .cg-icon{width:44px;height:44px;border-radius:8px}
+  #p-gear .cg-icon-tier,#p-gear .cg-icon-stars{font-size:10px}
+  #p-gear .gear-rowtop{gap:10px}
+  #p-gear .gear-fields{grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr);gap:7px}
+  #p-gear .gear-target-choice{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+  #p-gear .gear-target-choice .cg-icon{align-self:center}
+  #p-gear .gear-target-choice select{flex:auto;width:100%}
+  #p-gear .gear-fields select{min-height:40px}
+  #p-gear.gear-readonly .gear-range{margin-left:0;gap:8px}
+  #p-gear.gear-readonly .gear-rowcost{margin-left:0;gap:8px 12px}
+  #p-gear .gear-destination{gap:8px}
+}
+@media(max-width:380px){
+  #p-gear .gear-fields{grid-template-columns:minmax(0,1fr)}
+  #p-gear .gear-fields .gear-arrow{display:none}
+  #p-gear .gear-target-choice{flex-direction:row;align-items:center}
+}

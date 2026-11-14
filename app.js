@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-14-mobile-layout',date:'2026-11-14',title:'Clearer phone layouts',points:['Smaller gear icons, readable tier selectors, Pets costs that fit the screen, and improved mobile navigation and Fortress sorting.']},
 {id:'2026-11-14-torxim-contents',date:'2026-11-14',title:'Pack contents refreshed',points:['Applied 162 content corrections across 57 packs checked against Torxim. Prices, Bought counts, Backpack quantities and targets are unchanged. Unverified variants remain unchanged.']},
 {id:'2026-11-14-expert-speedups',date:'2026-11-14',title:'Expert learning speedup targets',points:['Push your Experts plan to the Backpack to include its learning time as an Expert Skill Learning Speedups target. Days, hours and minutes are preserved.']},
  {id:'2026-11-14-gen6-backpack',date:'2026-11-14',title:'Gen 6 resources and widget artwork',points:['Track Wu Ming, Renee and Wayne shards and widgets in your Backpack. Each hero widget now has its own artwork in the Backpack and planner.']},
