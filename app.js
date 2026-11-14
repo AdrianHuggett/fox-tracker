@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-15-rounded-targets',date:'2026-11-15',title:'Clearer Backpack targets',points:['Backpack targets display up to two decimal places. Calculations keep their full precision until you edit the value.']},
 {id:'2026-11-15-german',date:'2026-11-15',title:'German language available',points:['Choose Deutsch in either language menu. Your choice is remembered on this browser; your data stays unchanged.']},
 {id:'2026-11-14-backpack-target-filter',date:'2026-11-14',title:'Focus on Backpack targets',points:['Hide items without targets in the Backpack, then show them again with one click. Your quantities and targets are preserved.']},
 {id:'2026-11-14-mobile-layout',date:'2026-11-14',title:'Clearer phone layouts',points:['Smaller gear icons, readable tier selectors, Pets costs that fit the screen, and improved mobile navigation and Fortress sorting.']},
@@ -931,6 +932,7 @@ function inp(val,cls,attrs){
   return '<input class="cell '+(cls||'')+'" type="number" step="any" value="'+
     (val===null||val===undefined?'':val)+'" '+(attrs||'')+'>';
 }
+function targetDisplay(val){ return val===null||val===undefined?'':Number(n(val).toFixed(2)); }
 var widgetGenerations=Object.create(null);
 (window.WIDGETS_DATA&&window.WIDGETS_DATA.heroes||[]).forEach(function(hero){
   widgetGenerations[hero.name+' widget']=hero.generation;
@@ -972,7 +974,7 @@ function renderStock(){
     out.push('<tr data-state="'+state+'" data-q="'+esc((it.name+(widgetGen?' Gen '+widgetGen:'')).toLowerCase())+'" data-gn="'+esc(g)+'">'+
       '<td class="ic">'+itemIcon(it)+'</td><td class="nm">'+esc(it.name)+(widgetGen?'<span class="stock-gen">Gen '+widgetGen+'</span>':'')+'</td>'+
       '<td data-label="Have">'+inp(it.have,'','data-idx="'+idx+'" data-k="have" aria-label="'+esc(it.name)+' have"')+'</td>'+
-      '<td data-label="Target">'+inp(it.target,'t2','data-idx="'+idx+'" data-k="target" aria-label="'+esc(it.name)+' target"')+'</td>'+
+      '<td data-label="Target">'+inp(targetDisplay(it.target),'t2','data-idx="'+idx+'" data-k="target" aria-label="'+esc(it.name)+' target"')+'</td>'+
       '<td class="num">'+(c.tgt>0?fmt(c.raw):'<span class="mini">\u2014</span>')+'</td>'+
       '<td><div class="prog"><div class="pbar"><i style="width:'+w.toFixed(1)+'%;background:'+pcolor(c.pct)+'"></i></div>'+
         '<span>'+(c.pct===null?'\u2014':Math.round(c.pct*100)+'%')+'</span></div></td>'+
@@ -1359,10 +1361,14 @@ function render(){
 function bind(){
   [].forEach.call(document.querySelectorAll('input.cell'),function(el){
     if(el.__b) return; el.__b=1;
+    var lastValue=el.value;
     function commit(){
       try{
         if(el.dataset.idx!==undefined){
+        // Focusing a rounded display must not overwrite the precise stored value.
+        if(el.value===lastValue) return;
           var it=D.items[+el.dataset.idx]; it[el.dataset.k]=n(el.value); saveItem(it,el.dataset.k);
+        lastValue=el.value;
         } else if(el.dataset.pid!==undefined){
           var selected=D.packs.find(function(p){return String(p.id)===el.dataset.pid;});
           var qty=n(el.value); if(selected&&moonlightPack(selected)){ qty=Math.max(0,Math.floor(qty)); if(/Lunar Blessing|Everbright Moon/.test(selected.name)) qty=Math.min(1,qty); el.value=qty; }

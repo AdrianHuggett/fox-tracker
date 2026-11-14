@@ -4,6 +4,8 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Clearer Backpack targets","Objetivos del Backpack más claros","Daha anlaşılır Backpack hedefleri","Tydeligere Backpack-mål","Übersichtlichere Rucksackziele"],
+["Backpack targets display up to two decimal places. Calculations keep their full precision until you edit the value.","Los objetivos del Backpack muestran hasta dos decimales. Los cálculos conservan toda su precisión hasta que edites el valor.","Backpack hedefleri en fazla iki ondalık basamakla gösterilir. Değeri düzenleyene kadar hesaplamalar tam hassasiyetini korur.","Backpack-mål viser opptil to desimaler. Beregningene beholder full presisjon til du endrer verdien.","Rucksackziele werden mit bis zu zwei Dezimalstellen angezeigt. Berechnungen behalten ihre volle Genauigkeit, bis du den Wert bearbeitest."],
 ["German language available","Alemán disponible","Almanca kullanılabilir","Tysk er tilgjengelig","Deutsch verfügbar"],
 ["Choose Deutsch in either language menu. Your choice is remembered on this browser; your data stays unchanged.","Elige Deutsch en cualquiera de los menús de idioma. Tu elección se recuerda en este navegador; tus datos no cambian.","Dil menülerinden Deutsch seçin. Seçiminiz bu tarayıcıda hatırlanır; verileriniz değişmez.","Velg Deutsch i en av språkmenyene. Valget huskes i denne nettleseren; dataene dine endres ikke.","Wähle Deutsch in einem der Sprachmenüs. Deine Auswahl wird in diesem Browser gespeichert; deine Daten bleiben unverändert."],
 ["Hide items without targets","Ocultar objetos sin objetivo","Hedefi olmayan öğeleri gizle","Skjul gjenstander uten mål","Gegenstände ohne Ziel ausblenden"],

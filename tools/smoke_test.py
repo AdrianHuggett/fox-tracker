@@ -98,7 +98,12 @@ def run(p, width, name):
     assert pg.evaluate("window.__DB.user_items.find(x=>x.name==='Expert Skill Learning Speedups').have") == 12.5
     assert pg.evaluate("window.__DB.user_items.find(x=>x.name==='Charm Designs').target") == 40
     assert open_tab(pg, 'stock')
-    assert abs(float(pg.get_by_role('spinbutton', name='Expert Skill Learning Speedups target', exact=True).input_value()) - 1720/1440) < 1e-10
+    speedup_target = pg.get_by_role('spinbutton', name='Expert Skill Learning Speedups target', exact=True)
+    assert speedup_target.input_value() == '1.19'
+    speedup_target.focus()
+    speedup_target.press('Tab')
+    pg.wait_for_timeout(650)
+    assert abs(pg.evaluate("window.__DB.user_items.find(x=>x.name==='Expert Skill Learning Speedups').target") - 1720/1440) < 1e-10
     # Gen 6 is available to existing widget plans, with the same cost and stock rules.
     for hero in ('Wu Ming', 'Renee', 'Wayne'):
         assert pg.locator(f'#stock tr[data-q="{hero.lower()}"]').count() == 1
