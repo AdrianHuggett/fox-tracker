@@ -5,15 +5,16 @@
 (function(){
 'use strict';
 try{
-var NAMES={en:'English',es:'Español',tr:'Türkçe',no:'Norsk'};
-var COL={es:1,tr:2,no:3};
+var NAMES={en:'English',es:'Español',tr:'Türkçe',no:'Norsk',de:'Deutsch'};
+var COL={es:1,tr:2,no:3,de:4};
 var KEY='fox-lang';
 var MONTHS={
   en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
   es:['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
   tr:['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'],
-  no:['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des']};
-var DICT={es:{},tr:{},no:{}};
+ no:['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'],
+ de:['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']};
+var DICT={es:{},tr:{},no:{},de:{}};
 (window.I18N_ROWS||[]).forEach(function(r){
   Object.keys(COL).forEach(function(l){ if(r[COL[l]]) DICT[l][r[0]]=r[COL[l]]; });
 });
@@ -29,6 +30,8 @@ function translate(s){
   var lead=s.match(/^\s*/)[0], trail=s.match(/\s*$/)[0];
   var core=s.replace(/\s+/g,' ').trim();
   if(core.length<2) return null;
+  // Literal entries may contain numbers (for example "1. Members").
+  if(Object.prototype.hasOwnProperty.call(DICT[lang],core)) return lead+DICT[lang][core]+trail;
   var months=[];
   var k=core.replace(MON,function(m,d,mon){ months.push(MONTHS.en.indexOf(mon)); return d+' {m}'; });
   var nums=k.match(NUM)||[];
@@ -86,7 +89,7 @@ function detect(){
   var list=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en'];
   for(var i=0;i<list.length;i++){
     var c=String(list[i]).toLowerCase().slice(0,2);
-    if(c==='es'||c==='tr') return c;
+    if(c==='es'||c==='tr'||c==='de') return c;
     if(c==='nb'||c==='nn'||c==='no') return 'no';
     if(c==='en') return 'en';
   }

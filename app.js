@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-15-german',date:'2026-11-15',title:'German language available',points:['Choose Deutsch in either language menu. Your choice is remembered on this browser; your data stays unchanged.']},
 {id:'2026-11-14-backpack-target-filter',date:'2026-11-14',title:'Focus on Backpack targets',points:['Hide items without targets in the Backpack, then show them again with one click. Your quantities and targets are preserved.']},
 {id:'2026-11-14-mobile-layout',date:'2026-11-14',title:'Clearer phone layouts',points:['Smaller gear icons, readable tier selectors, Pets costs that fit the screen, and improved mobile navigation and Fortress sorting.']},
 {id:'2026-11-14-torxim-contents',date:'2026-11-14',title:'Pack contents refreshed',points:['Applied 162 content corrections across 57 packs checked against Torxim. Prices, Bought counts, Backpack quantities and targets are unchanged. Unverified variants remain unchanged.']},
