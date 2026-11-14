@@ -4,6 +4,11 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Hide items without targets","Ocultar objetos sin objetivo","Hedefi olmayan öğeleri gizle","Skjul gjenstander uten mål"],
+["Show items without targets","Mostrar objetos sin objetivo","Hedefi olmayan öğeleri göster","Vis gjenstander uten mål"],
+["No items with a target match this view.","Ningún objeto con objetivo coincide con esta vista.","Bu görünümle eşleşen hedefli öğe yok.","Ingen gjenstander med mål samsvarer med denne visningen."],
+["Focus on Backpack targets","Céntrate en los objetivos de la mochila","Sırt Çantası hedeflerine odaklan","Fokuser på ryggsekkmål"],
+["Hide items without targets in the Backpack, then show them again with one click. Your quantities and targets are preserved.","Oculta los objetos sin objetivo en la mochila y vuelve a mostrarlos con un clic. Tus cantidades y objetivos se conservan.","Sırt Çantasında hedefi olmayan öğeleri gizleyin, ardından tek tıklamayla tekrar gösterin. Miktarlarınız ve hedefleriniz korunur.","Skjul gjenstander uten mål i ryggsekken, og vis dem igjen med ett klikk. Mengdene og målene dine beholdes."],
 ["Clearer phone layouts","Diseños más claros en el móvil","Daha anlaşılır telefon düzenleri","Tydeligere mobiloppsett"],
 ["Smaller gear icons, readable tier selectors, Pets costs that fit the screen, and improved mobile navigation and Fortress sorting.","Iconos de equipo más pequeños, selectores de nivel legibles, costes de mascotas ajustados a la pantalla y mejoras en la navegación móvil y la ordenación de Fortress.","Daha küçük ekipman simgeleri, okunaklı kademe seçimleri, ekrana sığan Pets maliyetleri ve iyileştirilmiş mobil gezinme ve Fortress sıralaması.","Mindre utstyrsikoner, lesbare nivåvalg, Pets-kostnader som passer på skjermen, og bedre mobilnavigasjon og Fortress-sortering."],
 ["Pack contents refreshed","Contenido de paquetes actualizado","Paket içerikleri güncellendi","Pakkeinnhold oppdatert"],

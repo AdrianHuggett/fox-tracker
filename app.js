@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-14-backpack-target-filter',date:'2026-11-14',title:'Focus on Backpack targets',points:['Hide items without targets in the Backpack, then show them again with one click. Your quantities and targets are preserved.']},
 {id:'2026-11-14-mobile-layout',date:'2026-11-14',title:'Clearer phone layouts',points:['Smaller gear icons, readable tier selectors, Pets costs that fit the screen, and improved mobile navigation and Fortress sorting.']},
 {id:'2026-11-14-torxim-contents',date:'2026-11-14',title:'Pack contents refreshed',points:['Applied 162 content corrections across 57 packs checked against Torxim. Prices, Bought counts, Backpack quantities and targets are unchanged. Unverified variants remain unchanged.']},
 {id:'2026-11-14-expert-speedups',date:'2026-11-14',title:'Expert learning speedup targets',points:['Push your Experts plan to the Backpack to include its learning time as an Expert Skill Learning Speedups target. Days, hours and minutes are preserved.']},
@@ -1377,6 +1378,12 @@ function bind(){
 /* ---------- filters / tabs ---------- */
 var filters={stock:'all',packs:'all'}, queries={stock:'',packs:'',matrix:'',members:'',r4:''};
 function applyFilters(){
+  var targetToggle=$('stock-target-toggle');
+  if(targetToggle){
+    var targetsOnly=filters.stock==='targeted';
+    targetToggle.setAttribute('aria-pressed',String(targetsOnly));
+    targetToggle.textContent=targetsOnly?'Show items without targets':'Hide items without targets';
+  }
   ['stock','packs','matrix','members','r4'].forEach(function(id){
     var t=$(id); if(!t) return;
     var f=filters[id]||'all', q=(queries[id]||'').trim().toLowerCase();
@@ -1387,13 +1394,15 @@ function applyFilters(){
         var foldedGroup=id==='packs' && sortMode==='section' && r.classList.contains('grp') && !!PACK_FOLD[r.dataset.psection];
         r.classList.toggle('hide', searching || foldedGroup); return; }
       var st=r.dataset.state||'';
-      var okF = f==='all' || st.split(' ').indexOf(f)>=0;
+      var okF = f==='all' || (id==='stock'&&f==='targeted' ? st!=='none' : st.split(' ').indexOf(f)>=0);
       var okQ = !q || (r.dataset.q||'').indexOf(q)>=0;
       var okG = searching || !r.dataset.gn || !FOLD[r.dataset.gn];
       if(id==='packs' && !searching && sortMode==='section' && (PACK_FOLD[r.dataset.psection] || PACK_FOLD[r.dataset.pgroup])) okG=false;
       r.classList.toggle('hide', !(okF&&okQ&&okG));
     });
   });
+  var targetEmpty=$('stock-target-empty');
+  if(targetEmpty)targetEmpty.hidden=filters.stock!=='targeted'||!!document.querySelector('#stock tbody tr[data-state]:not(.hide)');
 }
 document.addEventListener('input',function(e){
   if(e.target.matches&&e.target.matches('input[type=search]')){
@@ -1454,6 +1463,13 @@ document.addEventListener('click',function(e){
     else { sortMode=m; sortDir=(m==='name')?1:-1; }
     renderPacks(); applyFilters(); bind(); return; }
   if(t.id==='c-section'){ sortMode='section'; sortDir=-1; renderPacks(); applyFilters(); bind(); return; }
+  if(t.id==='stock-target-toggle'){
+    filters.stock=filters.stock==='targeted'?'all':'targeted';
+    [].forEach.call(document.querySelectorAll('.chip[data-scope="stock"]'),function(c){
+      c.setAttribute('aria-pressed',String(c.dataset.f===filters.stock));
+    });
+    applyFilters();return;
+  }
   if(t.matches('.chip[data-f]')){
     filters[t.dataset.scope]=t.dataset.f;
     [].forEach.call(document.querySelectorAll('.chip[data-scope="'+t.dataset.scope+'"]'),function(c){
