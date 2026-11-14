@@ -1,6 +1,6 @@
 # Widgets planner
 
-The standalone Widgets planner covers the 16 mythic heroes from Gen 1–5 that have individual widget rows in Backpack:
+The standalone Widgets planner covers 19 mythic heroes from Gen 1–6. Backpack targets use each hero's existing widget row.
 
 | Generation | Heroes |
 | --- | --- |
@@ -9,6 +9,7 @@ The standalone Widgets planner covers the 16 mythic heroes from Gen 1–5 that h
 | 3 | Logan, Mia, Greg |
 | 4 | Ahmose, Reina, Lynn |
 | 5 | Hector, Norah, Gwen |
+| 6 | Wu Ming, Renee, Wayne |
 
 The planner level range is 0–10. Cumulative Widgets from level 0 are `0, 5, 15, 30, 50, 75, 105, 140, 180, 225, 275`. A planned upgrade costs `cumulative[target] - cumulative[current]`. SvS points use 8,000 points per Widget. Source: [WoSTools Hero Gear calculator](https://wostools.net/hero-gear-calculator), checked 15 October 2026.
 

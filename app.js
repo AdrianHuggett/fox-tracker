@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+ {id:'2026-11-14-gen6-widgets',date:'2026-11-14',title:'Gen 6 in the Widgets planner',points:['Plan widget upgrades for Wu Ming, Renee and Wayne in the new Gen 6 tab.']},
  {id:'2026-11-14-hero-icons-small',date:'2026-11-14',title:'Smaller Hero Gear icons',points:['Current and target icons now take up less space.']},
  {id:'2026-11-14-hero-gear-icons',date:'2026-11-14',title:'Current and target Hero Gear icons',points:['Each piece shows its current and target appearance, enhancement and Mastery Forging level.']},
  {id:'2026-11-12-foundry-regular-player',date:'2026-11-12',title:'Foundry player roles',points:['Keep tapping the same player to cycle through the team menu, Lead, Gatherer and regular player.']},

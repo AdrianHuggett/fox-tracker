@@ -101,7 +101,7 @@ Upgrade planner → Hero Gear plans Enhancement and Mastery Forging for the four
 
 ## Widgets planner
 
-Upgrade planner → Widgets covers all 16 mythic heroes in Gen 1–5, shown in five generation tabs with Gen 1 selected initially. Each hero has a current widget level and target level from 0 to 10. The planner shows the cumulative cost difference, the corresponding Backpack Have and shortfall, and total SvS points. The plan is saved in account metadata as `fox_widget_plan`. Push to Backpack previews the per-hero target quantity and updates only heroes with a positive planned upgrade. See `docs/widgets-notes.md` for the roster and source values.
+Upgrade planner → Widgets covers all 19 mythic heroes in Gen 1–6, shown in six generation tabs with Gen 1 selected initially. Each hero has a current widget level and target level from 0 to 10. The planner shows the cumulative cost difference, the corresponding Backpack Have and shortfall, and total SvS points. The plan is saved in account metadata as `fox_widget_plan`. Push to Backpack previews the per-hero target quantity and updates only heroes with a positive planned upgrade. See `docs/widgets-notes.md` for the roster and source values.
 
 ## Pets planner
 

@@ -1,4 +1,4 @@
-/* Mythic hero Widgets in the FOX Backpack, Gen 1–5. Widget costs and SvS scoring:
+/* Mythic hero Widgets, Gen 1–6. Widget costs and SvS scoring:
    https://wostools.net/hero-gear-calculator, checked 2026-10-15.
    Each cumulative entry is the total Widgets needed from level 0. */
 window.WIDGETS_DATA={
@@ -15,6 +15,8 @@ window.WIDGETS_DATA={
     {name:'Ahmose',generation:4},{name:'Reina',generation:4},
     {name:'Lynn',generation:4},
     {name:'Hector',generation:5},{name:'Norah',generation:5},
-    {name:'Gwen',generation:5}
+    {name:'Gwen',generation:5},
+    {name:'Wu Ming',generation:6},{name:'Renee',generation:6},
+    {name:'Wayne',generation:6}
   ]
 };

@@ -19,6 +19,7 @@ CATEGORIES = {'dash':'prep', 'stock':'prep', 'packs':'prep', 'matrix':'resources
 CATEGORIES['foxnews'] = 'foxnews'
 CATEGORIES['experts'] = 'planner'
 CATEGORIES['gear'] = 'planner'
+CATEGORIES['widgets'] = 'planner'
 
 def open_tab(pg, tab):
     pg.click(f'#category-nav button[data-category="{CATEGORIES[tab]}"]')
@@ -79,6 +80,22 @@ def run(p, width, name):
     print(f'[{name}] projected:', proj)
     open_tab(pg, 'r4'); pg.wait_for_timeout(400)
     print(f'[{name}] r4 workload:', pg.inner_text('#r4-load').replace('\n', ' | ') if pg.query_selector('#r4-load') else 'missing')
+    # Gen 6 is available to existing widget plans, with the same cost and stock rules.
+    assert open_tab(pg, 'widgets')
+    pg.locator('#p-widgets [data-gen="6"]').click()
+    assert pg.locator('#p-widgets .widget-person strong').all_text_contents() == ['Wu Ming', 'Renee', 'Wayne']
+    pg.locator('#p-widgets select[data-hero="Renee"][data-field="from"]').select_option('3')
+    pg.locator('#p-widgets select[data-hero="Renee"][data-field="to"]').select_option('4')
+    assert pg.locator('#p-widgets .widget-total strong').inner_text() == '20'
+    result = pg.evaluate("""() => {
+        const plan = FOXWidgets.normalize({view:'saved',rows:{Mia:{from:4,to:5},Renee:{from:3,to:4}}});
+        const totals = FOXWidgets.calculate(plan, {'Mia widget':{have:0},'Renee widget':{have:5}});
+        return {mia:plan.rows.Mia,wayne:plan.rows.Wayne,count:Object.keys(plan.rows).length,
+            total:totals.total,points:totals.points,renee:totals.rows.Renee.short};
+    }""")
+    assert result == {'mia':{'from':4,'to':5},'wayne':{'from':0,'to':0},'count':19,
+                      'total':45,'points':360000,'renee':15}, result
+
     # Foundry roster changes also update markers in earlier phases.
     assert open_tab(pg, 'foundry'), 'Foundry tab unavailable to mock admin'
     ff = pg.frame_locator('#p-foundry iframe')

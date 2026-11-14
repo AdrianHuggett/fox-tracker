@@ -4,6 +4,9 @@
    Anything missing from this file simply stays in English. Item names, building names and
    other in-game terms are deliberately left in English. */
 window.I18N_ROWS=[
+["Gen 6 in the Widgets planner","Gen 6 en el planificador de Widgets","Widget planlayıcısında Nesil 6","Gen 6 i Widget-planleggeren"],
+["Plan widget upgrades for Wu Ming, Renee and Wayne in the new Gen 6 tab.","Planifica mejoras de widgets para Wu Ming, Renee y Wayne en la nueva pestaña Gen 6.","Yeni Nesil 6 sekmesinde Wu Ming, Renee ve Wayne için widget yükseltmelerini planla.","Planlegg widget-oppgraderinger for Wu Ming, Renee og Wayne i den nye Gen 6-fanen."],
+["Set the current and target widget level for each mythic hero. Each hero has a separate Backpack target.","Establece el nivel actual y objetivo del widget de cada héroe mítico. Cada héroe tiene un objetivo separado en la mochila.","Her efsanevi kahramanın mevcut ve hedef widget seviyesini belirle. Her kahramanın ayrı bir Sırt Çantası hedefi vardır.","Angi nåværende og ønsket widget-nivå for hver mytiske helt. Hver helt har et eget ryggsekkmål."],
 ["Smaller Hero Gear icons","Iconos de equipo de héroe más pequeños","Daha küçük Kahraman Ekipmanı simgeleri","Mindre ikoner for helteutstyr"],
 ["Current and target icons now take up less space.","Los iconos actuales y objetivo ahora ocupan menos espacio.","Mevcut ve hedef simgeler artık daha az yer kaplıyor.","Ikonene for nåværende og ønsket utstyr tar nå mindre plass."],
 ["Current and target Hero Gear icons","Iconos del equipo de héroe actual y objetivo","Mevcut ve hedef Kahraman Ekipmanı simgeleri","Ikoner for nåværende og ønsket helteutstyr"],
