@@ -171,7 +171,7 @@ svg#map.t-roster { cursor: crosshair; }
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 14l3-7 5 4 2-6"/><path d="M9.6 4.6L13 2l.6 4.2z" fill="currentColor" stroke="none"/></svg>Path<kbd>L</kbd></button>
       <button type="button" class="tool" data-tool="dpath" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1 3.4"><path d="M2 14l3-7 5 4 2-6"/><path d="M9.6 4.6L13 2l.6 4.2z" fill="currentColor" stroke="none"/></svg>Dotted<kbd>D</kbd></button>
-      <button type="button" class="tool" data-tool="cpath" aria-pressed="false" title="Tap a start, bend and end. Tap the last point again or press Enter to finish.">
+      <button type="button" class="tool" data-tool="cpath" aria-pressed="false" title="Tap a start, one control point, then the end. Use Select to drag the yellow diamond.">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 3.4"><path d="M2 14C2 3 8 12 12 4"/><path d="M9 3l5-1-1 5z" fill="currentColor" stroke="none"/></svg>Curved dotted<kbd>C</kbd></button>
       <button type="button" class="tool" data-tool="pen" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c3-6 5 2 8-3s3-5 4-6"/></svg>Pen<kbd>P</kbd></button>
@@ -393,14 +393,18 @@ svg#map.t-roster { cursor: crosshair; }
   function pathPreview(cur) {
     if (!pathDraft) { $('#preview').innerHTML = ''; return; }
     const pts = cur ? pathDraft.points.concat([[cur.x, cur.y]]) : pathDraft.points;
-    $('#preview').innerHTML = (pts.length > 1 ? itemSvg({ id: 0, type: 'path', style: pathDraft.style, curved: pathDraft.curved, color, size, points: pts }, false) : '') +
+    $('#preview').innerHTML = (pts.length > 1 ? itemSvg({ id: 0, type: 'path', style: pathDraft.style, curved: pathDraft.curved, curveMode: pathDraft.curveMode, color, size, points: pts }, false) : '') +
       pathDraft.points.map((q) => `<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="#ffffff" stroke="#0a131d" stroke-width="2"/>`).join('');
   }
   function finishPath() {
     const d = pathDraft; pathDraft = null; $('#preview').innerHTML = '';
     if (!d || d.points.length < 2) return;
     snapshot(); const id = newId();
-    state.items.push({ id, phase, type: 'path', style: d.style, curved: d.curved, color, size, points: d.points });
+    if (d.curved && d.points.length === 2) {
+      const [a, b] = d.points; d.points.splice(1, 0, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
+    }
+    state.items.push({ id, phase, type: 'path', style: d.style, curved: d.curved, curveMode: d.curveMode, color, size, points: d.points });
+    if (d.curved) tool = 'select';
     clearSel(); selected = id; save(); render();
   }
 
@@ -449,6 +453,7 @@ svg#map.t-roster { cursor: crosshair; }
     d += `<pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#21364d" stroke-width="1"/></pattern>`;
     d += `<radialGradient id="arena" cx="50%" cy="50%" r="55%"><stop offset="0" stop-color="#1b2f45"/><stop offset=".75" stop-color="#14263a"/><stop offset="1" stop-color="#0f1d2d"/></radialGradient>`;
     d += `<clipPath id="arenaClip"><ellipse cx="500" cy="403" rx="462" ry="372"/></clipPath>`;
+    d += '<filter id="pencil-texture" x="-25%" y="-35%" width="150%" height="170%"><feTurbulence type="fractalNoise" baseFrequency=".06 .5" numOctaves="2" seed="8" result="grain"/><feDisplacementMap in="SourceGraphic" in2="grain" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter>';
     $('#defs').innerHTML = d;
   }
   function rim() {
@@ -526,19 +531,58 @@ svg#map.t-roster { cursor: crosshair; }
     const fs = ((15 + (SIZES[it.size] || 1) * 2) * 0.9 * 0.85).toFixed(1);
     return `<text transform="translate(${mx.toFixed(1)},${my.toFixed(1)}) rotate(${a.toFixed(1)})" y="${-(w / 2 + 8)}" text-anchor="middle" fill="${c}" font-family="Barlow, sans-serif" font-weight="700" font-size="${fs}" paint-order="stroke" stroke="#0a131d" stroke-width="5" stroke-linejoin="round">${esc(it.label)}</text>`;
   }
-  // Interpolate through every editable waypoint; legacy paths remain straight.
+  // Old waypoint curves are displayed with one control without rewriting saved points.
+  function curvePoints(it) {
+    const p = it.points;
+    if (it.curveMode === 'quadratic' && p.length === 3) return p;
+    const a = p[0], b = p[p.length - 1];
+    if (p.length < 3) return [a, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], b];
+    const mid = (p.length - 1) / 2, lo = p[Math.floor(mid)], hi = p[Math.ceil(mid)];
+    return [a, [lo[0] + hi[0] - (a[0] + b[0]) / 2, lo[1] + hi[1] - (a[1] + b[1]) / 2], b];
+  }
   function pathData(points, curved) {
     if (!points.length) return '';
-    let d = 'M' + points[0].join(' ');
-    for (let i = 1; i < points.length; i++) {
-      const a = points[i - 1], b = points[i];
-      if (!curved || points.length < 3) { d += ' L' + b.join(' '); continue; }
-      const prev = points[Math.max(0, i - 2)], next = points[Math.min(points.length - 1, i + 1)];
-      d += ' C' + [a[0] + (b[0] - prev[0]) / 6, a[1] + (b[1] - prev[1]) / 6,
-        b[0] - (next[0] - a[0]) / 6, b[1] - (next[1] - a[1]) / 6, b[0], b[1]].join(' ');
-    }
-    return d;
+    if (curved && points.length === 3) return 'M' + points[0].join(' ') + ' Q' + points[1].join(' ') + ' ' + points[2].join(' ');
+    return points.map((p, i) => (i ? 'L' : 'M') + p.join(' ')).join(' ');
   }
+  function endAngle(points) {
+    const b = points[points.length - 1];
+    for (let i = points.length - 2; i >= 0; i--) {
+      const a = points[i];
+      if (a[0] !== b[0] || a[1] !== b[1]) return Math.atan2(b[1] - a[1], b[0] - a[0]);
+    }
+    return 0;
+  }
+  function pathDash(it, width) { return it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(width * 2.2).toFixed(1)}"` : ''; }
+  function curveLabel(points, it) {
+    const [a, control, b] = points;
+    const x = (a[0] + 2 * control[0] + b[0]) / 4, y = (a[1] + 2 * control[1] + b[1]) / 4;
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    return { x1: x - dx / 2, y1: y - dy / 2, x2: x + dx / 2, y2: y + dy / 2, size: it.size, label: it.label };
+  }
+  function sketchArrow(path, color, width, dash, end, angle) {
+    const [x, y] = end, length = width * 3.6;
+    const bx = x - Math.cos(angle) * length, by = y - Math.sin(angle) * length;
+    const px = Math.sin(angle) * length * .46, py = -Math.cos(angle) * length * .46;
+    const head = `M${bx + px} ${by + py} L${x} ${y} L${bx - px} ${by - py} Z`;
+    // Texture affects only the ink; the selectable geometry remains an exact curve.
+    return `<g class="arrow-art" filter="url(#pencil-texture)" pointer-events="none">
+      <path d="${path}" fill="none" stroke="#0a131d" stroke-width="${width + 2}" stroke-linecap="round" stroke-linejoin="round"${dash}/>
+      <path class="arrow-ink" d="${path}" fill="none" stroke="${color}" stroke-width="${width * .7}" stroke-linecap="round" stroke-linejoin="round"${dash}/>
+      <path d="${path}" transform="translate(1.5,-1.2)" fill="none" stroke="${color}" opacity=".65" stroke-width="${Math.max(.8, width * .3)}" stroke-linecap="round" stroke-linejoin="round"${dash}/>
+      <path d="${head}" fill="${color}" fill-opacity=".16" stroke="#0a131d" stroke-width="5" stroke-linejoin="round"/>
+      <path d="${head}" fill="none" stroke="${color}" stroke-width="1.65" stroke-linejoin="round"/>
+      <path d="${head}" transform="translate(1.5,-1.2)" fill="none" stroke="${color}" opacity=".65" stroke-width=".8" stroke-linejoin="round"/>
+    </g>`;
+  }
+  function pathHandles(points, curved, color) {
+    const guides = curved ? `<path d="M${points[0].join(' ')} L${points[1].join(' ')} L${points[2].join(' ')}" fill="none" stroke="#d8e6ed" stroke-opacity=".55" stroke-width="1.5" stroke-dasharray="5 7" pointer-events="none"/>` : '';
+    return guides + points.map((q, i) => `<g data-handle="${i + 1}"${curved && i === 1 ? ' data-curve-control="true" aria-label="Curve control point"' : ''} style="cursor:grab">
+      <circle cx="${q[0]}" cy="${q[1]}" r="22" fill="transparent"/>
+      ${curved && i === 1 ? `<path d="M${q[0]} ${q[1] - 11} l11 11 -11 11 -11 -11 Z" fill="#ffd35d" stroke="#fff2c4" stroke-width="2.5"/>` : `<circle cx="${q[0]}" cy="${q[1]}" r="8" fill="#ffffff" stroke="#0a131d" stroke-width="3"/><circle cx="${q[0]}" cy="${q[1]}" r="3" fill="${color}"/>`}
+    </g>`).join('');
+  }
+
   function itemSvg(it, interactive) {
     const c = COLORS[it.color] || COLORS.W;
     const sel = interactive && (selected === it.id || multi.has(it.id));
@@ -550,8 +594,7 @@ svg#map.t-roster { cursor: crosshair; }
       return `<g${idAttr}>
         <line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="transparent" stroke-width="${hit}" stroke-linecap="round"/>
         ${sel ? `<line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="#ffffff" stroke-opacity=".35" stroke-width="${w + 10}" stroke-linecap="round"/>` : ''}
-        <line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="#0a131d" stroke-width="${w + 3}" stroke-linecap="round"${dash}/>
-        <line x1="${it.x1}" y1="${it.y1}" x2="${it.x2}" y2="${it.y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${dash} marker-end="url(#ah-${it.color})"/>
+        ${sketchArrow(`M${it.x1} ${it.y1} L${it.x2} ${it.y2}`, c, w, dash, [it.x2, it.y2], Math.atan2(it.y2 - it.y1, it.x2 - it.x1))}
         ${it.label ? arrowLabel(it, c, w) : ''}
         ${sel && selected === it.id && !multi.size ? [1, 2].map((h) => { const hx = h === 1 ? it.x1 : it.x2, hy = h === 1 ? it.y1 : it.y2;
           return `<g data-handle="${h}" style="cursor:grab"><circle cx="${hx}" cy="${hy}" r="20" fill="transparent"/><circle cx="${hx}" cy="${hy}" r="9" fill="#ffffff" stroke="#0a131d" stroke-width="3"/><circle cx="${hx}" cy="${hy}" r="3.5" fill="${c}"/></g>`; }).join('') : ''}
@@ -559,17 +602,17 @@ svg#map.t-roster { cursor: crosshair; }
     }
     if (it.type === 'path') {
       const w = 6 * (SIZES[it.size] || 1);
-      const path = pathData(it.points, it.curved);
+      const points = it.curved ? curvePoints(it) : it.points;
+      const path = pathData(points, it.curved);
       // the label sits on the longest segment, parallel to it
       let seg = null, sl = -1;
       for (let i = 1; i < it.points.length; i++) { const a = it.points[i - 1], b = it.points[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > sl) { sl = l; seg = { x1: a[0], y1: a[1], x2: b[0], y2: b[1], size: it.size, label: it.label }; } }
       return `<g${idAttr}>
         <path d="${path}" fill="none" stroke="transparent" stroke-width="${Math.max(28, w + 20)}" stroke-linecap="round" stroke-linejoin="round"/>
         ${sel ? `<path d="${path}" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="${w + 10}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-        <path d="${path}" fill="none" stroke="#0a131d" stroke-width="${w + 3}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''}/>
-        <path d="${path}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''} marker-end="url(#ah-${it.color})"/>
-        ${it.label && seg ? arrowLabel(seg, c, w) : ''}
-        ${sel && selected === it.id && !multi.size ? it.points.map((q, i) => `<g data-handle="${i + 1}" style="cursor:grab"><circle cx="${q[0]}" cy="${q[1]}" r="18" fill="transparent"/><circle cx="${q[0]}" cy="${q[1]}" r="${i === it.points.length - 1 || i === 0 ? 9 : 7}" fill="#ffffff" stroke="#0a131d" stroke-width="3"/><circle cx="${q[0]}" cy="${q[1]}" r="3" fill="${c}"/></g>`).join('') : ''}
+        ${sketchArrow(path, c, w, pathDash(it, w), points[points.length - 1], endAngle(points))}
+        ${it.label && seg ? arrowLabel(it.curved ? curveLabel(points, it) : seg, c, w) : ''}
+        ${sel && selected === it.id && !multi.size ? pathHandles(points, it.curved, c) : ''}
       </g>`;
     }
     if (it.type === 'pen') {
@@ -1270,11 +1313,12 @@ svg#map.t-roster { cursor: crosshair; }
     }
     if (tool === 'attack' || tool === 'route') { drag = { mode: 'arrow', x1: p.x, y1: p.y, x2: p.x, y2: p.y }; return; }
     if (tool === 'path' || tool === 'dpath' || tool === 'cpath') {
-      if (!pathDraft) { pathDraft = { points: [[p.x, p.y]], style: tool === 'path' ? 'solid' : 'dotted', curved: tool === 'cpath' }; clearSel(); renderItems(); toast('Tap to add points. Tap the last point again or press Enter to finish.'); }
+      if (!pathDraft) { pathDraft = { points: [[p.x, p.y]], style: tool === 'path' ? 'solid' : 'dotted', curved: tool === 'cpath', curveMode: tool === 'cpath' ? 'quadratic' : undefined }; clearSel(); renderItems(); toast(tool === 'cpath' ? 'Tap the yellow control point position, then the end. Three taps finish the curve.' : 'Tap to add points. Tap the last point again or press Enter to finish.'); }
       else {
         const last = pathDraft.points[pathDraft.points.length - 1];
         if (Math.hypot(p.x - last[0], p.y - last[1]) < 12) { finishPath(); return; }
         pathDraft.points.push([p.x, p.y]);
+        if (pathDraft.curved && pathDraft.points.length === 3) { finishPath(); return; }
       }
       pathPreview(); return;
     }
@@ -1315,7 +1359,14 @@ svg#map.t-roster { cursor: crosshair; }
     }
     if (drag.mode === 'handle') {
       const it = state.items.find((i) => i.id === selected); if (!it) return;
-      if (it.type === 'path') it.points[drag.end - 1] = [p.x, p.y];
+      if (it.type === 'path') {
+        if (it.curved && it.curveMode !== 'quadratic') {
+          // Keep the original drawing in shared/saved plans when an old curve is edited.
+          it.originalCurvePoints = it.points.map((q) => q.slice());
+          it.points = curvePoints(it); it.curveMode = 'quadratic';
+        }
+        it.points[drag.end - 1] = [p.x, p.y];
+      }
       else if (drag.end === 1) { it.x1 = p.x; it.y1 = p.y; } else { it.x2 = p.x; it.y2 = p.y; }
       drag.moved = true; renderItems(); return;
     }

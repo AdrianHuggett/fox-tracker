@@ -173,9 +173,11 @@ def run(p, width, name):
         canvas.click(position={'x': box['width'] * x, 'y': box['height'] * y})
     foundry.locator('body').press('Enter')
     curve = foundry.evaluate("JSON.parse(localStorage.getItem('fox-foundry-war-room-v4-L2')).items.slice(-1)[0]")
+    assert curve['curveMode'] == 'quadratic'
+    assert foundry.locator('#items [data-curve-control]').count() == 1
     assert curve['curved'] and curve['style'] == 'dotted' and len(curve['points']) == 3, curve
-    drawn = foundry.locator(f'#items [data-id="{curve["id"]}"] path[marker-end]')
-    assert 'C' in drawn.get_attribute('d') and drawn.get_attribute('stroke-dasharray')
+    drawn = foundry.locator(f'#items [data-id="{curve["id"]}"] path.arrow-ink')
+    assert 'Q' in drawn.get_attribute('d') and drawn.get_attribute('stroke-dasharray')
     assert foundry.locator(f'#items [data-id="{curve["id"]}"] [data-handle]').count() == 3
     foundry.locator('#copyBtn').click()
     foundry.locator('#pasteBtn').click()
@@ -183,7 +185,7 @@ def run(p, width, name):
     assert pasted['curved'] and pasted['id'] != curve['id']
     foundry.locator('#undo').click()
     foundry.goto(foundry.url)
-    assert 'C' in drawn.get_attribute('d') and drawn.get_attribute('stroke-dasharray')
+    assert 'Q' in drawn.get_attribute('d') and drawn.get_attribute('stroke-dasharray')
 
     # Layout planner: the iframe loads, Generate seats players, and the layout is saved under the account's own key
     open_tab(pg, 'layout'); pg.wait_for_timeout(800)

@@ -199,4 +199,6 @@ Tables and upgrade planners render on first opening. Data changes invalidate all
 
 ### Foundry curved dotted arrows
 
-Curved dotted (C) draws a smooth dotted arrow through tapped waypoints. Finish by tapping the final point again or pressing Enter; Escape cancels. Select exposes draggable waypoints. The existing path item gains curved: true, preserving compatibility with undo, copy/paste, phase/legion storage, plan codes and image export. Existing paths keep straight segments.
+Curved dotted (C) uses an exact quadratic curve with one yellow control point. Tap start, control and end to finish automatically. Select exposes two endpoint handles and one control diamond with guide lines. Attack, Route, Path, Dotted and Curved dotted share a pencil texture, double stroke and outlined arrowhead; interaction geometry remains precise. Image exports use the same renderer and texture definitions.
+
+New curves store three points with curveMode: 'quadratic'. Older waypoint curves display as a single quadratic using their endpoints and middle waypoint; the original saved points remain intact. Editing an older curve retains its original points in originalCurvePoints before converting it. Copy/paste, undo, phase/legion storage and plan codes retain the new properties.
