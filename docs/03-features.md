@@ -196,3 +196,7 @@ Alliances (since 10 Nov 2026): each layout carries its own list `{id, tag (≤ 4
 ## Rendering and memory
 
 Tables and upgrade planners render on first opening. Data changes invalidate all views, but only the active panel is refreshed immediately. Hidden views refresh on their next visit. This avoids rebuilding the pack matrix and six planners for every stock edit.
+
+### Foundry curved dotted arrows
+
+Curved dotted (C) draws a smooth dotted arrow through tapped waypoints. Finish by tapping the final point again or pressing Enter; Escape cancels. Select exposes draggable waypoints. The existing path item gains curved: true, preserving compatibility with undo, copy/paste, phase/legion storage, plan codes and image export. Existing paths keep straight segments.

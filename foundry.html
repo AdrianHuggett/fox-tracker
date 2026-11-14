@@ -64,7 +64,7 @@ h1 span { color: var(--fox); }
 .maskctl output { font: 500 11px var(--mono); min-width: 4ch; color: var(--fg); }
 svg#map { display: block; width: 100%; height: auto; max-height: calc(100vh - 150px); aspect-ratio: 1000 / 807; overscroll-behavior: contain; margin: 0 auto; touch-action: none; user-select: none; -webkit-user-select: none; }
 svg#map.t-select { cursor: default; }
-svg#map.t-attack, svg#map.t-route, svg#map.t-path, svg#map.t-dpath, svg#map.t-pen, svg#map.t-marker, svg#map.t-text { cursor: crosshair; }
+svg#map.t-attack, svg#map.t-route, svg#map.t-path, svg#map.t-dpath, svg#map.t-cpath, svg#map.t-pen, svg#map.t-marker, svg#map.t-text { cursor: crosshair; }
 svg#map.t-eraser { cursor: not-allowed; }
 svg#map.editmap .bld { cursor: move; }
 
@@ -171,6 +171,8 @@ svg#map.t-roster { cursor: crosshair; }
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 14l3-7 5 4 2-6"/><path d="M9.6 4.6L13 2l.6 4.2z" fill="currentColor" stroke="none"/></svg>Path<kbd>L</kbd></button>
       <button type="button" class="tool" data-tool="dpath" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1 3.4"><path d="M2 14l3-7 5 4 2-6"/><path d="M9.6 4.6L13 2l.6 4.2z" fill="currentColor" stroke="none"/></svg>Dotted<kbd>D</kbd></button>
+      <button type="button" class="tool" data-tool="cpath" aria-pressed="false" title="Tap a start, bend and end. Tap the last point again or press Enter to finish.">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 3.4"><path d="M2 14C2 3 8 12 12 4"/><path d="M9 3l5-1-1 5z" fill="currentColor" stroke="none"/></svg>Curved dotted<kbd>C</kbd></button>
       <button type="button" class="tool" data-tool="pen" aria-pressed="false">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12c3-6 5 2 8-3s3-5 4-6"/></svg>Pen<kbd>P</kbd></button>
       <button type="button" class="tool" data-tool="text" aria-pressed="false">
@@ -391,14 +393,14 @@ svg#map.t-roster { cursor: crosshair; }
   function pathPreview(cur) {
     if (!pathDraft) { $('#preview').innerHTML = ''; return; }
     const pts = cur ? pathDraft.points.concat([[cur.x, cur.y]]) : pathDraft.points;
-    $('#preview').innerHTML = (pts.length > 1 ? itemSvg({ id: 0, type: 'path', style: pathDraft.style, color, size, points: pts }, false) : '') +
+    $('#preview').innerHTML = (pts.length > 1 ? itemSvg({ id: 0, type: 'path', style: pathDraft.style, curved: pathDraft.curved, color, size, points: pts }, false) : '') +
       pathDraft.points.map((q) => `<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="#ffffff" stroke="#0a131d" stroke-width="2"/>`).join('');
   }
   function finishPath() {
     const d = pathDraft; pathDraft = null; $('#preview').innerHTML = '';
     if (!d || d.points.length < 2) return;
     snapshot(); const id = newId();
-    state.items.push({ id, phase, type: 'path', style: d.style, color, size, points: d.points });
+    state.items.push({ id, phase, type: 'path', style: d.style, curved: d.curved, color, size, points: d.points });
     clearSel(); selected = id; save(); render();
   }
 
@@ -524,6 +526,19 @@ svg#map.t-roster { cursor: crosshair; }
     const fs = ((15 + (SIZES[it.size] || 1) * 2) * 0.9 * 0.85).toFixed(1);
     return `<text transform="translate(${mx.toFixed(1)},${my.toFixed(1)}) rotate(${a.toFixed(1)})" y="${-(w / 2 + 8)}" text-anchor="middle" fill="${c}" font-family="Barlow, sans-serif" font-weight="700" font-size="${fs}" paint-order="stroke" stroke="#0a131d" stroke-width="5" stroke-linejoin="round">${esc(it.label)}</text>`;
   }
+  // Interpolate through every editable waypoint; legacy paths remain straight.
+  function pathData(points, curved) {
+    if (!points.length) return '';
+    let d = 'M' + points[0].join(' ');
+    for (let i = 1; i < points.length; i++) {
+      const a = points[i - 1], b = points[i];
+      if (!curved || points.length < 3) { d += ' L' + b.join(' '); continue; }
+      const prev = points[Math.max(0, i - 2)], next = points[Math.min(points.length - 1, i + 1)];
+      d += ' C' + [a[0] + (b[0] - prev[0]) / 6, a[1] + (b[1] - prev[1]) / 6,
+        b[0] - (next[0] - a[0]) / 6, b[1] - (next[1] - a[1]) / 6, b[0], b[1]].join(' ');
+    }
+    return d;
+  }
   function itemSvg(it, interactive) {
     const c = COLORS[it.color] || COLORS.W;
     const sel = interactive && (selected === it.id || multi.has(it.id));
@@ -544,15 +559,15 @@ svg#map.t-roster { cursor: crosshair; }
     }
     if (it.type === 'path') {
       const w = 6 * (SIZES[it.size] || 1);
-      const pts = it.points.map((q) => q[0] + ',' + q[1]).join(' ');
+      const path = pathData(it.points, it.curved);
       // the label sits on the longest segment, parallel to it
       let seg = null, sl = -1;
       for (let i = 1; i < it.points.length; i++) { const a = it.points[i - 1], b = it.points[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > sl) { sl = l; seg = { x1: a[0], y1: a[1], x2: b[0], y2: b[1], size: it.size, label: it.label }; } }
       return `<g${idAttr}>
-        <polyline points="${pts}" fill="none" stroke="transparent" stroke-width="${Math.max(28, w + 20)}" stroke-linecap="round" stroke-linejoin="round"/>
-        ${sel ? `<polyline points="${pts}" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="${w + 10}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-        <polyline points="${pts}" fill="none" stroke="#0a131d" stroke-width="${w + 3}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''}/>
-        <polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''} marker-end="url(#ah-${it.color})"/>
+        <path d="${path}" fill="none" stroke="transparent" stroke-width="${Math.max(28, w + 20)}" stroke-linecap="round" stroke-linejoin="round"/>
+        ${sel ? `<path d="${path}" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="${w + 10}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+        <path d="${path}" fill="none" stroke="#0a131d" stroke-width="${w + 3}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''}/>
+        <path d="${path}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"${it.style === 'dotted' ? ` stroke-dasharray="0.01 ${(w * 2.2).toFixed(1)}"` : ''} marker-end="url(#ah-${it.color})"/>
         ${it.label && seg ? arrowLabel(seg, c, w) : ''}
         ${sel && selected === it.id && !multi.size ? it.points.map((q, i) => `<g data-handle="${i + 1}" style="cursor:grab"><circle cx="${q[0]}" cy="${q[1]}" r="18" fill="transparent"/><circle cx="${q[0]}" cy="${q[1]}" r="${i === it.points.length - 1 || i === 0 ? 9 : 7}" fill="#ffffff" stroke="#0a131d" stroke-width="3"/><circle cx="${q[0]}" cy="${q[1]}" r="3" fill="${c}"/></g>`).join('') : ''}
       </g>`;
@@ -967,7 +982,7 @@ svg#map.t-roster { cursor: crosshair; }
     if (e.target.matches('input, textarea, select')) return;
     if (pathDraft && (e.key === 'Enter' || e.key === 'Escape')) { e.preventDefault(); if (e.key === 'Enter') finishPath(); else { pathDraft = null; pathPreview(); } return; }
     if (e.key === 'Escape' && pending) { pending = null; tool = 'select'; render(); return; }
-    const map0 = { v: 1, a: 1, r: 1, l: 1, d: 1, p: 1, t: 1, e: 1 };
+    const map0 = { v: 1, a: 1, r: 1, l: 1, d: 1, c: 1, p: 1, t: 1, e: 1 };
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
     if (e.key === 'Delete' || e.key === 'Backspace') { if (selIds().length) { e.preventDefault(); deleteSelected(); } return; }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') { e.preventDefault(); copySel(); return; }
@@ -976,7 +991,7 @@ svg#map.t-roster { cursor: crosshair; }
     if (e.key === 'Escape' && selIds().length) { clearSel(); render(); return; }
     if (pending) return;
     if (pathDraft && map0[e.key.toLowerCase()]) finishPath();
-    const map = { v: 'select', a: 'attack', r: 'route', l: 'path', d: 'dpath', p: 'pen', t: 'text', e: 'eraser' };
+    const map = { v: 'select', a: 'attack', r: 'route', l: 'path', d: 'dpath', c: 'cpath', p: 'pen', t: 'text', e: 'eraser' };
     const k = e.key.toLowerCase();
     if (map[k] && !e.ctrlKey && !e.metaKey && !e.altKey) { tool = map[k]; render(); }
     if (['1', '2', '3'].includes(e.key)) { phase = +e.key; clearSel(); render(); }
@@ -1254,8 +1269,8 @@ svg#map.t-roster { cursor: crosshair; }
       return;
     }
     if (tool === 'attack' || tool === 'route') { drag = { mode: 'arrow', x1: p.x, y1: p.y, x2: p.x, y2: p.y }; return; }
-    if (tool === 'path' || tool === 'dpath') {
-      if (!pathDraft) { pathDraft = { points: [[p.x, p.y]], style: tool === 'dpath' ? 'dotted' : 'solid' }; clearSel(); renderItems(); toast('Tap to add points. Tap the last point again or press Enter to finish.'); }
+    if (tool === 'path' || tool === 'dpath' || tool === 'cpath') {
+      if (!pathDraft) { pathDraft = { points: [[p.x, p.y]], style: tool === 'path' ? 'solid' : 'dotted', curved: tool === 'cpath' }; clearSel(); renderItems(); toast('Tap to add points. Tap the last point again or press Enter to finish.'); }
       else {
         const last = pathDraft.points[pathDraft.points.length - 1];
         if (Math.hypot(p.x - last[0], p.y - last[1]) < 12) { finishPath(); return; }
@@ -1279,7 +1294,7 @@ svg#map.t-roster { cursor: crosshair; }
   });
 
   svg.addEventListener('pointermove', (e) => {
-    if ((tool === 'path' || tool === 'dpath') && pathDraft && !drag) { pathPreview(pt(e)); return; }
+    if ((tool === 'path' || tool === 'dpath' || tool === 'cpath') && pathDraft && !drag) { pathPreview(pt(e)); return; }
     if (!drag) return;
     if (drag.mode === 'pan') { const k = view.w / svg.getBoundingClientRect().width; setView(drag.vx - (e.clientX - drag.cx) * k, drag.vy - (e.clientY - drag.cy) * k, view.w); return; }
     const p = pt(e);
