@@ -33,7 +33,7 @@ ok    = tgt > 0 ? proj >= tgt : null        // on track / behind
 - Hero Widget item names display a generation label from `WIDGETS_DATA.heroes`; the stored item names and targets remain unchanged.
 - Steel's section follows Fire Crystal materials in the display order; saved item IDs are unchanged.
 
-- Hero Shards displays only the 16 Gen 1–5 mythic heroes and generic Mythic Hero Shards. Epic/rare rows remain stored and included in stock snapshots; only their Backpack rows are hidden.
+- Hero Shards displays only the 19 Gen 1–6 mythic heroes and generic Mythic Hero Shards. Epic/rare rows remain stored and included in stock snapshots; only their Backpack rows are hidden.
 
 - Grouped by `grp`, with foldable headers (a fill bar shows how many items have Have > 0).
 - Columns: icon, item, Have (input), Target (input), Remaining, Progress (bar + %), Free/day, Projected, Status pill (on track / behind / no target) and "N short by SvS day".

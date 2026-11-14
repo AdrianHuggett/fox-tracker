@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+ {id:'2026-11-14-gen6-backpack',date:'2026-11-14',title:'Gen 6 resources and widget artwork',points:['Track Wu Ming, Renee and Wayne shards and widgets in your Backpack. Each hero widget now has its own artwork in the Backpack and planner.']},
  {id:'2026-11-14-gen6-widgets',date:'2026-11-14',title:'Gen 6 in the Widgets planner',points:['Plan widget upgrades for Wu Ming, Renee and Wayne in the new Gen 6 tab.']},
  {id:'2026-11-14-hero-icons-small',date:'2026-11-14',title:'Smaller Hero Gear icons',points:['Current and target icons now take up less space.']},
  {id:'2026-11-14-hero-gear-icons',date:'2026-11-14',title:'Current and target Hero Gear icons',points:['Each piece shows its current and target appearance, enhancement and Mastery Forging level.']},
@@ -928,10 +929,11 @@ function inp(val,cls,attrs){
 var widgetGenerations=Object.create(null);
 (window.WIDGETS_DATA&&window.WIDGETS_DATA.heroes||[]).forEach(function(hero){
   widgetGenerations[hero.name+' widget']=hero.generation;
+  if(hero.icon)ITEM_ART[hero.name+' widget']=hero.icon;
 });
 function renderStock(){
   // Keep hidden quantities in memory and snapshots; only narrow the Backpack view.
-  var mythicShards=['Mythic Hero Shards','Natalia','Jeronimo','Molly','Zinman','Flint','Philly','Alonso','Logan','Mia','Greg','Ahmose','Reina','Lynn','Hector','Norah','Gwen'];
+  var mythicShards=['Mythic Hero Shards'].concat((window.WIDGETS_DATA.heroes||[]).map(function(hero){return hero.name;}));
   function visible(it){ return !/Hero Shards/i.test(it.grp||'') || mythicShards.indexOf(it.name)!==-1; }
   /* Count each group first so its header can say how much of it you have filled in. */
   var stats={};

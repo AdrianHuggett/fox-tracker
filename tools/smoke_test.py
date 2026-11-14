@@ -81,9 +81,16 @@ def run(p, width, name):
     open_tab(pg, 'r4'); pg.wait_for_timeout(400)
     print(f'[{name}] r4 workload:', pg.inner_text('#r4-load').replace('\n', ' | ') if pg.query_selector('#r4-load') else 'missing')
     # Gen 6 is available to existing widget plans, with the same cost and stock rules.
+    for hero in ('Wu Ming', 'Renee', 'Wayne'):
+        assert pg.locator(f'#stock tr[data-q="{hero.lower()}"]').count() == 1
+    widget_icons = pg.locator('#stock tr[data-q*="widget gen"] img.item-art')
+    assert widget_icons.count() == 19
+    widget_icons.evaluate_all('(images) => Promise.all(images.map(img => img.decode()))')
+    assert widget_icons.evaluate_all('(images) => images.every(img => img.naturalWidth > 0)')
     assert open_tab(pg, 'widgets')
     pg.locator('#p-widgets [data-gen="6"]').click()
     assert pg.locator('#p-widgets .widget-person strong').all_text_contents() == ['Wu Ming', 'Renee', 'Wayne']
+    assert pg.locator('#p-widgets .widget-person img').evaluate_all('(images) => images.every(img => img.getAttribute("src").startsWith("widget-art/"))')
     pg.locator('#p-widgets select[data-hero="Renee"][data-field="from"]').select_option('3')
     pg.locator('#p-widgets select[data-hero="Renee"][data-field="to"]').select_option('4')
     assert pg.locator('#p-widgets .widget-total strong').inner_text() == '20'
