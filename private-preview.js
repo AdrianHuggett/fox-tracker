@@ -5,10 +5,10 @@
   window.FOXPrivatePreview={create:function(options){
     var sb=options.sb, owner=options.userId, rowId='account-optimizer';
     var alive=true, allowed=false, frame=null, host=null, revision=0, busy=false;
-    var generation=0, loadPromise=null;
+    var generation=0, loadPromise=null, lookupBusy=false;
     function query(columns){return sb.from('private_feature_previews').select(columns).eq('id',rowId).eq('owner_id',owner).maybeSingle();}
     function send(message){if(alive&&frame&&frame.contentWindow)frame.contentWindow.postMessage(Object.assign({channel:'fox-private-preview'},message),'*');}
-    function clear(){generation++;if(frame)frame.remove();frame=null;if(host)host.replaceChildren();}
+    function clear(){generation++;lookupBusy=false;if(frame)frame.remove();frame=null;if(host)host.replaceChildren();}
     function notice(message,retry){
       if(!host)return;host.replaceChildren();var box=document.createElement('div');box.className='card';
       var p=document.createElement('p');p.textContent=message;box.appendChild(p);
@@ -43,6 +43,30 @@
       if(!alive||!frame||e.source!==frame.contentWindow||!e.data||e.data.channel!=='fox-private-preview')return;
       var m=e.data;
       if(m.type==='resize'){var h=Number(m.height);if(Number.isFinite(h))frame.style.height=Math.min(30000,Math.max(440,Math.ceil(h)))+'px';return;}
+      if(m.type==='lookup-player'){
+        if(!allowed||lookupBusy)return;
+        if(typeof m.request!=='string'||m.request.length>80||!/^\d{1,15}$/.test(String(m.chiefId))||!/^\d{1,6}$/.test(String(m.stateId))){
+          send({type:'lookup-result',request:m.request,ok:false,message:'Enter a valid State and Chief ID.'});return;
+        }
+        var lookupTicket=generation, lookupTimeout;lookupBusy=true;
+        try{
+          var result=await Promise.race([
+            sb.functions.invoke('wos-profile',{body:{chiefId:String(m.chiefId),stateId:String(m.stateId)}}),
+            new Promise(function(resolve,reject){lookupTimeout=setTimeout(function(){reject(new Error('Lookup timed out'));},45000);})
+          ]);
+          var payload=result.data;
+          if(result.error&&result.error.context&&typeof result.error.context.json==='function'){
+            try{payload=await result.error.context.json();}catch(ignore){}
+          }
+          if(!alive||lookupTicket!==generation)return;
+          if(!payload||typeof payload.ok!=='boolean')payload={ok:false,message:'Account lookup is not available yet. Please try later.'};
+          send({type:'lookup-result',request:m.request,ok:payload.ok,snapshot:payload.ok?payload.snapshot:undefined,
+            message:payload.message,error:payload.error,retryAfter:payload.retryAfter});
+        }catch(error){
+          if(alive&&lookupTicket===generation)send({type:'lookup-result',request:m.request,ok:false,message:'Could not connect. Please try again.'});
+        }finally{clearTimeout(lookupTimeout);if(lookupTicket===generation)lookupBusy=false;}
+        return;
+      }
       if(m.type!=='save'||busy||!allowed)return;
       if(!m.profile||m.profile.schema!==1||JSON.stringify(m.profile).length>1000000){send({type:'save-result',request:m.request,error:'This profile is too large or has an unsupported format.'});return;}
       busy=true;

@@ -111,4 +111,6 @@ A tab click toggles `.panel.on` and stores the tab in `sessionStorage['fox-tab']
 
 ## Private profile delivery
 
+Approved on 16 November 2026: the delivery bridge supports source-checked `lookup-player` requests to the separate `wos-profile` Edge Function, with a 45-second client timeout and generation checks that discard replies to a disposed frame. The private questionnaire document remains outside the repository. The backend uses an owner-only atomic quota; see `supabase/functions/wos-profile/README.md`. No existing alliance sync access is broadened.
+
 `private-preview.js` is the public delivery bridge only. The optimizer document, recommendation rules and saved account profile remain outside this public repository and are delivered by owner-scoped Supabase policies. The iframe keeps an opaque origin and source-checked save messages. Its `data-private-preview-version` attribute records the version returned by the authenticated database query so a deployment can be verified without copying private document content into public assets. A document-only release preserves the saved profile, revision and access policies; changes visible only to the private test owner do not create a What's new announcement.
