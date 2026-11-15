@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-15-shard-frames',date:'2026-11-15',title:'Consistent hero shard icons',points:['Hero shard icons now share matching frames and sizing on desktop and phone, including Hector and generic shards.']},
 {id:'2026-11-15-hero-shards',date:'2026-11-15',title:'Hero shard icons in the Backpack',points:['Hero shards now use compact shard artwork. Fifteen heroes have their own portrait; the remaining four use the Mythic shard icon until their artwork is available.']},
 {id:'2026-11-15-foundry-sketch',date:'2026-11-15',title:'Sketch arrows and simpler curves',points:['All Foundry arrows now have a pencil style. Curved dotted arrows use one yellow control point: tap the start, control point and end, then adjust with Select.']},
 {id:'2026-11-15-foundry-curves',date:'2026-11-15',title:'Curved dotted arrows in Foundry',points:['Choose Curved dotted (C), tap the start, bend and end, then tap the last point again or press Enter. Drag the points with Select to adjust the curve.']},
@@ -929,7 +930,8 @@ var ITEM_ART = {
 };
 function itemIcon(it){
   var src=ITEM_ART[it.name];
-  return src ? '<img class="item-art" src="'+esc(src)+'" alt="" width="24" height="24" decoding="async">' : esc(it.icon||'·');
+  var frame=src==='shard-art/hector.webp'||src==='item-mythic-hero-shards.png'?' shard-frame':src==='item-epic-hero-shards.png'?' shard-frame shard-frame-epic':src==='item-rare-hero-shards.png'?' shard-frame shard-frame-rare':'';
+  return src ? '<img class="item-art'+frame+'" src="'+esc(src)+'" alt="" width="24" height="24" decoding="async">' : esc(it.icon||'·');
 }
 function inp(val,cls,attrs){
   return '<input class="cell '+(cls||'')+'" type="number" step="any" value="'+
