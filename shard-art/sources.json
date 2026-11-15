@@ -1,0 +1,97 @@
+{
+  "checked": "2026-11-15",
+  "sources": [
+    {
+      "file": "shard-art/natalia.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Natalia/Natalia-Shard.png",
+      "bytes": 76997,
+      "hero": "Natalia"
+    },
+    {
+      "file": "shard-art/molly.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Molly/Molly-Shard.png",
+      "bytes": 25014,
+      "hero": "Molly"
+    },
+    {
+      "file": "shard-art/zinman.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Zinman/Zinman-Shard.png",
+      "bytes": 79898,
+      "hero": "Zinman"
+    },
+    {
+      "file": "shard-art/flint.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Flint/Flint-Shard.png",
+      "bytes": 76182,
+      "hero": "Flint"
+    },
+    {
+      "file": "shard-art/philly.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Philly/Philly-Shard.png",
+      "bytes": 78638,
+      "hero": "Philly"
+    },
+    {
+      "file": "shard-art/alonso.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Alonso/Alonso-Shard.png",
+      "bytes": 80601,
+      "hero": "Alonso"
+    },
+    {
+      "file": "shard-art/logan.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Logan/Logan-Shard.png",
+      "bytes": 79054,
+      "hero": "Logan"
+    },
+    {
+      "file": "shard-art/mia.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Mia/Mia-Shard.png",
+      "bytes": 81531,
+      "hero": "Mia"
+    },
+    {
+      "file": "shard-art/greg.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Greg/Greg-Shard.png",
+      "bytes": 77560,
+      "hero": "Greg"
+    },
+    {
+      "file": "shard-art/reina.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Reina/Reina-Shard.png",
+      "bytes": 20999,
+      "hero": "Reina"
+    },
+    {
+      "file": "shard-art/lynn.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Lynn/Lynn-Shard.png",
+      "bytes": 78168,
+      "hero": "Lynn"
+    },
+    {
+      "file": "shard-art/norah.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Norah/Norah-Shard.png",
+      "bytes": 81008,
+      "hero": "Norah"
+    },
+    {
+      "file": "shard-art/gwen.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/Gwen/Gwen-Shard.png",
+      "bytes": 79987,
+      "hero": "Gwen"
+    },
+    {
+      "file": "shard-art/wu-ming.png",
+      "source": "https://whiteout-survival.gamerdex.app/images/heroes/WuMing/WuMing-Shard.png",
+      "bytes": 19365,
+      "hero": "Wu Ming"
+    }
+  ],
+  "hector": "https://gacha-data.com/assets/img/whiteout-survival/ds/materials/item_icon_500024.webp",
+  "missing": [
+    "Jeronimo",
+    "Ahmose",
+    "Renee",
+    "Wayne"
+  ],
+  "fallback": "item-mythic-hero-shards.png"
+}

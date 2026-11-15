@@ -111,6 +111,14 @@ def run(p, width, name):
     assert widget_icons.count() == 19
     widget_icons.evaluate_all('(images) => Promise.all(images.map(img => img.decode()))')
     assert widget_icons.evaluate_all('(images) => images.every(img => img.naturalWidth > 0)')
+    shard_icons = pg.locator('#stock tr[data-q] img.item-art[src^="shard-art/"]')
+    assert shard_icons.count() == 15, f'Expected 15 hero shard portraits, found {shard_icons.count()}'
+    shard_icons.evaluate_all('(images) => Promise.all(images.map(img => img.decode()))')
+    assert shard_icons.evaluate_all('(images) => images.every(img => img.naturalWidth > 0 && img.width <= 24 && img.height <= 24)')
+    for hero in ('Jeronimo', 'Ahmose', 'Renee', 'Wayne'):
+        assert pg.locator(f'#stock tr[data-q="{hero.lower()}"] img.item-art').get_attribute('src') == 'item-mythic-hero-shards.png'
+    pg.locator('#stock tr[data-q="gwen"]').scroll_into_view_if_needed()
+    pg.screenshot(path=str(OUT / f'{name}-hero-shards.png'), full_page=True)
     assert open_tab(pg, 'widgets')
     pg.locator('#p-widgets [data-gen="6"]').click()
     assert pg.locator('#p-widgets .widget-person strong').all_text_contents() == ['Wu Ming', 'Renee', 'Wayne']

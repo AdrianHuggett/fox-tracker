@@ -7,17 +7,17 @@ window.WIDGETS_DATA={
   cumulative:[0,5,15,30,50,75,105,140,180,225,275],
   svsPointsPerWidget:8000,
   heroes:[
-    {name:'Natalia',generation:1,icon:'widget-art/natalia.webp'},{name:'Jeronimo',generation:1,icon:'widget-art/jeronimo.webp'},
-    {name:'Molly',generation:1,icon:'widget-art/molly.webp'},{name:'Zinman',generation:1,icon:'widget-art/zinman.webp'},
-    {name:'Flint',generation:2,icon:'widget-art/flint.webp'},{name:'Philly',generation:2,icon:'widget-art/philly.webp'},
-    {name:'Alonso',generation:2,icon:'widget-art/alonso.webp'},
-    {name:'Logan',generation:3,icon:'widget-art/logan.webp'},{name:'Mia',generation:3,icon:'widget-art/mia.webp'},
-    {name:'Greg',generation:3,icon:'widget-art/greg.webp'},
-    {name:'Ahmose',generation:4,icon:'widget-art/ahmose.webp'},{name:'Reina',generation:4,icon:'widget-art/reina.webp'},
-    {name:'Lynn',generation:4,icon:'widget-art/lynn.webp'},
-    {name:'Hector',generation:5,icon:'widget-art/hector.webp'},{name:'Norah',generation:5,icon:'widget-art/norah.webp'},
-    {name:'Gwen',generation:5,icon:'widget-art/gwen.webp'},
-    {name:'Wu Ming',generation:6,icon:'widget-art/wu-ming.webp'},{name:'Renee',generation:6,icon:'widget-art/renee.webp'},
+    {name:'Natalia',generation:1,icon:'widget-art/natalia.webp',shardIcon:'shard-art/natalia.png'},{name:'Jeronimo',generation:1,icon:'widget-art/jeronimo.webp'},
+    {name:'Molly',generation:1,icon:'widget-art/molly.webp',shardIcon:'shard-art/molly.png'},{name:'Zinman',generation:1,icon:'widget-art/zinman.webp',shardIcon:'shard-art/zinman.png'},
+    {name:'Flint',generation:2,icon:'widget-art/flint.webp',shardIcon:'shard-art/flint.png'},{name:'Philly',generation:2,icon:'widget-art/philly.webp',shardIcon:'shard-art/philly.png'},
+    {name:'Alonso',generation:2,icon:'widget-art/alonso.webp',shardIcon:'shard-art/alonso.png'},
+    {name:'Logan',generation:3,icon:'widget-art/logan.webp',shardIcon:'shard-art/logan.png'},{name:'Mia',generation:3,icon:'widget-art/mia.webp',shardIcon:'shard-art/mia.png'},
+    {name:'Greg',generation:3,icon:'widget-art/greg.webp',shardIcon:'shard-art/greg.png'},
+    {name:'Ahmose',generation:4,icon:'widget-art/ahmose.webp'},{name:'Reina',generation:4,icon:'widget-art/reina.webp',shardIcon:'shard-art/reina.png'},
+    {name:'Lynn',generation:4,icon:'widget-art/lynn.webp',shardIcon:'shard-art/lynn.png'},
+    {name:'Hector',generation:5,icon:'widget-art/hector.webp',shardIcon:'shard-art/hector.webp'},{name:'Norah',generation:5,icon:'widget-art/norah.webp',shardIcon:'shard-art/norah.png'},
+    {name:'Gwen',generation:5,icon:'widget-art/gwen.webp',shardIcon:'shard-art/gwen.png'},
+    {name:'Wu Ming',generation:6,icon:'widget-art/wu-ming.webp',shardIcon:'shard-art/wu-ming.png'},{name:'Renee',generation:6,icon:'widget-art/renee.webp'},
     {name:'Wayne',generation:6,icon:'widget-art/wayne.webp'}
   ]
 };

@@ -624,6 +624,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-15-hero-shards',date:'2026-11-15',title:'Hero shard icons in the Backpack',points:['Hero shards now use compact shard artwork. Fifteen heroes have their own portrait; the remaining four use the Mythic shard icon until their artwork is available.']},
 {id:'2026-11-15-foundry-sketch',date:'2026-11-15',title:'Sketch arrows and simpler curves',points:['All Foundry arrows now have a pencil style. Curved dotted arrows use one yellow control point: tap the start, control point and end, then adjust with Select.']},
 {id:'2026-11-15-foundry-curves',date:'2026-11-15',title:'Curved dotted arrows in Foundry',points:['Choose Curved dotted (C), tap the start, bend and end, then tap the last point again or press Enter. Drag the points with Select to adjust the curve.']},
 {id:'2026-11-15-rounded-targets',date:'2026-11-15',title:'Clearer Backpack targets',points:['Backpack targets display up to two decimal places. Calculations keep their full precision until you edit the value.']},
@@ -939,6 +940,7 @@ var widgetGenerations=Object.create(null);
 (window.WIDGETS_DATA&&window.WIDGETS_DATA.heroes||[]).forEach(function(hero){
   widgetGenerations[hero.name+' widget']=hero.generation;
   if(hero.icon)ITEM_ART[hero.name+' widget']=hero.icon;
+  ITEM_ART[hero.name]=hero.shardIcon||'item-mythic-hero-shards.png';
 });
 function renderStock(){
   // Keep hidden quantities in memory and snapshots; only narrow the Backpack view.

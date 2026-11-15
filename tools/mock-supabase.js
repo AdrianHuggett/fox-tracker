@@ -45,7 +45,7 @@ var DB = window.__DB = {
 };
 ['Natalia','Jeronimo','Molly','Zinman','Flint','Philly','Alonso','Logan','Mia','Greg','Ahmose','Reina','Lynn','Hector','Norah','Gwen','Wu Ming','Renee','Wayne'].forEach(function(name, index){
   DB.user_items.push({sort:100+index,grp:'⚔️ Hero Exclusive Gear',icon:'🧩',name:name+' widget',have:0,target:0,free:0});
-  if(index>=16)DB.user_items.push({sort:200+index,grp:'🧬 Hero Shards',icon:'★',name:name,have:0,target:0,free:0});
+  DB.user_items.push({sort:200+index,grp:'🧬 Hero Shards',icon:'★',name:name,have:0,target:0,free:0});
 });
 var log = window.__log = [];
 function clone(x){ return JSON.parse(JSON.stringify(x)); }
