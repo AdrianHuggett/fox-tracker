@@ -84,14 +84,33 @@
       "source": "https://whiteout-survival.gamerdex.app/images/heroes/WuMing/WuMing-Shard.png",
       "bytes": 19365,
       "hero": "Wu Ming"
+    },
+    {
+      "file": "shard-art/jeronimo.png",
+      "source": "User-provided in-game shard icon, 2026-11-15",
+      "hero": "Jeronimo",
+      "bytes": 25044
+    },
+    {
+      "file": "shard-art/wayne.png",
+      "source": "User-provided in-game shard icon, 2026-11-15",
+      "hero": "Wayne",
+      "bytes": 25373
+    },
+    {
+      "file": "shard-art/renee.png",
+      "source": "User-provided in-game shard icon, 2026-11-15",
+      "hero": "Renee",
+      "bytes": 25474
+    },
+    {
+      "file": "shard-art/ahmose.png",
+      "source": "User-provided in-game shard icon, 2026-11-15",
+      "hero": "Ahmose",
+      "bytes": 25155
     }
   ],
   "hector": "https://gacha-data.com/assets/img/whiteout-survival/ds/materials/item_icon_500024.webp",
-  "missing": [
-    "Jeronimo",
-    "Ahmose",
-    "Renee",
-    "Wayne"
-  ],
+  "missing": [],
   "fallback": "item-mythic-hero-shards.png"
 }
