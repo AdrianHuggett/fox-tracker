@@ -29,16 +29,13 @@ grant execute on function public.admin_set_password(uuid, text) to authenticated
 
 Front end: in `renderMembers()`, for non-admin rows, add a button `data-pwset="<id>"`. Its handler (admin only) does `window.prompt` for the password, checks it has at least 8 characters, calls `SB.rpc('admin_set_password', {target: id, new_password: pw})` and reports via `say()`. Adrian types the password and gives it to the member in game; the member then changes it in My password. Add a What's new entry only if members should know.
 
-## 2. Change the site address (it contains Adrian's full name)
+## 2. Change site address — approved on 18 November 2026
 
-Recommended path (explained to Adrian; **waiting for the organization name he wants**):
+Target: https://fox-3685.github.io/, repository fox-3685/fox-3685.github.io on GitHub Free. The owner approved creating the organization and updating authentication URLs.
 
-1. Adrian creates a free GitHub organization (e.g. `fox-3685`) and transfers `fox-tracker` to it (repo Settings → Transfer). He does both himself.
-2. Re-enable Pages on the transferred repo (Settings → Pages → Deploy from branch `main`, `/` root).
-3. New URL: `https://<org>.github.io/fox-tracker/`. Update the Supabase Site URL and Redirect URLs (Adrian), `git remote set-url origin https://github.com/<org>/fox-tracker.git` on his PC, and all URLs in `CLAUDE.md` and `docs/`.
-4. The old URL does **not** redirect for Pages. Write a short announcement for him to post in game. Accounts and data are unaffected (same Supabase project).
+Publish the public history to the new repository, with Pages on main at the root. Keep the old AdrianHuggett/fox-tracker repository and site accessible: Foundry and Canyon plans live in browser storage scoped to the old origin. The old site links to the new address without automatically redirecting. The same Supabase project supplies accounts and saved Backpack data; members sign in again on the new origin.
 
-Alternatives: renaming his GitHub account (affects everything; not recommended) or a paid custom domain (about $10/year, with DNS setup).
+Set Supabase Site URL to https://fox-3685.github.io/ and allow both that exact URL and https://adrianhuggett.github.io/fox-tracker/ as authentication redirects. Password-reset redirects follow the current origin/path. After verification, keep the old Git remote as legacy and make the new repository origin. Future releases target the new repository.
 
 ## 3. Exchange limit semantics (needs Adrian's answer)
 

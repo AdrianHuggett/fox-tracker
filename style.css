@@ -1,3 +1,9 @@
+.site-move{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 20px;margin:20px 0;border:1px solid #35c8f5;border-radius:10px;background:#0b2e44;color:#f5f7ff}
+.site-move[hidden]{display:none}
+.site-move p{margin:5px 0 0;max-width:75ch;color:#c7dcec;font-size:14px}
+.site-move a{flex:none;background:#35c8f5;color:#03121d;padding:12px 16px;border-radius:7px;font-weight:700;text-decoration:none}
+.site-move a:focus-visible{outline:3px solid #ff823f;outline-offset:3px}
+@media(max-width:600px){.site-move{align-items:stretch;flex-direction:column;gap:12px;padding:16px}.site-move a{text-align:center}}
 :root{
  --ground:#03121D;--panel:#061626;--surface:#081B29;--dcard:#071523;--sunk:#0A1B2B;
  --line:#12283D;--line2:#0E1E2E;

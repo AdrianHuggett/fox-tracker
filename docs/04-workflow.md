@@ -9,7 +9,7 @@ Adrian runs these himself; Claude Code can guide him.
 3. Clone the repo:
    ```
    cd D:\WOS
-   git clone https://github.com/AdrianHuggett/fox-tracker.git
+   git clone https://github.com/fox-3685/fox-3685.github.io.git
    cd fox-tracker
    ```
    Pushing needs his GitHub login: Git Credential Manager opens a browser window the first time. He signs in himself.
@@ -34,7 +34,7 @@ Adrian runs these himself; Claude Code can guide him.
    ```
    git add -A && git commit -m "Short imperative subject" -m "Why, if not obvious." && git push
    ```
-7. Verify: `git rev-parse HEAD`, then fetch `https://raw.githubusercontent.com/AdrianHuggett/fox-tracker/<sha>/index.html` and check the cache tag. **Do not trust the branch URL** (CDN cache). Pages usually updates within about two minutes; Adrian confirms on the live site, with a normal refresh.
+7. Verify: `git rev-parse HEAD`, then fetch `https://raw.githubusercontent.com/fox-3685/fox-3685.github.io/<sha>/index.html` and check the cache tag. **Do not trust the branch URL** (CDN cache). Pages usually updates within about two minutes; Adrian confirms on the live site, with a normal refresh.
 8. Report to Adrian in French: what changed, what to check, and anything not tested.
 
 ## Commit style

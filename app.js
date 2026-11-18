@@ -1,6 +1,8 @@
 /* FOX Prep Tracker — front end */
 (function(){
 'use strict';
+var siteMove=document.getElementById('site-move');
+if(siteMove)siteMove.hidden=location.hostname!=='adrianhuggett.github.io';
 var SB=null, U=null, ADMIN=false, R4ED=false, FORTRESS_ACCESS=false, membersLoaded=false, D={items:[],packs:[],contents:{},base:{},settings:{}}, uPacks={};
 var timers={}, sync=document.getElementById('sync');
 var sortMode='section', sortDir=-1;
@@ -624,6 +626,7 @@ document.addEventListener('keydown',function(e){
    Newest first. Add an entry with every change members will notice. Each id must be
    new, because the newest id a member has closed is what marks the rest as seen. */
 var UPDATES=[
+{id:'2026-11-18-new-address',date:'2026-11-18',title:'New website address',points:['The tracker is now at https://fox-3685.github.io/. Sign in with your existing account; your Backpack and saved account data are kept.','Foundry and Canyon plans are saved in your browser for each website address. The old site stays available so you can export your existing plans.']},
 {id:'2026-11-15-shards-complete',date:'2026-11-15',title:'All hero shard portraits available',points:['Jeronimo, Wayne, Renee and Ahmose now have their original shard icons. All 19 heroes in the Backpack have their own shard portrait.']},
 {id:'2026-11-15-shard-frames',date:'2026-11-15',title:'Consistent hero shard icons',points:['Hero shard icons now share matching frames and sizing on desktop and phone, including Hector and generic shards.']},
 {id:'2026-11-15-hero-shards',date:'2026-11-15',title:'Hero shard icons in the Backpack',points:['Hero shards now use compact shard artwork. Fifteen heroes have their own portrait; the remaining four use the Mythic shard icon until their artwork is available.']},

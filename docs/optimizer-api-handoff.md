@@ -6,8 +6,8 @@ Prepared on 11 November 2026. Resume work on FOX's private "Optimise your profil
 
 Research and the implementation outline are complete. Hero import has not been implemented or deployed. Adrian wants to continue from another computer; this handoff records the agreed direction, not a completed feature or approval of a specific database migration.
 
-- Repository: https://github.com/AdrianHuggett/fox-tracker
-- Live site: https://adrianhuggett.github.io/fox-tracker/
+- Repository: https://github.com/fox-3685/fox-3685.github.io
+- Live site: https://fox-3685.github.io/
 - API documentation: https://api.whiteoutstats.com/
 - Baseline inspected: `fcc7b9c` on `main`.
 - Read `AGENTS.md`, `CLAUDE.md`, and the relevant project docs before changing anything. Speak French to Adrian; keep repository content and source UI text in English.

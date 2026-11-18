@@ -22,8 +22,8 @@ This is a static web app (no build) for the FOX alliance in Whiteout Survival (S
 
 | | |
 |---|---|
-| Live | https://adrianhuggett.github.io/fox-tracker/ (GitHub Pages from `main`, repo root) |
-| Repo | https://github.com/AdrianHuggett/fox-tracker (public) |
+| Live | https://fox-3685.github.io/ (GitHub Pages from `main`, repo root) |
+| Repo | https://github.com/fox-3685/fox-3685.github.io (public) |
 | Backend | Supabase project `nhkyrurfcrorwbobqlrp` |
 | Owner / only admin | Adrian (`profiles.is_admin = true`) |
 | Users | About 5 alliance members |
