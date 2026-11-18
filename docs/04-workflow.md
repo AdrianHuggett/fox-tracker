@@ -9,7 +9,7 @@ Adrian runs these himself; Claude Code can guide him.
 3. Clone the repo:
    ```
    cd D:\WOS
-   git clone https://github.com/fox-3685/fox-3685.github.io.git
+   git clone https://github.com/fox-3685/fox-3685.github.io.git fox-tracker
    cd fox-tracker
    ```
    Pushing needs his GitHub login: Git Credential Manager opens a browser window the first time. He signs in himself.
